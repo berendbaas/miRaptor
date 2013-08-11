@@ -11,13 +11,13 @@ $config = array();
 
 // Index
 $config['index'] = array();
-$config['index']['default_host'] = 'www.miraptor.nl';
+$config['index']['default_host'] = 'www.example.org';
 
 // Mysql
 $config['mysql'] = array();
-$config['mysql']['username'] = 'root';
-$config['mysql']['password'] = 'Teemoskills!';
-$config['mysql']['database'] = 'miraptor_cms';
+$config['mysql']['username'] = 'username';
+$config['mysql']['password'] = 'password';
+$config['mysql']['database'] = 'database';
 $config['mysql']['hostname'] = 'localhost';
 
 // Gatekeeper
