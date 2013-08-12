@@ -13,21 +13,28 @@ class Parser {
 	private $request;
 	private $pdbc;
 	private $tokenizer;
-	private $config;
 	private $static;
 
-	public function __construct(Request $request, PDBC $pdbc, array $config) {
-		$this->request = $request;
+	/**
+	 *
+	 */
+	public function __construct(PDBC $pdbc, Request $request) {
 		$this->pdbc = $pdbc;
+		$this->request = $request;
 		$this->tokenizer = new Tokenizer(Token::DEFAULT_START . self::MODULE_DEFAULT . Token::DEFAULT_END);
-		$this->config = $config;
 		$this->static = TRUE;
 	}
 
+	/**
+	 *
+	 */
 	public function __toString() {
 		return $this->tokenizer->__toString();
 	}
 
+	/**
+	 *
+	 */
 	public function run() {
 		$page = $this->page();
 		$modules = $this->modules();
@@ -37,10 +44,16 @@ class Parser {
 		}
 	}
 
+	/**
+	 *
+	 */
 	public function isStatic() {
 		return $this->static;
 	}
 
+	/**
+	 *
+	 */
 	private function page() {
 		$page = end($this->pdbc->fetch('SELECT id FROM `pages` WHERE `url`="'. $this->pdbc->quote($this->request->getUri()->getPath()) . '"'));
 
@@ -51,9 +64,11 @@ class Parser {
 		return end($page);
 	}
 
+	/**
+	 *
+	 */
 	private function modules() {
 		$modules = $this->pdbc->fetch('SELECT `name` FROM `modules`');
-		$result = $this->config['default_modules'];
 
 		foreach($modules as $module) {
 			$result[] = $module['name'];
@@ -62,6 +77,9 @@ class Parser {
 		return $result;
 	}
 
+	/**
+	 *
+	 */
 	private function module(array $modules, Token $token, $page) {
 		$module = $token->getModule();
 		$file = self::MODULE_LOCATION . $module . '/' . self::MODULE_FILE;
@@ -77,7 +95,7 @@ class Parser {
 				throw new Exception('Module doensn\'t exists.');
 			}
 
-			$result = new $module($token->getArgs(), $page, $this->pdbc);
+			$result = new $module($this->pdbc, $page, $token->getArgs());
 
 			if(!$result->isStatic()) {
 				$this->static = FALSE;

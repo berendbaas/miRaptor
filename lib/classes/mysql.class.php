@@ -8,18 +8,27 @@
 class Mysql implements PDBC {
 	private $link;
 
+	/**
+	 *
+	 */
 	public function __construct(array $config) {
 		if(!($this->link = mysql_connect($config['hostname'], $config['username'], $config['password'], TRUE))) {
 			throw new Exception('Mysql: Can\'t connect to database - ' . $config['hostname'], 500);
 		}
 	}
 
+	/**
+	 *
+	 */
 	public function selectDatabase($database) {
 		if(!mysql_select_db($database, $this->link)) {
 			throw new Exception('Mysql: Can\'t select database - ' . $database, 500);
 		}
 	}
 
+	/**
+	 *
+	 */
 	public function execute($query) {
 		$resource = mysql_query($query, $this->link);
 
@@ -30,6 +39,9 @@ class Mysql implements PDBC {
 		return $resource;
 	}
 
+	/**
+	 *
+	 */
 	public function fetch($query) {
 		$resource = $this->execute($query);
 
@@ -42,6 +54,9 @@ class Mysql implements PDBC {
 		return $rows;
 	}
 
+	/**
+	 *
+	 */
 	public function quote($string) {
 		return mysql_real_escape_string($string);
 	}

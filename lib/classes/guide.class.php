@@ -6,8 +6,11 @@
  * @version 1.0
  */
 class Guide {
-	public function __construct(Gatekeeper $gatekeeper, Request $request, PDBC $pdbc, array $config) {
-		$filename = $gatekeeper->getLocation() . $request->getUri()->getPath();
+	/**
+	 *
+	 */
+	public function __construct(PDBC $pdbc, Request $request, $location) {
+		$filename = $location . $request->getUri()->getPath();
 
 		switch($request->getMethod()) {
 			case 'get':
@@ -23,7 +26,7 @@ class Guide {
 				}
 
 			case 'post':
-				$this->parseRequest($filename, $request, $pdbc, $config);
+				$this->parseRequest($pdbc, $request, $filename);
 			break;
 
 			defaut:
@@ -32,6 +35,9 @@ class Guide {
 		}
 	}
 
+	/**
+	 *
+	 */
 	private function getRequest($filename) {
 		// Header parse
 		$lastModified = filemtime($filename);
@@ -49,6 +55,9 @@ class Guide {
 
 	}
 
+	/**
+	 *
+	 */
 	private function isModified($lastModified) {
 		if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
 			if(strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) == $lastModified) {
@@ -59,12 +68,15 @@ class Guide {
 		return true;
 	}
 
-	private function parseRequest($filename, Request $request, PDBC $pdbc, array $config) {
+	/**
+	 *
+	 */
+	private function parseRequest(PDBC $pdbc, Request $request, $filename) {
 		// Header
 		header('content-type: text/html');
 
 		// Content parse
-		$parser = new Parser($request, $pdbc, $config);
+		$parser = new Parser($pdbc, $request);
 		$parser->run();
 
 		// Content echo

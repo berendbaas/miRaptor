@@ -6,8 +6,19 @@
  * @version 1.0
  */
 interface Module {
-	public function __construct(array $args, $page, PDBC $pdbc);
+	/**
+	 *
+	 */
+	public function __construct(PDBC $pdbc, $page, array $args);
+
+	/**
+	 *
+	 */
 	public function isStatic();
+
+	/**
+	 *
+	 */
 	public function get();
 }
 

@@ -6,20 +6,29 @@
  * @version 1.0
  */
 class Menu implements Module {
-	private $args;
-	private $page;
 	private $pdbc;
+	private $page;
+	private $args;
 
-	public function __construct(array $args, $page, PDBC $pdbc) {
-		$this->args = $args;
-		$this->page = $page;
+	/**
+	 *
+	 */
+	public function __construct(PDBC $pdbc, $page, array $args) {
 		$this->pdbc = $pdbc;
+		$this->page = $page;
+		$this->args = $args;
 	}
 
+	/**
+	 *
+	 */
 	public function isStatic() {
 		return TRUE;
 	}
 
+	/**
+	 *
+	 */
 	public function get() {
 		$pid = $this->parseId();
 		$levels = $this->parseLevel();
@@ -34,6 +43,9 @@ class Menu implements Module {
 		}
 	}
 
+	/**
+	 *
+	 */
 	private function parseId() {
 		if(isset($this->args['id'])) {
 			$id = intval($this->args['id']);
@@ -44,6 +56,9 @@ class Menu implements Module {
 		return 0;
 	}
 
+	/**
+	 *
+	 */
 	private function parseLevel() {
 		if(isset($this->args['levels'])) {
 			$level = intval($this->args['levels']);
@@ -54,6 +69,9 @@ class Menu implements Module {
 		return -1;
 	}
 
+	/**
+	 *
+	 */
 	private function parseStyle() {
 		if(isset($this->args['style'])) {
 			return $this->args['style'];
@@ -62,6 +80,9 @@ class Menu implements Module {
 		return '';
 	}
 
+	/**
+	 *
+	 */
 	private function parseMenuDefault($pid, $level) {
 		// Check levels
 		if($level == 0) {
@@ -85,6 +106,9 @@ class Menu implements Module {
 		return $menu . '</ul>';
 	}
 
+	/**
+	 *
+	 */
 	private function parseMenuDescription($pid, $level) {
 		// Check levels
 		if($level == 0) {

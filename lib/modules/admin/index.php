@@ -6,25 +6,34 @@
  * @version 1.0
  */
 class Admin implements Module {
-	private $args;
-	private $page;
 	private $pdbc;
+	private $page;
+	private $args;
         private $user;
 
-	public function __construct(array $args, $page, PDBC $pdbc) {
-		$this->args = $args;
-		$this->page = $page;
+	/**
+	 *
+	 */
+	public function __construct(PDBC $pdbc, $page, array $args) {
 		$this->pdbc = $pdbc;
+		$this->page = $page;
+		$this->args = $args;
 
 		include('config.php');
 
 		$this->user = new User(new Mysql($config['mysql']));
 	}
 
+	/**
+	 *
+	 */
 	public function isStatic() {
 		return FALSE;
 	}
 
+	/**
+	 *
+	 */
 	public function get() {
 		if($this->user->isLoggedIn()) {
 			return $this->handleAdmin();
@@ -33,6 +42,9 @@ class Admin implements Module {
 		}
 	}
 
+	/**
+	 *
+	 */
 	private function handleLogIn() {
 		if(isset($this->args['get']) && $this->args['get'] == 'login') {
 			return $this->user->loginFields('overview/');
@@ -42,6 +54,9 @@ class Admin implements Module {
 		}
 	}
 
+	/**
+	 *
+	 */
 	private function handleAdmin() {
 		if(isset($this->args['get'])) {
 			switch($this->args['get']) {
@@ -81,6 +96,9 @@ class Admin implements Module {
 		}
 	}
 
+	/**
+	 *
+	 */
 	private function handleAdminOverview() {
 		/* TODO
 		 * - Updates
@@ -93,6 +111,9 @@ class Admin implements Module {
 		return $ret;
 	}
 
+	/**
+	 *
+	 */
 	private function handleAdminStats() {
 
 		$ret = 'Stats, motherfucker. Do you has them?';
@@ -100,6 +121,9 @@ class Admin implements Module {
 		return $ret;
 	}
 
+	/**
+	 *
+	 */
 	private function handleAdminRenameWebsite() {
 
 		$ret = '<h2>Rename website</h2>';
@@ -132,6 +156,9 @@ class Admin implements Module {
 		return $ret;
 	}
 
+	/**
+	 *
+	 */
 	private function handleAdminWebsites() {
 
 		$ret = '<h2>Websites</h2>';
@@ -196,6 +223,9 @@ class Admin implements Module {
 		return $ret;
 	}
 
+	/**
+	 *
+	 */
 	private function handleAdminDomains() {
 		/* TODO
 		 * - Domeinen van de gebruiker
@@ -204,6 +234,9 @@ class Admin implements Module {
 		return '<p>Unknown page (yet?), check <code>{admin get="' . $this->args['get'] . '"}</code></p>';
 	}
 
+	/**
+	 *
+	 */
 	private function handleAdminSettings() {
 		/* TODO
 		 * - Username
@@ -217,6 +250,9 @@ class Admin implements Module {
 		return '<p>Unknown page (yet?), check <code>{admin get="' . $this->args['get'] . '"}</code></p>';
 	}
 
+	/**
+	 *
+	 */
 	private function handleAdminWebsite() {
 		/* TODO
 		 * Parse menu (default modules + modules van de gebruikers)

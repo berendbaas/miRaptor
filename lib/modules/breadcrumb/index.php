@@ -6,24 +6,36 @@
  * @version 1.0
  */
 class Breadcrumb implements Module {
-	private $args;
-	private $page;
 	private $pdbc;
+	private $page;
+	private $args;
 
-	public function __construct(array $args, $page, PDBC $pdbc) {
-		$this->args = $args;
-		$this->page = $page;
+	/**
+	 *
+	 */
+	public function __construct(PDBC $pdbc, $page, array $args) {
 		$this->pdbc = $pdbc;
+		$this->page = $page;
+		$this->args = $args;
 	}
 
+	/**
+	 *
+	 */
 	public function isStatic() {
 		return FALSE;
 	}
 
+	/**
+	 *
+	 */
 	public function get() {
 		return '<ul>' . $this->parseBreadcrumb($this->page) . '</ul>';
 	}
 
+	/**
+	 *
+	 */
 	private function parseId() {
 		if(isset($this->args['id'])) {
 			return intval($this->args['id']);
@@ -32,6 +44,9 @@ class Breadcrumb implements Module {
 		return 0;
 	}
 
+	/**
+	 *
+	 */
 	private function parseBreadcrumb($id) {
 		// Fetch
 		$breadcrumb = end($this->pdbc->fetch('SELECT `pid`,`name`,`url` FROM `pages` WHERE `id` = "' . $this->pdbc->quote($id) . '"'));

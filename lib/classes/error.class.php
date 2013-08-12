@@ -8,7 +8,7 @@
 class Error {
 	const DEFAULT_ERROR = 500;
 
-	private $exception; // TODO debug
+	private $exception;
 
 	private $error;
 	private $errors = array
@@ -49,11 +49,17 @@ class Error {
 		)
 	);
 
+	/**
+	 *
+	 */
 	public function __construct(Exception $exception) {
 		$this->exception = $exception;
 		$this->error = empty($this->errors[$exception->getCode()]) ? $this->errors[self::DEFAULT_ERROR] : $this->errors[$exception->getCode()] ;
 	}
 
+	/**
+	 *
+	 */
 	public function __toString() {
 		// Header
 		header($this->error['title'], TRUE, $this->error['statuscode']);

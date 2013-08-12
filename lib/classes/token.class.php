@@ -15,6 +15,9 @@ class Token {
 	private $token_start;
 	private $token_end;
 
+	/**
+	 *
+	 */
 	public function __construct($token, $token_start = self::DEFAULT_START, $token_end = self::DEFAULT_END) {
 		// Set token
 		$this->token = $token;
@@ -41,14 +44,23 @@ class Token {
 		}
 	}
 
+	/**
+	 *
+	 */
 	public function __toString() {
 		return $this->token;
 	}
 
+	/**
+	 *
+	 */
 	public function getModule() {
 		return $this->module;
 	}
 
+	/**
+	 *
+	 */
 	public function getArgs() {
 		return $this->args;
 	}

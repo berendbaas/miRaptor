@@ -7,40 +7,70 @@
 */
 class Gatekeeper {
 	private $location;
+	private $database;
 
-	public function __construct(Request $request, PDBC $pdbc, array $config) {
-		// Get host
-		$website = end($pdbc->fetch('SELECT `uid`,`location`,`db` FROM `website` WHERE `active` = 1 AND `domain` = "' . mysql_real_escape_string($request->getHost()) . '"'));
+	/**
+	 *
+	 */
+	public function __construct(PDBC $pdbc, Request $request) {
+		// Get website location & databse
+		$host = $this->getHost($pdbc, $request);
+		$user = $this->getUser($pdbc, $request, $host['uid']);
+
+		// Set website location & database
+		$this->location = $config['user_location'] . $user['location'] . $host['location'];
+		$this->database = $host['db'];
+	}
+
+	/**
+	 *
+	 */
+	private function getHost(PDBC $pdbc, Request $request) {
+		$host = end($pdbc->fetch('SELECT `uid`,`location`,`db` FROM `website` WHERE `active` = 1 AND `domain` = "' . $pdbc->quote($request->getHost()) . '"'));
 
 		// Check redirect or found
-		if(empty($website)) {
+		if(empty($host)) {
 			// Get redirect
-			$redirect = end($pdbc->fetch('SELECT `website`.`domain`, `host`.`path` FROM `website` RIGHT JOIN (SELECT `wid`,`path` FROM `host` WHERE `domain` = "' . mysql_real_escape_string($request->getHost()) . '") AS `host` ON `website`.`id` = `host`.`wid`'));
+			$redirect = end($pdbc->fetch('SELECT `website`.`domain`, `host`.`path` FROM `website` RIGHT JOIN (SELECT `wid`,`path` FROM `host` WHERE `domain` = "' . pdbc->quote($request->getHost()) . '") AS `host` ON `website`.`id` = `host`.`wid`'));
 
 			// Check redirect
 			if(empty($redirect)) {
 				throw new Exception('Gatekeeper: unknown domain - ' . $request->getHost(), 404);
 			}
-
-			// Redirect
+			
 			throw new Exception($redirect['domain'] . $redirect['path'] . $request->getUri(), 301);
 		}
 
+		return $host;
+	}
+
+	/**
+	 * 
+	 */
+	private function getUser(PDBC $pdbc, Request $request, $id) {
 		// Get user location
-		$user = end($pdbc->fetch('SELECT `location` FROM `user` WHERE `id` = ' . $website['uid']));
+		$user = end($pdbc->fetch('SELECT `location` FROM `user` WHERE `id` = ' . $id));
 
 		// Check user
 		if(empty($user)) {
 			throw new Exception('Gatekeeper: unknown domain - ' . $request->getHost(), 404);
 		}
 
-		// Set website location & database
-		$this->location = $config['user_location'] . $user['location'] . $website['location'];
-		$pdbc->selectDatabase($website['db']);
+		return $user;
 	}
 
+	/**
+	 * 
+	 */
 	public function getLocation() {
 		return $this->location;
+	}
+
+	/**
+	 * 
+	 */
+	public function getDatabase() {
+		return $this->database;
 	}
 }
 

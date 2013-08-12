@@ -13,6 +13,9 @@ class URI {
 	private $path;
 	private $query;
 
+	/**
+	 *
+	 */
 	public function __construct($uri) {
 		// Split path and query
 		$uri = explode(self::QUERY_DELIMITER, $uri, 2);
@@ -22,18 +25,30 @@ class URI {
 		$this->query = empty($uri[1]) ? NULL : $uri[1];
 	}
 
+	/**
+	 *
+	 */
 	public function __toString() {
 		return $this->path . $this->query;
 	}
 
+	/**
+	 *
+	 */
 	public function getPath() {
 		return $this->path;
 	}
 
+	/**
+	 *
+	 */
 	public function addQuery($key, $value) {
 		$this->query .= (($this->query == NULL) ? self::QUERY_DELIMITER : self::QUERY_SEPARATOR) . $key . self::QUERY_KEY_VALUE . $value;
 	}
 
+	/**
+	 *
+	 */
 	public function getQuery() {
 		return $this->query;
 	}

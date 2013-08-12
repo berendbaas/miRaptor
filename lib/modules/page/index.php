@@ -6,20 +6,29 @@
  * @version 1.0
  */
 class Page implements Module {
-	private $args;
-	private $page;
 	private $pdbc;
+	private $page;
+	private $args;
 
-	public function __construct(array $args, $page, PDBC $pdbc) {
-		$this->args = $args;
-		$this->page = $page;
+	/**
+	 *
+	 */
+	public function __construct(PDBC $pdbc, $page, array $args) {
 		$this->pdbc = $pdbc;
+		$this->page = $page;
+		$this->args = $args;
 	}
 
+	/**
+	 *
+	 */
 	public function isStatic() {
 		return TRUE;
 	}
 
+	/**
+	 *
+	 */
 	public function get() {
 		switch($this->parseGet()) {
 			case "content":
@@ -40,6 +49,9 @@ class Page implements Module {
 		}
 	}
 
+	/**
+	 *
+	 */
 	private function parseGet() {
 		if(isset($this->args['get'])) {
 			return $this->args['get'];
@@ -48,6 +60,9 @@ class Page implements Module {
 		throw new Exception('get="" required.');
 	}
 
+	/**
+	 *
+	 */
 	private function parseContent() {
 		return isset($this->args['name']) ? $this->parseContentName($this->args['name'])  : $this->parseContentNoName() ;
 	}
@@ -76,6 +91,9 @@ class Page implements Module {
 		return end(end($result));
 	}
 
+	/**
+	 *
+	 */
 	private function parseDescription() {
 		$result = $this->pdbc->fetch('SELECT `description` FROM `pages` WHERE `id`=' .  $this->pdbc->quote($this->page));
 
@@ -86,6 +104,9 @@ class Page implements Module {
 		return end(end($result));
 	}
 
+	/**
+	 *
+	 */
 	private function parseMedia() {
 		if(!isset($this->args['type'])) {
 			throw new Exception('type="" required.');
@@ -108,6 +129,9 @@ class Page implements Module {
 		return '<!--{media type="' . $this->args['type'] . '" name="' . $this->args['name'] . '" url="' . end(end($url)) . '"}-->';
 	}
 
+	/**
+	 *
+	 */
 	private function parseTitle() {
 		$result = $this->pdbc->fetch('SELECT `name` FROM `pages` WHERE `id`=' . $this->pdbc->quote($this->page));
 

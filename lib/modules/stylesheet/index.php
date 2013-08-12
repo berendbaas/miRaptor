@@ -6,20 +6,29 @@
  * @version 1.0
  */
 class Stylesheet implements Module {
-	private $args;
-	private $page;
 	private $pdbc;
+	private $page;
+	private $args;
 
-	public function __construct(array $args, $page, PDBC $pdbc) {
-		$this->args = $args;
-		$this->page = $page;
+	/**
+	 *
+	 */
+	public function __construct(PDBC $pdbc, $page, array $args) {
 		$this->pdbc = $pdbc;
+		$this->page = $page;
+		$this->args = $args;
 	}
 
+	/**
+	 *
+	 */
 	public function isStatic() {
 		return TRUE;
 	}
 
+	/**
+	 *
+	 */
 	public function get() {
 		// Query
 		$query = '(SELECT `tid` FROM `pages` WHERE `id` = "' . $this->pdbc->quote($this->page) . '")'; // Get template id

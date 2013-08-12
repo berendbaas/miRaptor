@@ -5,8 +5,15 @@
  * @copyright Copyright (c) 2013, miWebb
  * @version 1.0
  */
-interface Admin {
+interface AdminInterface {
+	/**
+	 *
+	 */
 	public function __construct(URI $uri, PDBC $pdbc);
+
+	/**
+	 *
+	 */
 	public function get();
 }
 

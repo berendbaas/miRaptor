@@ -6,12 +6,17 @@
  * @version 1.0
  */
 
+// Globals
+define('MIRAPTOR_CACHE', FALSE);
+define('MIRAPTOR_DEBUG', TRUE);
+
 // Init config
 $config = array();
 
-// Index
-$config['index'] = array();
-$config['index']['default_host'] = 'www.example.org';
+// Main
+$config['main'] = array();
+$config['main']['default_host'] = 'www.example.org';
+$config['main']['user_location'] = 'users';
 
 // Mysql
 $config['mysql'] = array();
@@ -19,13 +24,5 @@ $config['mysql']['username'] = 'username';
 $config['mysql']['password'] = 'password';
 $config['mysql']['database'] = 'database';
 $config['mysql']['hostname'] = 'localhost';
-
-// Gatekeeper
-$config['gatekeeper'] = array();
-$config['gatekeeper']['user_location'] = 'users';
-
-// Parser
-$config['parser'] = array();
-$config['parser']['default_modules'] = array('media','menu','page','site','stylesheet','template');
 
 ?>

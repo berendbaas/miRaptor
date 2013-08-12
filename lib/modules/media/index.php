@@ -6,20 +6,29 @@
  * @version 1.0
  */
 class Media implements Module {
-	private $args;
-	private $page;
 	private $pdbc;
+	private $page;
+	private $args;
 
-	public function __construct(array $args, $page, PDBC $pdbc) {
-		$this->args = $args;
-		$this->page = $page;
+	/**
+	 *
+	 */
+	public function __construct(PDBC $pdbc, $page, array $args) {
 		$this->pdbc = $pdbc;
+		$this->page = $page;
+		$this->args = $args;
 	}
 
+	/**
+	 *
+	 */
 	public function isStatic() {
 		return TRUE;
 	}
 
+	/**
+	 *
+	 */
 	public function get() {
 		$get = $this->parseGet();
 		$url = $this->parseUrl();
@@ -39,6 +48,9 @@ class Media implements Module {
 		return $this->parseMedia($this->parseType(), $this->parseUrl());
 	}
 
+	/**
+	 *
+	 */
 	private function parseGet() {
 		if(isset($this->args['get'])) {
 			return $this->args['get'];
@@ -47,6 +59,9 @@ class Media implements Module {
 		throw new Exception('get="" required.');
 	}
 
+	/**
+	 *
+	 */
 	private function parseUrl() {
 		if(isset($this->args['url'])) {
 			return $this->args['url'];
@@ -55,11 +70,17 @@ class Media implements Module {
 		throw new Exception('url="" required.');
 	}
 
+	/**
+	 *
+	 */
 	private function parseImage($url) {
 		return '<img src="_media/images/' . $url . '" alt="' . (isset($this->args['alt']) ? $this->args['alt'] : '') . '" />';
 	}
 
-	private function parsePdf($url) {
+	pr
+	/**
+	 *
+	 */ivate function parsePdf($url) {
 		return '<a href="_media/pdf/' . $url . '" target="_blank">' . (isset($this->args['alt']) ? $this->args['alt'] : '') . '</a>';
 	}
 }

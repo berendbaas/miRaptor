@@ -5,7 +5,7 @@
  * @copyright Copyright (c) 2013, miWebb
  * @version 1.0
  */
-class SiteAdmin implements AdminInterface {
+class AdminAdmin implements AdminInterface {
 	private $mysql;
 
 	/**
@@ -19,7 +19,7 @@ class SiteAdmin implements AdminInterface {
 	 *
 	 */
 	public function get() {
-		return '<p>Site Admin</p>'
+		return '<p>News Admin</p>'
 	}
 }
 

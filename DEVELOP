@@ -1,0 +1,24 @@
+# TODO
+- Add Comments
+- @license at the header of every file?
+- install
+
+# Clean
+- "User" class
+
+# Features
+- page redirect
+- Maintenance page!
+
+# Modules
+- font (Google fonts or your own font)
+- stylesheet - cache the stylesheets!
+- news module
+	o Tag instead of category
+	o Static pages
+- form
+- admin
+
+# Discuss
+- Mysql vs PDO
+- Improvement of the DB Query readability

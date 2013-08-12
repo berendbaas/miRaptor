@@ -8,10 +8,16 @@
 class StylesheetAdmin implements AdminInterface {
 	private $mysql;
 
+	/**
+	 *
+	 */
 	public function __construct($mysql) {
 		$this->mysql = $mysql;
 	}
 
+	/**
+	 *
+	 */
 	public function get() {
 		return '<p>Stylesheet Admin</p>'
 	}
