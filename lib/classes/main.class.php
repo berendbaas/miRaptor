@@ -31,10 +31,10 @@ class Main {
 		} catch(Exception $e) {
 			$statuscode = $e->getCode();
 			echo new Error($e);
-		} finally {
-			if($pdbc != null) {
-				Logger::log($pdbc, $statuscode, ob_get_length());
-			}
+		} 
+		
+		if($pdbc != null) {
+			Logger::log($pdbc, $statuscode, ob_get_length());
 		}
 
 		ob_end_flush();
