@@ -18,7 +18,7 @@ class Gatekeeper {
 		$user = $this->getUser($pdbc, $request, $host['uid']);
 
 		// Set website location & database
-		$this->location = $config['user_location'] . $user['location'] . $host['location'];
+		$this->location = $user['location'] . $host['location'];
 		$this->database = $host['db'];
 	}
 
@@ -31,7 +31,7 @@ class Gatekeeper {
 		// Check redirect or found
 		if(empty($host)) {
 			// Get redirect
-			$redirect = end($pdbc->fetch('SELECT `website`.`domain`, `host`.`path` FROM `website` RIGHT JOIN (SELECT `wid`,`path` FROM `host` WHERE `domain` = "' . pdbc->quote($request->getHost()) . '") AS `host` ON `website`.`id` = `host`.`wid`'));
+			$redirect = end($pdbc->fetch('SELECT `website`.`domain`, `host`.`path` FROM `website` RIGHT JOIN (SELECT `wid`,`path` FROM `host` WHERE `domain` = "' . $pdbc->quote($request->getHost()) . '") AS `host` ON `website`.`id` = `host`.`wid`'));
 
 			// Check redirect
 			if(empty($redirect)) {
