@@ -27,14 +27,14 @@ class Main {
 			$request = $this->parseRequest();
 			$pdbc = $this->parsePDBC($this->config['mysql']);
 			$gatekeeper = $this->parseGatekeeper($pdbc, $request);
-			new Guide($pdbc, $request, $this->config['main']['user_location'] . $gatekeeper->getLocation(), $config['parser']);
+			new Guide($pdbc, $request, $this->config['main']['user_location'] . $gatekeeper->getLocation());
 		} catch(Exception $e) {
-			$statuscode = $e->getCode();
+			$this->statuscode = $e->getCode();
 			echo new Error($e);
 		} 
 		
 		if($pdbc != null) {
-			Logger::log($pdbc, $statuscode, ob_get_length());
+			Logger::log($pdbc, $this->statuscode, ob_get_length());
 		}
 
 		ob_end_flush();

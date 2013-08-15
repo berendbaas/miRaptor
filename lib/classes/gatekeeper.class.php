@@ -18,7 +18,7 @@ class Gatekeeper {
 		$user = $this->getUser($pdbc, $request, $host['uid']);
 
 		// Set website location & database
-		$this->location = $config['user_location'] . $user['location'] . $host['location'];
+		$this->location = $user['location'] . $host['location'];
 		$this->database = $host['db'];
 	}
 
