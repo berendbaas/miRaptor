@@ -15,6 +15,7 @@ function __autoload($class_name) {
 }
 
 // Create and start the main thread
-new Main($config)->run();
+$main = new Main($config);
+$main->run();
 
 ?>
