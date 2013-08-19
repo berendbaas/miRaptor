@@ -3,6 +3,7 @@
 /**
  * @author miWebb <info@miwebb.com>
  * @copyright Copyright (c) 2013, miWebb
+ * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
 class Media implements Module {
@@ -77,10 +78,10 @@ class Media implements Module {
 		return '<img src="_media/images/' . $url . '" alt="' . (isset($this->args['alt']) ? $this->args['alt'] : '') . '" />';
 	}
 
-	pr
 	/**
 	 *
-	 */ivate function parsePdf($url) {
+	 */
+	private function parsePdf($url) {
 		return '<a href="_media/pdf/' . $url . '" target="_blank">' . (isset($this->args['alt']) ? $this->args['alt'] : '') . '</a>';
 	}
 }
