@@ -1,16 +1,16 @@
 # TODO
 - Add Comments
-- @license at the header of every file?
-- install
+- Create install
 
 # Clean
 - "User" class
+- "Admin" module
 
 # Features
-- page redirect
+- Page redirect
 - Maintenance page!
 
-# Modules
+# Modules index.php
 - font (Google fonts or your own font)
 - stylesheet - cache the stylesheets!
 - news module
@@ -19,6 +19,11 @@
 - form
 - admin
 
+# Modules admin.php
+- All xD
+
 # Discuss
 - Mysql vs PDO
+- ModuleInterface & AdminInterface vs AbtractModule & AbstactInterface
+- Add runnable interface for "main", "parser" & modules classes
 - Improvement of the DB Query readability
