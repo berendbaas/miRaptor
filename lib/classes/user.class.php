@@ -34,7 +34,9 @@ class User
 			$pass = $_POST['user_class_password'];
 		}
 
-		$uq = $this->pdbc->fetch('SELECT id FROM user WHERE username = "' . $user . '" AND password = "' . $pass . '"');
+		$uq = $this->pdbc->fetch('SELECT id
+		                          FROM user
+		                          WHERE username = "' . $user . '" AND password = "' . $pass . '"');
 
 		$uq = end($uq);
 

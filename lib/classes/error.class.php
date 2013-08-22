@@ -46,7 +46,7 @@ class Error {
 		(
 			'statuscode' => '500',
 			'title' => 'Service error',
-			'description' => 'There is something wrong with the service. Sorry! :('
+			'description' => 'There is something wrong with the service.'
 		)
 	);
 
@@ -96,7 +96,12 @@ class Error {
 
 		<h1>" . $this->error['title'] . "</h1>
 
-		<p>" . $this->error['description'] . "</p>" . (MIRAPTOR_DEBUG ? PHP_EOL . PHP_EOL . '		<pre>' . $this->exception->getMessage() . '</pre>' . PHP_EOL . PHP_EOL . '		<pre>' . $this->exception->getTraceAsString() . '</pre>' : '') . "
+		<p>" . $this->error['description'] . "</p>" .
+
+		(MIRAPTOR_DEBUG ? PHP_EOL . PHP_EOL .
+		'		<pre>' . $this->exception->getMessage() . '</pre>' . 
+		PHP_EOL . PHP_EOL .
+		'		<pre>' . $this->exception->getTraceAsString() . '</pre>' : '') . "
 
 	</body>
 

@@ -56,7 +56,9 @@ class Parser {
 	 *
 	 */
 	private function page() {
-		$page = end($this->pdbc->fetch('SELECT id FROM `pages` WHERE `url`="'. $this->pdbc->quote($this->request->getUri()->getPath()) . '"'));
+		$page = end($this->pdbc->fetch('SELECT id
+		                                FROM `pages`
+		                                WHERE `url`="'. $this->pdbc->quote($this->request->getUri()->getPath()) . '"'));
 
 		if(empty($page)) {
 			throw new Exception('Parser: url doesnt exists - ' . $this->request->getUri()->getPath(), 404);

@@ -44,7 +44,8 @@ class URI {
 	 *
 	 */
 	public function addQuery($key, $value) {
-		$this->query .= (($this->query == NULL) ? self::QUERY_DELIMITER : self::QUERY_SEPARATOR) . $key . self::QUERY_KEY_VALUE . $value;
+		$this->query .= (($this->query == NULL) ? self::QUERY_DELIMITER :
+		                                          self::QUERY_SEPARATOR) . $key . self::QUERY_KEY_VALUE . $value;
 	}
 
 	/**
