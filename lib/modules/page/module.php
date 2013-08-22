@@ -69,9 +69,17 @@ class Page implements Module {
 	}
 
 	private function parseContentName($name) {
-		$query = '(SELECT `tid` FROM `pages` WHERE `id` = "' . $this->pdbc->quote($this->page) . '")'; // Get template ID
-		$query = '(SELECT `id` FROM `module_page_content_name` WHERE `tid` = ' . $query . ' AND `name` = "' . $this->pdbc->quote($name) . '")'; // Get name ID
-		$query = 'SELECT `content` FROM `module_page_content` WHERE `pid` = ' . $this->pdbc->quote($this->page) . ' AND `nid`= ' . $query; // Get content url
+		$query = '(SELECT `tid`
+		           FROM `pages`
+		           WHERE `id` = "' . $this->pdbc->quote($this->page) . '")'; // Get template ID
+
+		$query = '(SELECT `id`
+		           FROM `module_page_content_name`
+		           WHERE `tid` = ' . $query . ' AND `name` = "' . $this->pdbc->quote($name) . '")'; // Get name ID
+
+		$query = 'SELECT `content`
+		          FROM `module_page_content`
+		          WHERE `pid` = ' . $this->pdbc->quote($this->page) . ' AND `nid`= ' . $query; // Get content url
 
 		$content = $this->pdbc->fetch($query);
 
@@ -83,7 +91,9 @@ class Page implements Module {
 	}
 
 	private function parseContentNoName() {
-		$result = $this->pdbc->fetch('SELECT `content` FROM `pages` WHERE `id`=' .  $this->pdbc->quote($this->page));
+		$result = $this->pdbc->fetch('SELECT `content`
+		                              FROM `pages`
+		                              WHERE `id`=' .  $this->pdbc->quote($this->page));
 
 		if(empty($result)) {
 			throw new Exception('Content does not exists.');
@@ -96,7 +106,9 @@ class Page implements Module {
 	 *
 	 */
 	private function parseDescription() {
-		$result = $this->pdbc->fetch('SELECT `description` FROM `pages` WHERE `id`=' .  $this->pdbc->quote($this->page));
+		$result = $this->pdbc->fetch('SELECT `description`
+		                              FROM `pages`
+		                              WHERE `id`=' .  $this->pdbc->quote($this->page));
 
 		if(empty($result)) {
 			throw new Exception('Description does not exists.');
@@ -117,9 +129,17 @@ class Page implements Module {
 			throw new Exception('name="" required.');
 		}
 
-		$query = '(SELECT `tid` FROM `pages` WHERE `id` = ' . $this->pdbc->quote($this->page) . ')'; // Get template ID
-		$query = '(SELECT `id` FROM `module_page_media_name` WHERE `tid` = ' . $query . ' AND `name` = "' . $this->pdbc->quote($this->args['name']) . '")'; // Get name ID
-		$query = 'SELECT `url` FROM `module_page_media` WHERE `pid` = ' . $this->pdbc->quote($this->page) . ' AND `nid`= ' . $query; // Get media url
+		$query = '(SELECT `tid`
+		           FROM `pages`
+			   WHERE `id` = ' . $this->pdbc->quote($this->page) . ')'; // Get template ID
+
+		$query = '(SELECT `id`
+		           FROM `module_page_media_name`
+		           WHERE `tid` = ' . $query . ' AND `name` = "' . $this->pdbc->quote($this->args['name']) . '")'; // Get name ID
+
+		$query = 'SELECT `url`
+		          FROM `module_page_media`
+		          WHERE `pid` = ' . $this->pdbc->quote($this->page) . ' AND `nid`= ' . $query; // Get media url
 
 		$url = $this->pdbc->fetch($query);
 
@@ -134,7 +154,9 @@ class Page implements Module {
 	 *
 	 */
 	private function parseTitle() {
-		$result = $this->pdbc->fetch('SELECT `name` FROM `pages` WHERE `id`=' . $this->pdbc->quote($this->page));
+		$result = $this->pdbc->fetch('SELECT `name`
+		                              FROM `pages`
+		                              WHERE `id`=' . $this->pdbc->quote($this->page));
 
 		if(empty($result)) {
 			throw new Exception('Title does not exists.');

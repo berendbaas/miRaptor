@@ -82,7 +82,9 @@ class Media implements Module {
 	 *
 	 */
 	private function parsePdf($url) {
-		return '<a href="_media/pdf/' . $url . '" target="_blank">' . (isset($this->args['alt']) ? $this->args['alt'] : '') . '</a>';
+		return '<a href="_media/pdf/' . $url . '" target="_blank">' .
+		          (isset($this->args['alt']) ? $this->args['alt'] : '') .
+		       '</a>';
 	}
 }
 

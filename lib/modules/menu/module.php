@@ -91,7 +91,10 @@ class Menu implements Module {
 		}
 
 		// Get pages
-		$pages = $this->pdbc->fetch('SELECT `id`,`name`,`description`,`url` FROM `pages` WHERE `pid` = ' . $pid . ' ORDER BY `order` ASC');
+		$pages = $this->pdbc->fetch('SELECT `id`,`name`,`description`,`url`
+		                             FROM `pages`
+		                             WHERE `pid` = ' . $pid .
+		                            ' ORDER BY `order` ASC');
 
 		if(empty($pages)) {
 			return '';
@@ -101,7 +104,10 @@ class Menu implements Module {
 		$menu = '<ul>' . PHP_EOL;
 
 		foreach($pages as $page) {
-			$menu .= '<li' . ($this->page == $page['id'] ? ' class="current"' : '') .  '><a href="' . $page['url'] . '" alt="' . $page['description'] . '">' . $page['name'] . '</a>' . $this->parseMenuDefault($page['id'], ($level - 1)) . '</li>' . PHP_EOL;
+			$menu .= '<li' . ($this->page == $page['id'] ? ' class="current"' : '') .  '>
+			             <a href="' . $page['url'] . '" alt="' . $page['description'] . '">' . $page['name'] . '</a>' .
+			             $this->parseMenuDefault($page['id'], ($level - 1)) . 
+			         '</li>' . PHP_EOL;
 		}
 
 		return $menu . '</ul>';
@@ -117,7 +123,10 @@ class Menu implements Module {
 		}
 
 		// Get pages
-		$pages = $this->pdbc->fetch('SELECT `id`,`name`,`description`,`url` FROM `pages` WHERE `pid` = ' . $pid . ' ORDER BY `order` ASC');
+		$pages = $this->pdbc->fetch('SELECT `id`,`name`,`description`,`url`
+		                             FROM `pages`
+		                             WHERE `pid` = ' . $pid . '
+		                             ORDER BY `order` ASC');
 
 		if(empty($pages)) {
 			return '';
@@ -127,7 +136,10 @@ class Menu implements Module {
 		$menu = '<ul>' . PHP_EOL;
 
 		foreach($pages as $page) {
-			$menu .= '<li' . ($this->page == $page['id'] ? ' class="current"' : '') .  '><a href="' . $page['url'] . '">' . $page['name'] . '<span>' . $page['description'] . '</span></a>' . $this->parseMenuDescription($page['id'], ($level - 1)) . '</li>' . PHP_EOL;
+			$menu .= '<li' . ($this->page == $page['id'] ? ' class="current"' : '') .  '>
+			            <a href="' . $page['url'] . '">' . $page['name'] . '<span>' . $page['description'] . '</span></a>' .
+			            $this->parseMenuDescription($page['id'], ($level - 1)) .
+			         '</li>' . PHP_EOL;
 		}
 
 		return $menu . '</ul>';

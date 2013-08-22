@@ -46,7 +46,9 @@ class Site implements Module {
 	}
 
 	private function parseSite($get) {
-		$result = $this->pdbc->fetch('SELECT `content` FROM `module_site` WHERE `name` = "' . $this->pdbc->quote($get) . '"');
+		$result = $this->pdbc->fetch('SELECT `content`
+		                              FROM `module_site`
+		                              WHERE `name` = "' . $this->pdbc->quote($get) . '"');
 
 		if(empty($result)) {
 			throw new Exception('get="' . $get . '" does not exists.');

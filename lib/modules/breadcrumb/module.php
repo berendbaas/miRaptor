@@ -50,7 +50,9 @@ class Breadcrumb implements Module {
 	 */
 	private function parseBreadcrumb($id) {
 		// Fetch
-		$breadcrumb = end($this->pdbc->fetch('SELECT `pid`,`name`,`url` FROM `pages` WHERE `id` = "' . $this->pdbc->quote($id) . '"'));
+		$breadcrumb = end($this->pdbc->fetch('SELECT `pid`,`name`,`url`
+		                                      FROM `pages`
+		                                      WHERE `id` = "' . $this->pdbc->quote($id) . '"'));
 
 		// Stop
 		if(empty($breadcrumb)) {
@@ -58,7 +60,8 @@ class Breadcrumb implements Module {
 		}
 
 		// HTML
-		return $this->parseBreadcrumb($breadcrumb['pid']) . '<li><a href="' . $breadcrumb['url'] . '">' . $breadcrumb['name'] . '</a></li>' . PHP_EOL;
+		return $this->parseBreadcrumb($breadcrumb['pid']) .
+		       '<li><a href="' . $breadcrumb['url'] . '">' . $breadcrumb['name'] . '</a></li>' . PHP_EOL;
 	}
 }
 

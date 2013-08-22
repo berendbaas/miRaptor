@@ -32,7 +32,7 @@ class News implements Module {
 	 */
 	public function get() {
 /*
-		$query = 'SELECT `id` FROM `module_news_category` WHERE `name` = ' . mysql_;
+		$query = 'SELECT `id`FROM `module_news_category` WHERE `name` = ' . mysql_;
 		$query = 
 
 		$this->pdbc->fetch($query);

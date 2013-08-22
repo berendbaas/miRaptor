@@ -31,7 +31,11 @@ class Template implements Module {
 	 *
 	 */
 	public function get() {
-		$result = $this->pdbc->fetch('SELECT `content` FROM `module_template` WHERE `id` = (SELECT `tid` FROM `pages` WHERE `id` = "' . $this->pdbc->quote($this->page) . '")');
+		$result = $this->pdbc->fetch('SELECT `content`
+		                              FROM `module_template`
+		                              WHERE `id` = (SELECT `tid`
+		                                            FROM `pages`
+		                                            WHERE `id` = "' . $this->pdbc->quote($this->page) . '")');
 
 		if(empty($result)) {
 			throw new Exception('Template does not exists.');
