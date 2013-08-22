@@ -9,7 +9,7 @@
 class Parser {
 	const MODULE_DEFAULT = 'template';
 	const MODULE_LOCATION = 'lib/modules/';
-	const MODULE_FILE = 'index.php';
+	const MODULE_FILE = 'module.php';
 
 	private $request;
 	private $pdbc;
