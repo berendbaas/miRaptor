@@ -18,21 +18,21 @@ class Error {
 		(
 			'statuscode' => '301',
 			'title' => 'Moved permanently',
-			'description' => 'The page is moved, that\'s all we know. Sorry! :('
+			'description' => 'The page moved, that\'s all we know.'
 		),
 
 		'304' => array
 		(
 			'statuscode' => '304',
 			'title' => 'Not Modified',
-			'description' => 'The page has not been edited since the last time! ;)'
+			'description' => 'The page has not been modified.'
 		),
 
 		'400' => array
 		(
 			'statuscode' => '400',
 			'title' => 'Bad request',
-			'description' => 'We don\'t understand what you want. Sorry! :('
+			'description' => 'We don\'t understand what you\'re requesting.'
 		),
 
 		'404' => array

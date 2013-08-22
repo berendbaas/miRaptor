@@ -2,6 +2,8 @@
 - Add Comments
 - Create install
 - Module change index.php -> module.php
+- Add runnable interface for "main", "parser" & modules classes
+- Improvement of the DB Query readability
 
 # Clean
 - "User" class
@@ -24,7 +26,3 @@
 - All xD
 
 # Discuss
-- Mysql vs PDO
-- ModuleInterface & AdminInterface vs AbtractModule & AbstactInterface
-- Add runnable interface for "main", "parser" & modules classes
-- Improvement of the DB Query readability

@@ -27,12 +27,18 @@ class Gatekeeper {
 	 *
 	 */
 	private function getHost(PDBC $pdbc, Request $request) {
-		$host = end($pdbc->fetch('SELECT `uid`,`location`,`db` FROM `website` WHERE `active` = 1 AND `domain` = "' . $pdbc->quote($request->getHost()) . '"'));
+		$host = end($pdbc->fetch('SELECT `uid`,`location`,`db`
+		                          FROM `website`
+		                          WHERE `active` = 1 AND `domain` = "' . $pdbc->quote($request->getHost()) . '"'));
 
 		// Check redirect or found
 		if(empty($host)) {
 			// Get redirect
-			$redirect = end($pdbc->fetch('SELECT `website`.`domain`, `host`.`path` FROM `website` RIGHT JOIN (SELECT `wid`,`path` FROM `host` WHERE `domain` = "' . $pdbc->quote($request->getHost()) . '") AS `host` ON `website`.`id` = `host`.`wid`'));
+			$redirect = end($pdbc->fetch('SELECT `website`.`domain`, `host`.`path`
+			                              FROM `website`
+			                              RIGHT JOIN (SELECT `wid`,`path` FROM `host`
+			                              WHERE `domain` = "' . $pdbc->quote($request->getHost()) . '") AS `host`
+			                              ON `website`.`id` = `host`.`wid`'));
 
 			// Check redirect
 			if(empty($redirect)) {
