@@ -12,7 +12,7 @@ include_once('config.php');
 
 // Autoload classes
 function __autoload($class_name) {
-	include_once('lib/core/' . strtolower($class_name) . '.class.php');
+	include_once('lib/core/' . $class_name . '.class.php');
 }
 
 // Create and start the main thread

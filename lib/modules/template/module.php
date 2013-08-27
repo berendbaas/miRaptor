@@ -6,7 +6,7 @@
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class Template implements Module {
+class Template implements ModuleInterface {
 	private $pdbc;
 	private $page;
 	private $args;
