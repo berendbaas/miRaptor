@@ -11,7 +11,7 @@ interface AdminInterface extends Runnable {
 	/**
 	 *
 	 */
-	public function __construct(URI $uri, PDBC $pdbc);
+	public function __construct(PDBC $pdbc, URI $uri);
 
 	/**
 	 *

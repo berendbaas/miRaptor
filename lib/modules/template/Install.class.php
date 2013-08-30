@@ -1,4 +1,5 @@
 <?php
+namespace lib/modules/template;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -6,16 +7,16 @@
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class TemplateInstall implements InstallInterface {
+class Install implements /lib/core/InstallInterface {
 	private $pdbc;
 	private $result;
 
 	/**
 	 *
 	 */
-	public function __construct(PDBC $pdbc) {
+	public function __construct(/lib/core/PDBC $pdbc) {
 		$this->pdbc = $pdbc;
-		$this->result = $result;
+		$this->result = '';
 	}
 
 	/**

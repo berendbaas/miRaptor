@@ -87,7 +87,6 @@ class Parser implements Runnable {
 	private function module(array $modules, Token $token, $page) {
 		try {
 			$module = self::MODULE_NAMESPACE . $token->getModule() . self::MODULE_CLASS;
-			echo $module;
 
 			$result = new $module($this->pdbc, $page, $token->getArgs());
 			$result->run();

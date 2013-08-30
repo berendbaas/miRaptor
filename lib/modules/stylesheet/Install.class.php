@@ -1,5 +1,5 @@
 <?php
-namespace lib/modules/template;
+namespace lib/modules/stylesheet;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -7,17 +7,15 @@ namespace lib/modules/template;
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class Admin implements /lib/core/AdminInterface {
+class Install implements /lib/core/InstallInterface {
 	private $pdbc;
-	private $uri;
 	private $result;
 
 	/**
 	 *
 	 */
-	public function __construct(/lib/core/PDBC $pdbc, /lib/core/URI $uri) {
+	public function __construct(/lib/core/PDBC $pdbc) {
 		$this->pdbc = $pdbc;
-		$this->uri = $uri;
 		$this->result = '';
 	}
 
@@ -29,7 +27,7 @@ class Admin implements /lib/core/AdminInterface {
 	}
 
 	/**
-	 *
+	 * 
 	 */
 	public function run() {
 

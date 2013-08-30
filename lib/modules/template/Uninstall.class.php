@@ -1,4 +1,5 @@
 <?php
+namespace lib/modules/template;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -6,7 +7,7 @@
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class TemplateUninstall implements UninstallInterface {
+class Uninstall implements UninstallInterface {
 	private $pdbc;
 	private $result;
 
@@ -15,7 +16,7 @@ class TemplateUninstall implements UninstallInterface {
 	 */
 	public function __construct(PDBC $pdbc) {
 		$this->pdbc = $pdbc;
-		$this->result = $result;
+		$this->result = '';
 	}
 
 	/**
