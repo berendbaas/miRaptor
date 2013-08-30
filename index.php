@@ -11,12 +11,12 @@
 include_once('config.php');
 
 // Autoload classes
-function __autoload($class_name) {
-	include_once('lib/classes/' . strtolower($class_name) . '.class.php');
+function __autoload($class) {
+	include_once(str_replace('\\', '/', $class) . '.class.php');
 }
 
-// Create and start the main thread
-$main = new Main($config);
+// Create and run main object
+$main = new lib\core\Main($config);
 $main->run();
 
 ?>
