@@ -10,6 +10,7 @@ class News implements ModuleInterface {
 	private $pdbc;
 	private $page;
 	private $args;
+	private $result;
 
 	/**
 	 *
@@ -18,6 +19,14 @@ class News implements ModuleInterface {
 		$this->pdbc = $pdbc;
 		$this->page = $page;
 		$this->args = $args;
+		$this->result = '';
+	}
+
+	/**
+	 *
+	 */
+	public function __toString() {
+		return $this->result;
 	}
 
 	/**
@@ -30,7 +39,7 @@ class News implements ModuleInterface {
 	/**
 	 *
 	 */
-	public function get() {
+	public function run() {
 /*
 		$query = 'SELECT `id`FROM `module_news_category` WHERE `name` = ' . mysql_;
 		$query = 

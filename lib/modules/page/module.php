@@ -10,6 +10,7 @@ class Page implements ModuleInterface {
 	private $pdbc;
 	private $page;
 	private $args;
+	private $result;
 
 	/**
 	 *
@@ -18,6 +19,14 @@ class Page implements ModuleInterface {
 		$this->pdbc = $pdbc;
 		$this->page = $page;
 		$this->args = $args;
+		$this->result = '';
+	}
+
+	/**
+	 *
+	 */
+	public function __toString() {
+		return $this->result;
 	}
 
 	/**
@@ -30,19 +39,19 @@ class Page implements ModuleInterface {
 	/**
 	 *
 	 */
-	public function get() {
+	public function run() {
 		switch($this->parseGet()) {
 			case "content":
-				return $this->parseContent();
+				$this->result = $this->parseContent();
 			break;
 			case "description":
-				return $this->parseDescription();
+				$this->result = $this->parseDescription();
 			break;
 			case "media":
-				return $this->parseMedia();
+				$this->result = $this->parseMedia();
 			break;
 			case "title":
-				return $this->parseTitle();
+				$this->result = $this->parseTitle();
 			break;
 			default:
 				throw new Exception('get="' . $this->args['get']. '" does not exists.');

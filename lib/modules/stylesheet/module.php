@@ -10,6 +10,7 @@ class Stylesheet implements ModuleInterface {
 	private $pdbc;
 	private $page;
 	private $args;
+	private $result;
 
 	/**
 	 *
@@ -18,6 +19,14 @@ class Stylesheet implements ModuleInterface {
 		$this->pdbc = $pdbc;
 		$this->page = $page;
 		$this->args = $args;
+		$this->result = '';
+	}
+
+	/**
+	 *
+	 */
+	public function __toString() {
+		return $this->result;
 	}
 
 	/**
@@ -30,7 +39,7 @@ class Stylesheet implements ModuleInterface {
 	/**
 	 *
 	 */
-	public function get() {
+	public function run() {
 		// Query
 		$query = '(SELECT `tid`
 		           FROM `pages`
@@ -57,7 +66,7 @@ class Stylesheet implements ModuleInterface {
 				. '/* ' . $stylesheet['name'] . ' end */' . PHP_EOL; 
 		}
 
-		return '<style>' . $result . '</style>';
+		$this->result = '<style>' . $result . '</style>';
 	}
 }
 

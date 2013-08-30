@@ -10,6 +10,7 @@ class Media implements ModuleInterface {
 	private $pdbc;
 	private $page;
 	private $args;
+	private $result;
 
 	/**
 	 *
@@ -18,6 +19,14 @@ class Media implements ModuleInterface {
 		$this->pdbc = $pdbc;
 		$this->page = $page;
 		$this->args = $args;
+		$this->result = '';
+	}
+
+	/**
+	 *
+	 */
+	public function __toString() {
+		return $this->result;
 	}
 
 	/**
@@ -30,7 +39,7 @@ class Media implements ModuleInterface {
 	/**
 	 *
 	 */
-	public function get() {
+	public function run() {
 		$get = $this->parseGet();
 		$url = $this->parseUrl();
 
@@ -46,7 +55,7 @@ class Media implements ModuleInterface {
 			break;
 		}
 
-		return $this->parseMedia($this->parseType(), $this->parseUrl());
+		$this->result = $this->parseMedia($this->parseType(), $this->parseUrl());
 	}
 
 	/**

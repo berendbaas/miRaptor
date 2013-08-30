@@ -6,17 +6,7 @@
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-interface AdminInterface extends Runnable {
-	/**
-	 *
-	 */
-	public function __construct(URI $uri, PDBC $pdbc);
-
-	/**
-	 *
-	 */
-	public function __toString();
-
+interface Runnable {
 	/**
 	 *
 	 */

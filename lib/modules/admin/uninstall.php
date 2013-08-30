@@ -6,18 +6,16 @@
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class TemplateAdmin implements AdminInterface {
-	private $uri;
+class AdminUninstall implements UninstallInterface {
 	private $pdbc;
 	private $result;
 
 	/**
 	 *
 	 */
-	public function __construct(URI $uri, PDBC $pdbc) {
-		$this->uri = $uri;
+	public function __construct(PDBC $pdbc) {
 		$this->pdbc = $pdbc;
-		$this->result = '';
+		$this->result = $result;
 	}
 
 	/**
@@ -28,7 +26,7 @@ class TemplateAdmin implements AdminInterface {
 	}
 
 	/**
-	 *
+	 * 
 	 */
 	public function run() {
 

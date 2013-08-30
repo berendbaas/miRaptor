@@ -10,6 +10,7 @@ class Breadcrumb implements ModuleInterface {
 	private $pdbc;
 	private $page;
 	private $args;
+	private $result;
 
 	/**
 	 *
@@ -18,6 +19,14 @@ class Breadcrumb implements ModuleInterface {
 		$this->pdbc = $pdbc;
 		$this->page = $page;
 		$this->args = $args;
+		$this->result = '';
+	}
+
+	/**
+	 *
+	 */
+	public function __toString() {
+		return $this->result;
 	}
 
 	/**
@@ -30,8 +39,8 @@ class Breadcrumb implements ModuleInterface {
 	/**
 	 *
 	 */
-	public function get() {
-		return '<ul>' . $this->parseBreadcrumb($this->page) . '</ul>';
+	public function run() {
+		$this->result = '<ul>' . $this->parseBreadcrumb($this->page) . '</ul>';
 	}
 
 	/**

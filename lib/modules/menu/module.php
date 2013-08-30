@@ -10,6 +10,7 @@ class Menu implements ModuleInterface {
 	private $pdbc;
 	private $page;
 	private $args;
+	private $result;
 
 	/**
 	 *
@@ -18,6 +19,14 @@ class Menu implements ModuleInterface {
 		$this->pdbc = $pdbc;
 		$this->page = $page;
 		$this->args = $args;
+		$this->result = '';
+	}
+
+	/**
+	 *
+	 */
+	public function __toString() {
+		return $this->result;
 	}
 
 	/**
@@ -30,16 +39,16 @@ class Menu implements ModuleInterface {
 	/**
 	 *
 	 */
-	public function get() {
+	public function run() {
 		$pid = $this->parseId();
 		$levels = $this->parseLevel();
 
 		switch($this->parseStyle()) {
 			case 'description':
-				return $this->parseMenuDescription($pid, $levels);
+				$this->result = $this->parseMenuDescription($pid, $levels);
 			break;
 			default:
-				return $this->parseMenuDefault($pid, $levels);
+				$this->result = $this->parseMenuDefault($pid, $levels);
 			break;
 		}
 	}

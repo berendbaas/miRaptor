@@ -10,6 +10,7 @@ class Admin implements ModuleInterface {
 	private $pdbc;
 	private $page;
 	private $args;
+	private $result;
         private $user;
 
 	/**
@@ -19,10 +20,18 @@ class Admin implements ModuleInterface {
 		$this->pdbc = $pdbc;
 		$this->page = $page;
 		$this->args = $args;
+		$this->result = '';
 
 		include('config.php');
 
 		$this->user = new User(new Mysql($config['mysql']));
+	}
+
+	/**
+	 *
+	 */
+	public function __toString() {
+		return $this->result;
 	}
 
 	/**
@@ -35,11 +44,11 @@ class Admin implements ModuleInterface {
 	/**
 	 *
 	 */
-	public function get() {
+	public function run() {
 		if($this->user->isLoggedIn()) {
-			return $this->handleAdmin();
+			$this->result = $this->handleAdmin();
 		} else {
-			return $this->handleLogIn();
+			$this->result = $this->handleLogIn();
 		}
 	}
 

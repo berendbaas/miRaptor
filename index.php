@@ -11,8 +11,8 @@
 include_once('config.php');
 
 // Autoload classes
-function __autoload($class_name) {
-	include_once('lib/core/' . $class_name . '.class.php');
+function __autoload($className) {
+	include_once('lib/core/' . $className . '.class.php');
 }
 
 // Create and start the main thread

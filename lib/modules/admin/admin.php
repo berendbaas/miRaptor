@@ -7,20 +7,31 @@
  * @version 1.0
  */
 class AdminAdmin implements AdminInterface {
-	private $mysql;
+	private $uri;
+	private $pdbc;
+	private $result;
 
 	/**
 	 *
 	 */
-	public function __construct($mysql) {
-		$this->mysql = $mysql;
+	public function __construct(URI $uri, PDBC $pdbc) {
+		$this->uri = $uri;
+		$this->pdbc = $pdbc;
+		$this->result = '';
 	}
 
 	/**
 	 *
 	 */
-	public function get() {
-		return '<p>News Admin</p>'
+	public function __toString() {
+		return $this->result;
+	}
+
+	/**
+	 *
+	 */
+	public function run() {
+
 	}
 }
 

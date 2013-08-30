@@ -6,10 +6,11 @@
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class Parser {
+class Parser implements Runnable {
 	const MODULE_DEFAULT = 'template';
 	const MODULE_LOCATION = 'lib/modules/';
 	const MODULE_FILE = 'module.php';
+	const MODULE_INTERFACE = 'ModuleInterface';
 
 	private $request;
 	private $pdbc;
@@ -94,17 +95,18 @@ class Parser {
 
 			include_once($file);
 
-			if(!class_exists($module) || !in_array('Module', class_implements($module))) {
+			if(!class_exists($module) || !in_array(self::MODULE_INTERFACE, class_implements($module))) {
 				throw new Exception('Module doensn\'t exists.');
 			}
 
 			$result = new $module($this->pdbc, $page, $token->getArgs());
+			$result->run();
 
 			if(!$result->isStatic()) {
 				$this->static = FALSE;
 			}
 
-			return $result->get();
+			return $result->__toString();
 		} catch(Exception $e) {
 			return '<!-- {' . $module . '}: ' . $e->getMessage() . ' -->';
 		}

@@ -10,6 +10,7 @@ class Site implements ModuleInterface {
 	private $pdbc;
 	private $page;
 	private $args;
+	private $result;
 
 	/**
 	 *
@@ -18,6 +19,14 @@ class Site implements ModuleInterface {
 		$this->pdbc = $pdbc;
 		$this->page = $page;
 		$this->args = $args;
+		$this->result = '';
+	}
+
+	/**
+	 *
+	 */
+	public function __toString() {
+		return $this->result;
 	}
 
 	/**
@@ -30,8 +39,8 @@ class Site implements ModuleInterface {
 	/**
 	 *
 	 */
-	public function get() {
-		return $this->parseSite($this->parseGet());
+	public function run() {
+		$this->result = $this->parseSite($this->parseGet());
 	}
 
 	/**
