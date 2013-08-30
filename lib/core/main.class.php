@@ -1,4 +1,5 @@
 <?php
+namespace lib\core;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -29,7 +30,7 @@ class Main implements Runnable {
 			$pdbc = $this->parsePDBC($this->config['mysql']);
 			$gatekeeper = $this->parseGatekeeper($pdbc, $request);
 			new Guide($pdbc, $request, $this->config['main']['user_location'] . $gatekeeper->getLocation());
-		} catch(Exception $e) {
+		} catch(\Exception $e) {
 			$this->statuscode = $e->getCode();
 			echo new Error($e);
 		} 

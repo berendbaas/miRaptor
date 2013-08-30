@@ -1,4 +1,5 @@
 <?php
+namespace lib\core;
 
 /**
  * @author miWebb <info@miwebb.com>

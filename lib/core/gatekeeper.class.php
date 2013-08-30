@@ -1,4 +1,5 @@
 <?php
+namespace lib\core;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -42,10 +43,10 @@ class Gatekeeper {
 
 			// Check redirect
 			if(empty($redirect)) {
-				throw new Exception('Gatekeeper: unknown domain - ' . $request->getHost(), 404);
+				throw new \Exception('Gatekeeper: unknown domain - ' . $request->getHost(), 404);
 			}
 			
-			throw new Exception($redirect['domain'] . $redirect['path'] . $request->getUri(), 301);
+			throw new \Exception($redirect['domain'] . $redirect['path'] . $request->getUri(), 301);
 		}
 
 		return $host;
@@ -60,7 +61,7 @@ class Gatekeeper {
 
 		// Check user
 		if(empty($user)) {
-			throw new Exception('Gatekeeper: unknown domain - ' . $request->getHost(), 404);
+			throw new \Exception('Gatekeeper: unknown domain - ' . $request->getHost(), 404);
 		}
 
 		return $user;

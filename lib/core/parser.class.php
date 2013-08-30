@@ -1,4 +1,5 @@
 <?php
+namespace lib\core;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -7,10 +8,9 @@
  * @version 1.0
  */
 class Parser implements Runnable {
-	const MODULE_DEFAULT = 'template';
-	const MODULE_LOCATION = 'lib/modules/';
-	const MODULE_FILE = 'module.php';
-	const MODULE_INTERFACE = 'ModuleInterface';
+	const TOKEN_DEFAULT = 'template';
+	const MODULE_CLASS = '\\Module';
+	const MODULE_NAMESPACE = 'lib\\modules\\';
 
 	private $request;
 	private $pdbc;
@@ -23,7 +23,7 @@ class Parser implements Runnable {
 	public function __construct(PDBC $pdbc, Request $request) {
 		$this->pdbc = $pdbc;
 		$this->request = $request;
-		$this->tokenizer = new Tokenizer(Token::DEFAULT_START . self::MODULE_DEFAULT . Token::DEFAULT_END);
+		$this->tokenizer = new Tokenizer(Token::DEFAULT_START . self::TOKEN_DEFAULT . Token::DEFAULT_END);
 		$this->static = TRUE;
 	}
 
@@ -57,12 +57,12 @@ class Parser implements Runnable {
 	 *
 	 */
 	private function page() {
-		$page = end($this->pdbc->fetch('SELECT id
+		$page = end($this->pdbc->fetch('SELECT `id`
 		                                FROM `pages`
-		                                WHERE `url`="'. $this->pdbc->quote($this->request->getUri()->getPath()) . '"'));
+		                                WHERE `url`="' . $this->pdbc->quote($this->request->getUri()->getPath()) . '"'));
 
 		if(empty($page)) {
-			throw new Exception('Parser: url doesnt exists - ' . $this->request->getUri()->getPath(), 404);
+			throw new \Exception('Parser: url doesnt exists - ' . $this->request->getUri()->getPath(), 404);
 		}
 
 		return end($page);
@@ -85,19 +85,9 @@ class Parser implements Runnable {
 	 *
 	 */
 	private function module(array $modules, Token $token, $page) {
-		$module = $token->getModule();
-		$file = self::MODULE_LOCATION . $module . '/' . self::MODULE_FILE;
-
 		try {
-			if(!file_exists($file) || !in_array($module, $modules)) {
-				throw new Exception('Module doensn\'t exists.');
-			}
-
-			include_once($file);
-
-			if(!class_exists($module) || !in_array(self::MODULE_INTERFACE, class_implements($module))) {
-				throw new Exception('Module doensn\'t exists.');
-			}
+			$module = self::MODULE_NAMESPACE . $token->getModule() . self::MODULE_CLASS;
+			echo $module;
 
 			$result = new $module($this->pdbc, $page, $token->getArgs());
 			$result->run();
@@ -107,8 +97,8 @@ class Parser implements Runnable {
 			}
 
 			return $result->__toString();
-		} catch(Exception $e) {
-			return '<!-- {' . $module . '}: ' . $e->getMessage() . ' -->';
+		} catch(\Exception $e) {
+			return '<!-- {' . $token->getModule() . '}: ' . $e->getMessage() . ' -->';
 		}
 	}
 }

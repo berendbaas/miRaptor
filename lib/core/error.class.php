@@ -1,4 +1,5 @@
 <?php
+namespace lib\core;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -53,7 +54,7 @@ class Error {
 	/**
 	 *
 	 */
-	public function __construct(Exception $exception) {
+	public function __construct(\Exception $exception) {
 		$this->exception = $exception;
 		$this->error = empty($this->errors[$exception->getCode()]) ? $this->errors[self::DEFAULT_ERROR] : $this->errors[$exception->getCode()] ;
 	}

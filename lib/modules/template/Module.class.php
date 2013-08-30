@@ -1,4 +1,5 @@
 <?php
+namespace lib\modules\template;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -6,7 +7,7 @@
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class Template implements \ModuleInterface {
+class Module implements \lib\core\ModuleInterface {
 	private $pdbc;
 	private $page;
 	private $args;
@@ -15,7 +16,7 @@ class Template implements \ModuleInterface {
 	/**
 	 *
 	 */
-	public function __construct(\PDBC $pdbc, $page, array $args) {
+	public function __construct(\lib\core\PDBC $pdbc, $page, array $args) {
 		$this->pdbc = $pdbc;
 		$this->page = $page;
 		$this->args = $args;

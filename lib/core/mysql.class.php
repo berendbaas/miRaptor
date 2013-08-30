@@ -1,4 +1,5 @@
 <?php
+namespace lib\core;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -14,7 +15,7 @@ class Mysql implements PDBC {
 	 */
 	public function __construct(array $config) {
 		if(!($this->link = mysql_connect($config['hostname'], $config['username'], $config['password'], TRUE))) {
-			throw new Exception('Mysql: Can\'t connect to database - ' . $config['hostname'], 500);
+			throw new \Exception('Mysql: Can\'t connect to database - ' . $config['hostname'], 500);
 		}
 	}
 
@@ -23,7 +24,7 @@ class Mysql implements PDBC {
 	 */
 	public function selectDatabase($database) {
 		if(!mysql_select_db($database, $this->link)) {
-			throw new Exception('Mysql: Can\'t select database - ' . $database, 500);
+			throw new \Exception('Mysql: Can\'t select database - ' . $database, 500);
 		}
 	}
 
@@ -34,7 +35,7 @@ class Mysql implements PDBC {
 		$resource = mysql_query($query, $this->link);
 
 		if(!$resource) {
-			throw new Exception('Mysql: Can\'t execute query - ' . mysql_error(), 500);
+			throw new \Exception('Mysql: Can\'t execute query - ' . mysql_error(), 500);
 		}
 
 		return $resource;

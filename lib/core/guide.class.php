@@ -1,4 +1,5 @@
 <?php
+namespace lib\core;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -31,7 +32,7 @@ class Guide {
 			break;
 
 			defaut:
-				throw new Exception('Bad request: Method not supported.', 400);
+				throw new \Exception('Bad request: Method not supported.', 400);
 			break;
 		}
 	}
@@ -44,7 +45,7 @@ class Guide {
 		$lastModified = filemtime($filename);
 
 		if(!$this->isModified($lastModified)) {
-			throw new Exception('Not Modified', 304);
+			throw new \Exception('Not Modified', 304);
 		}
 
 		// Header echo
