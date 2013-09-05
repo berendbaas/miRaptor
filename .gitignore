@@ -23,7 +23,7 @@
 # Logs and databases #
 ######################
 *.log
-*.sql
+# *.sql untill the full install is done
 *.sqlite
 
 # OS generated files #

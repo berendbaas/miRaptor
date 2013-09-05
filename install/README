@@ -1,0 +1,19 @@
+Install miRaptor
+
+# STEP 1
+Clean LAMP server
+
+# STEP 2
+Copy miRaptor to /var/www/
+
+# STEP 4
+Change miraptor.nl in the .sql files to your own domain
+
+# STEP 3
+Import the 3 .sql files in the install directory
+
+# STEP 5
+Add the correct default host and database credentials to the config.php file
+
+# STEP 6
+Remove the install directory

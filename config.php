@@ -9,7 +9,7 @@
 
 // Globals
 define('MIRAPTOR_CACHE', FALSE);
-define('MIRAPTOR_DEBUG', TRUE);
+define('MIRAPTOR_DEBUG', FALSE);
 
 // Init config
 $config = array();
