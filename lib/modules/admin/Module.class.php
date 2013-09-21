@@ -25,7 +25,7 @@ class Module implements \lib\core\ModuleInterface {
 
 		include('config.php');
 
-		$this->user = new User(new Mysql($config['mysql']));
+		$this->user = new \lib\core\User(new \lib\core\Mysql($config['mysql']));
 	}
 
 	/**
