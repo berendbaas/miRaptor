@@ -79,17 +79,13 @@ class Module implements \lib\core\ModuleInterface {
 	}
 
 	private function parseContentName($name) {
-		$query = '(SELECT `tid`
-		           FROM `pages`
-		           WHERE `id` = "' . $this->pdbc->quote($this->page) . '")'; // Get template ID
-
 		$query = '(SELECT `id`
 		           FROM `module_page_content_name`
-		           WHERE `tid` = ' . $query . ' AND `name` = "' . $this->pdbc->quote($name) . '")'; // Get name ID
+		           WHERE `name` = "' . $this->pdbc->quote($name) . '")'; // Get name ID
 
 		$query = 'SELECT `content`
 		          FROM `module_page_content`
-		          WHERE `pid` = ' . $this->pdbc->quote($this->page) . ' AND `nid`= ' . $query; // Get content url
+		          WHERE `pid` = ' . $this->pdbc->quote($this->page) . ' AND `nid`= ' . $query; // Get content
 
 		$content = $this->pdbc->fetch($query);
 
@@ -139,13 +135,9 @@ class Module implements \lib\core\ModuleInterface {
 			throw new Exception('name="" required.');
 		}
 
-		$query = '(SELECT `tid`
-		           FROM `pages`
-			   WHERE `id` = ' . $this->pdbc->quote($this->page) . ')'; // Get template ID
-
 		$query = '(SELECT `id`
 		           FROM `module_page_media_name`
-		           WHERE `tid` = ' . $query . ' AND `name` = "' . $this->pdbc->quote($this->args['name']) . '")'; // Get name ID
+		           WHERE `name` = "' . $this->pdbc->quote($this->args['name']) . '")'; // Get name ID
 
 		$query = 'SELECT `url`
 		          FROM `module_page_media`
