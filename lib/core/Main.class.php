@@ -33,7 +33,7 @@ class Main implements Runnable {
 		} catch(\Exception $e) {
 			$this->statuscode = $e->getCode();
 			echo new Error($e);
-		} 
+		}
 		
 		if($pdbc != null) {
 			Logger::log($pdbc, $this->statuscode, ob_get_length());
@@ -43,7 +43,7 @@ class Main implements Runnable {
 	}
 
 	/**
-	 *
+	 * 
 	 */
 	private function parseRequest() {
 		$method = $_SERVER['REQUEST_METHOD'];
@@ -54,7 +54,7 @@ class Main implements Runnable {
 	}
 
 	/**
-	 *
+	 * 
 	 */
 	private function parsePDBC($config) {
 		$pdbc = new Mysql($config);
@@ -64,7 +64,7 @@ class Main implements Runnable {
 	}
 
 	/**
-	 *
+	 * 
 	 */
 	private function parseGatekeeper(PDBC $pdbc, Request $request) {
 		$gatekeeper = new Gatekeeper($pdbc, $request);

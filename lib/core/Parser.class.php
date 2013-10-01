@@ -15,7 +15,9 @@ class Parser implements Runnable {
 	private $request;
 	private $pdbc;
 	private $tokenizer;
-	private $static;
+
+	private $isStatic;
+	private $isNamespace;
 
 	/**
 	 *
@@ -24,7 +26,9 @@ class Parser implements Runnable {
 		$this->pdbc = $pdbc;
 		$this->request = $request;
 		$this->tokenizer = new Tokenizer(Token::DEFAULT_START . self::TOKEN_DEFAULT . Token::DEFAULT_END);
-		$this->static = TRUE;
+
+		$this->isStatic = TRUE;
+		$this->isNamespace = FALSE;
 	}
 
 	/**
@@ -44,13 +48,18 @@ class Parser implements Runnable {
 		while($token = $this->tokenizer->token()) {
 			$this->tokenizer->replace($token, $this->module($modules, $token, $page));
 		}
+
+		// The page exists, but is considered not found because the filename was not required.
+		if(!$this->isNamespace && $this->request->getUri()->getFilename() != '') {
+			throw new \Exception('Parser: uri doesnt exists - ' . $this->request->getUri()->getPath() . $this->request->getUri()->getFilename() , 404);
+		}
 	}
 
 	/**
 	 *
 	 */
 	public function isStatic() {
-		return $this->static;
+		return $this->isStatic;
 	}
 
 	/**
@@ -59,10 +68,10 @@ class Parser implements Runnable {
 	private function page() {
 		$page = end($this->pdbc->fetch('SELECT `id`
 		                                FROM `pages`
-		                                WHERE `url`="' . $this->pdbc->quote($this->request->getUri()->getPath()) . '"'));
+		                                WHERE `uri`="' . $this->pdbc->quote($this->request->getUri()->getPath()) . '"'));
 
 		if(empty($page)) {
-			throw new \Exception('Parser: url doesnt exists - ' . $this->request->getUri()->getPath(), 404);
+			throw new \Exception('Parser: uri doesnt exists - ' . $this->request->getUri()->getPath() . $this->request->getUri()->getFilename() , 404);
 		}
 
 		return end($page);
@@ -85,20 +94,15 @@ class Parser implements Runnable {
 	 *
 	 */
 	private function module(array $modules, Token $token, $page) {
-		try {
-			$module = self::MODULE_NAMESPACE . $token->getModule() . self::MODULE_CLASS;
+		$module = self::MODULE_NAMESPACE . $token->getModule() . self::MODULE_CLASS;
 
-			$result = new $module($this->pdbc, $page, $token->getArgs());
-			$result->run();
+		$result = new $module($this->pdbc, $this->request, $page, $token->getArgs());
+		$result->run();
 
-			if(!$result->isStatic()) {
-				$this->static = FALSE;
-			}
+		$this->isStatic = $this->isStatic && $result->isStatic();
+		$this->isNamespace = $this->isNamespace || $result->isNamespace();
 
-			return $result->__toString();
-		} catch(\Exception $e) {
-			return '<!-- {' . $token->getModule() . '}: ' . $e->getMessage() . ' -->';
-		}
+		return $result->__toString();
 	}
 }
 

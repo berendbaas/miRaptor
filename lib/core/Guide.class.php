@@ -8,20 +8,16 @@ namespace lib\core;
  * @version 1.0
  */
 class Guide {
+	const DEFAULT_FILE = 'index.html';
+
 	/**
 	 *
 	 */
 	public function __construct(PDBC $pdbc, Request $request, $location) {
-		$filename = $location . $request->getUri()->getPath();
+		$filename = $location . $request->getUri()->getPath() . ($request->getUri()->getFilename() == '' ? self:: DEFAULT_FILE : $request->getUri()->getFilename());
 
 		switch($request->getMethod()) {
 			case 'get':
-				// index.html
-				if(substr($filename, -1) == '/') {
-					$filename .= 'index.html';
-				}
-
-				// Check if the file exists
 				if(file_exists($filename)) {
 					$this->getRequest($filename);
 					break;
@@ -31,7 +27,7 @@ class Guide {
 				$this->parseRequest($pdbc, $request, $filename);
 			break;
 
-			defaut:
+			default:
 				throw new \Exception('Bad request: Method not supported.', 400);
 			break;
 		}

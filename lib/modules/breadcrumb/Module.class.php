@@ -9,6 +9,7 @@ namespace lib\modules\breadcrumb;
  */
 class Module implements \lib\core\ModuleInterface {
 	private $pdbc;
+	private $request;
 	private $page;
 	private $args;
 	private $result;
@@ -16,8 +17,9 @@ class Module implements \lib\core\ModuleInterface {
 	/**
 	 *
 	 */
-	public function __construct(\lib\core\PDBC $pdbc, $page, array $args) {
+	public function __construct(\lib\core\PDBC $pdbc, \lib\core\Request $request, $page, array $args) {
 		$this->pdbc = $pdbc;
+		$this->request = $request;
 		$this->page = $page;
 		$this->args = $args;
 		$this->result = '';
@@ -34,6 +36,13 @@ class Module implements \lib\core\ModuleInterface {
 	 *
 	 */
 	public function isStatic() {
+		return TRUE;
+	}
+
+	/**
+	 *
+	 */
+	public function isNamespace() {
 		return FALSE;
 	}
 
@@ -41,7 +50,9 @@ class Module implements \lib\core\ModuleInterface {
 	 *
 	 */
 	public function run() {
-		$this->result = '<ul>' . $this->parseBreadcrumb($this->page) . '</ul>';
+		$this->result = <<<HTML
+<ul>{$this->parseBreadcrumb($this->page)}</ul>
+HTML;
 	}
 
 	/**
@@ -59,19 +70,14 @@ class Module implements \lib\core\ModuleInterface {
 	 *
 	 */
 	private function parseBreadcrumb($id) {
-		// Fetch
-		$breadcrumb = end($this->pdbc->fetch('SELECT `pid`,`name`,`url`
+		$breadcrumb = end($this->pdbc->fetch('SELECT `pid`,`name`,`uri`
 		                                      FROM `pages`
 		                                      WHERE `id` = "' . $this->pdbc->quote($id) . '"'));
 
-		// Stop
-		if(empty($breadcrumb)) {
-			return PHP_EOL;
-		}
+		return empty($breadcrumb) ? PHP_EOL : $this->parseBreadcrumb($breadcrumb['pid']) . <<<HTML
+<li><a href="{$breadcrumb['uri']}">{$breadcrumb['name']}</a></li>
 
-		// HTML
-		return $this->parseBreadcrumb($breadcrumb['pid']) .
-		       '<li><a href="' . $breadcrumb['url'] . '">' . $breadcrumb['name'] . '</a></li>' . PHP_EOL;
+HTML;
 	}
 }
 

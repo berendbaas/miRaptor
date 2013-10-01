@@ -9,6 +9,7 @@ namespace lib\modules\menu;
  */
 class Module implements \lib\core\ModuleInterface {
 	private $pdbc;
+	private $request;
 	private $page;
 	private $args;
 	private $result;
@@ -16,8 +17,9 @@ class Module implements \lib\core\ModuleInterface {
 	/**
 	 *
 	 */
-	public function __construct(\lib\core\PDBC $pdbc, $page, array $args) {
+	public function __construct(\lib\core\PDBC $pdbc, \lib\core\Request $request, $page, array $args) {
 		$this->pdbc = $pdbc;
+		$this->request = $request;
 		$this->page = $page;
 		$this->args = $args;
 		$this->result = '';
@@ -35,6 +37,13 @@ class Module implements \lib\core\ModuleInterface {
 	 */
 	public function isStatic() {
 		return TRUE;
+	}
+
+	/**
+	 *
+	 */
+	public function isNamespace() {
+		return FALSE;
 	}
 
 	/**
@@ -101,7 +110,7 @@ class Module implements \lib\core\ModuleInterface {
 		}
 
 		// Get pages
-		$pages = $this->pdbc->fetch('SELECT `id`,`name`,`description`,`url`
+		$pages = $this->pdbc->fetch('SELECT `id`,`name`,`description`,`uri`
 		                             FROM `pages`
 		                             WHERE `pid` = ' . $pid .
 		                            ' ORDER BY `order` ASC');
@@ -114,8 +123,7 @@ class Module implements \lib\core\ModuleInterface {
 		$menu = '<ul>' . PHP_EOL;
 
 		foreach($pages as $page) {
-			$menu .= '<li' . ($this->page == $page['id'] ? ' class="current"' : '') .  '>
-			             <a href="' . $page['url'] . '" alt="' . $page['description'] . '">' . $page['name'] . '</a>' .
+			$menu .= '<li' . ($this->page == $page['id'] ? ' class="current"' : '') .  '><a href="' . $page['uri'] . '" alt="' . $page['description'] . '">' . $page['name'] . '</a>' .
 			             $this->parseMenuDefault($page['id'], ($level - 1)) . 
 			         '</li>' . PHP_EOL;
 		}
@@ -133,7 +141,7 @@ class Module implements \lib\core\ModuleInterface {
 		}
 
 		// Get pages
-		$pages = $this->pdbc->fetch('SELECT `id`,`name`,`description`,`url`
+		$pages = $this->pdbc->fetch('SELECT `id`,`name`,`description`,`uri`
 		                             FROM `pages`
 		                             WHERE `pid` = ' . $pid . '
 		                             ORDER BY `order` ASC');
@@ -146,8 +154,7 @@ class Module implements \lib\core\ModuleInterface {
 		$menu = '<ul>' . PHP_EOL;
 
 		foreach($pages as $page) {
-			$menu .= '<li' . ($this->page == $page['id'] ? ' class="current"' : '') .  '>
-			            <a href="' . $page['url'] . '">' . $page['name'] . '<span>' . $page['description'] . '</span></a>' .
+			$menu .= '<li' . ($this->page == $page['id'] ? ' class="current"' : '') .  '><a href="' . $page['uri'] . '">' . $page['name'] . '<span>' . $page['description'] . '</span></a>' .
 			            $this->parseMenuDescription($page['id'], ($level - 1)) .
 			         '</li>' . PHP_EOL;
 		}

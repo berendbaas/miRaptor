@@ -9,6 +9,7 @@ namespace lib\modules\stylesheet;
  */
 class Module implements \lib\core\ModuleInterface {
 	private $pdbc;
+	private $request;
 	private $page;
 	private $args;
 	private $result;
@@ -16,8 +17,9 @@ class Module implements \lib\core\ModuleInterface {
 	/**
 	 *
 	 */
-	public function __construct(\lib\core\PDBC $pdbc, $page, array $args) {
+	public function __construct(\lib\core\PDBC $pdbc, \lib\core\Request $request, $page, array $args) {
 		$this->pdbc = $pdbc;
+		$this->request = $request;
 		$this->page = $page;
 		$this->args = $args;
 		$this->result = '';
@@ -35,6 +37,13 @@ class Module implements \lib\core\ModuleInterface {
 	 */
 	public function isStatic() {
 		return TRUE;
+	}
+
+	/**
+	 *
+	 */
+	public function isNamespace() {
+		return FALSE;
 	}
 
 	/**

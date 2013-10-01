@@ -9,6 +9,7 @@ namespace lib\modules\template;
  */
 class Module implements \lib\core\ModuleInterface {
 	private $pdbc;
+	private $request;
 	private $page;
 	private $args;
 	private $result;
@@ -16,8 +17,9 @@ class Module implements \lib\core\ModuleInterface {
 	/**
 	 *
 	 */
-	public function __construct(\lib\core\PDBC $pdbc, $page, array $args) {
+	public function __construct(\lib\core\PDBC $pdbc, \lib\core\Request $request, $page, array $args) {
 		$this->pdbc = $pdbc;
+		$this->request = $request;
 		$this->page = $page;
 		$this->args = $args;
 		$this->result = '';
@@ -40,12 +42,22 @@ class Module implements \lib\core\ModuleInterface {
 	/**
 	 *
 	 */
+	public function isNamespace() {
+		return FALSE;
+	}
+
+	/**
+	 *
+	 */
 	public function run() {
-		$result = $this->pdbc->fetch('SELECT `content`
-		                              FROM `module_template`
-		                              WHERE `id` = (SELECT `tid`
-		                                            FROM `pages`
-		                                            WHERE `id` = "' . $this->pdbc->quote($this->page) . '")');
+		$result = $this->pdbc->fetch(<<<SQL
+SELECT `content`
+FROM `module_template`
+WHERE `id` = (SELECT `tid`
+	      FROM `pages`
+	      WHERE `id` = "{$this->pdbc->quote($this->page)}")
+SQL
+);
 
 		if(empty($result)) {
 			throw new Exception('Template does not exists.');

@@ -1,5 +1,5 @@
 <?php
-namespace lib\modules\news;
+namespace lib\modules\form;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -50,12 +50,7 @@ class Module implements \lib\core\ModuleInterface {
 	 *
 	 */
 	public function run() {
-/*
-		$query = 'SELECT `id`FROM `module_news_category` WHERE `name` = ' . mysql_;
-		$query = 
 
-		$this->pdbc->fetch($query);
-*/
 	}
 }
 

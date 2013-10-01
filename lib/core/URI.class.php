@@ -13,7 +13,7 @@ class URI {
 	const QUERY_KEY_VALUE = '=';
 
 	private $path;
-	private $query;
+	private $filename;
 
 	/**
 	 *
@@ -22,16 +22,17 @@ class URI {
 		// Split path and query
 		$uri = explode(self::QUERY_DELIMITER, $uri, 2);
 
-		// Set path and query
-		$this->path = $uri[0];
-		$this->query = empty($uri[1]) ? NULL : $uri[1];
+		// Set path and file
+		$pos = strrpos($uri[0], '/') + 1;
+		$this->path = substr($uri[0], 0, $pos);
+		$this->filename = strlen($uri[0]) > $pos ? substr($uri[0], $pos) : '';
 	}
 
 	/**
 	 *
 	 */
 	public function __toString() {
-		return $this->path . $this->query;
+		return $this->path . $this->filename . $this->query;
 	}
 
 	/**
@@ -44,16 +45,8 @@ class URI {
 	/**
 	 *
 	 */
-	public function addQuery($key, $value) {
-		$this->query .= (($this->query == NULL) ? self::QUERY_DELIMITER :
-		                                          self::QUERY_SEPARATOR) . $key . self::QUERY_KEY_VALUE . $value;
-	}
-
-	/**
-	 *
-	 */
-	public function getQuery() {
-		return $this->query;
+	public function getFilename() {
+		return $this->filename;
 	}
 }
 

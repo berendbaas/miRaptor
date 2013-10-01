@@ -9,6 +9,7 @@ namespace lib\modules\admin;
  */
 class Module implements \lib\core\ModuleInterface {
 	private $pdbc;
+	private $request;
 	private $page;
 	private $args;
 	private $result;
@@ -17,14 +18,14 @@ class Module implements \lib\core\ModuleInterface {
 	/**
 	 *
 	 */
-	public function __construct(\lib\core\PDBC $pdbc, $page, array $args) {
+	public function __construct(\lib\core\PDBC $pdbc, \lib\core\Request $request, $page, array $args) {
 		$this->pdbc = $pdbc;
+		$this->request = $request;
 		$this->page = $page;
 		$this->args = $args;
 		$this->result = '';
 
 		include('config.php');
-
 		$this->user = new \lib\core\User(new \lib\core\Mysql($config['mysql']));
 	}
 
@@ -45,231 +46,37 @@ class Module implements \lib\core\ModuleInterface {
 	/**
 	 *
 	 */
+	public function isNamespace() {
+		return TRUE;
+	}
+
+	/**
+	 *
+	 */
 	public function run() {
-		if($this->user->isLoggedIn()) {
-			$this->result = $this->handleAdmin();
-		} else {
-			$this->result = $this->handleLogIn();
+		switch($this->request->getUri()->getFilename()) {
+			case '':
+				$this->result = 'home';
+			break;
+			case 'login':
+				$this->result = 'login';
+			break;
+			case 'logout':
+				$this->result = 'logout';
+			break;
+			case 'overview':
+				$this->result = 'overview';
+			break;
+			case 'site':
+				$this->result = 'site';
+			break;
+			case 'settings':
+				$this->result = 'settings';
+			break;
+			default:
+				$this->result = 'default';
+			break;
 		}
-	}
-
-	/**
-	 *
-	 */
-	private function handleLogIn() {
-		if(isset($this->args['get']) && $this->args['get'] == 'login') {
-			return $this->user->loginFields('overview/');
-		} else {
-			header('location: http://admin.miraptor.nl/', TRUE, 303);
-			return '';
-		}
-	}
-
-	/**
-	 *
-	 */
-	private function handleAdmin() {
-		if(isset($this->args['get'])) {
-			switch($this->args['get']) {
-				case 'login':
-					header('location: http://admin.miraptor.nl/overview/', TRUE, 303); 
-					return '';
-				break;
-				case 'logout':
-					$this->user->logout();
-					header('location: http://admin.miraptor.nl/', TRUE, 303);
-					return '';
-				break;
-				case 'overview':
-					return $this->handleAdminOverview();
-				break;
-				case 'websites':
-					return $this->handleAdminWebsites();
-				break;
-				case 'domains':
-					return $this->handleAdminDomains();
-				break;
-				case 'settings':
-					return $this->handleAdminSettings();
-				break;
-				case 'website':
-					return $this->handleAdminWebsite();
-				break;
-				case 'renamewebsite':
-					return $this->handleAdminRenameWebsite();
-				break;
-				case 'websitestats':
-					return $this->handleAdminStats();
-				break;
-			}
-
-			throw new exception('"Get" Argument not supported.');
-		}
-	}
-
-	/**
-	 *
-	 */
-	private function handleAdminOverview() {
-		/* TODO
-		 * - Updates
-		 * - Nieuws
-		 */
-		$ret = '<p>Welcome back, ' . $this->user->get_name() . '.</p>';
-
-
-
-		return $ret;
-	}
-
-	/**
-	 *
-	 */
-	private function handleAdminStats() {
-
-		$ret = 'Stats, motherfucker. Do you has them?';
-
-		return $ret;
-	}
-
-	/**
-	 *
-	 */
-	private function handleAdminRenameWebsite() {
-
-		$ret = '<h2>Rename website</h2>';
-
-
-		if( isset( $_POST['name'] ) )
-		{
-			$this->user->update_sitename( $_POST['site'], $_POST['name'] );
-
-			header('location: http://admin.miraptor.nl/websites/', TRUE, 303);
-		}
-
-		$site = isset( $_GET['site'] ) ? $_GET['site'] : 0;
-
-		if( $this->user->hasAccessToSite( $site ) )
-		{
-			$curname = $this->user->get_sitename( $site );
-
-			$ret .= "<form action='' method='post'>";
-			$ret .= "<input type='hidden' value='" . $site . "' id='site' name='site' />";
-			$ret .=    "<label for='name'>";
-			$ret .=       "Name: <input type='text' id='name' name='name' value='" . $curname . "' />";
-			$ret .=    "</label>";
-			$ret .=    "<input type='submit' value='save'>";
-			$ret .= "</form>";
-		}else{
-			$ret .= "<p>You don't have access to this website.</p><p>Return to the <a href='websites/'>website overview</a></p>";
-		}
-
-		return $ret;
-	}
-
-	/**
-	 *
-	 */
-	private function handleAdminWebsites() {
-
-		$ret = '<h2>Websites</h2>';
-
-
-		if( isset( $_GET['togglestatus'] ) )
-		{
-			$this->user->toggle_website_status( $_GET['togglestatus'] );
-		}
-
-		if( isset( $_GET['newsite'] ) && trim( $_GET['newsite'] ) != '' )
-		{
-			$this->user->new_website( $_GET['newsite'] );
-		}
-
-
-		$ret .= '<p>This page lists all your websites. Click on the name of a website to edit that website, or click on the status icon to toggle the website on/offline.</p>';
-
-		$ret .= '<table><thead><tr><th>name</th><th>status</th><th></th></tr></thead><tbody>';
-
-		foreach( $this->user->get_websites() as $website )
-		{
-			$status = $website['status'] == 1 ? 'online' : 'offline';
-
-			$ret .= '<tr>';
-
-			$ret .=    "<td><a href='website/?siteid=" . $website['id'] . "'>" . $website['name'] . "</a></td>";
-
-			$ret .=    "<td>";
-			$ret .=       "<a href='websites/?togglestatus=" . $website['id'] . "'>";
-			$ret .=          "<img src='_media/images/status_" . $status . ".png' alt='Site is " . $status . "' title='Site is " . $status . "' />";
-			$ret .=       "</a>";
-			$ret .=    "</td>";
-
-			$ret .=    "<td>";
-			$ret .=       "<a href='websites/rename/?site=" . $website['id'] . "'>";
-			$ret .=          "<img src='_media/images/rename.png' alt='Rename website' title='Rename website' />";
-			$ret .=       "</a>";
-
-			$ret .=    "</td>";
-			$ret .=    "<td>";
-			$ret .=       "<a href='websites/stats/?site=" . $website['id'] . "'>";
-			$ret .=          "<img src='_media/images/stats.png' alt='Website statistics' title='Website statistics' />";
-			$ret .=       "</a>";
-			$ret .=    "</td>";
-
-			$ret .= '</tr>';
-		}
-
-
-		$ret .= '</tbody></table>';
-
-
-		$ret .= '<h3>Add new site</h3>';
-		$ret .= "<form action='websites/' method='get'>";
-		$ret .=    "<label for='newsite'>";
-		$ret .=       "Name: <input type='text' id='newsite' name='newsite' />";
-		$ret .=    "</label>";
-		$ret .=    "<input type='submit' value='create' />";
-                $ret .= "</form>";
-
-		return $ret;
-	}
-
-	/**
-	 *
-	 */
-	private function handleAdminDomains() {
-		/* TODO
-		 * - Domeinen van de gebruiker
-		 * - Redirects
-		 */
-		return '<p>Unknown page (yet?), check <code>{admin get="' . $this->args['get'] . '"}</code></p>';
-	}
-
-	/**
-	 *
-	 */
-	private function handleAdminSettings() {
-		/* TODO
-		 * - Username
-		 * - Password
-		 * - First name
-		 * - Last name
-		 * - Adres
-		 * - E-mail
-		 * - Telefoon
-		 */
-		return '<p>Unknown page (yet?), check <code>{admin get="' . $this->args['get'] . '"}</code></p>';
-	}
-
-	/**
-	 *
-	 */
-	private function handleAdminWebsite() {
-		/* TODO
-		 * Parse menu (default modules + modules van de gebruikers)
-		 * Fix content (admin.php van de betreffende module)
-		 */
-		return '<div id="menu"></div><div id="content"><p>Unknown page (yet?), check <code>{admin get="' . $this->args['get'] . '"}</code></p></div>';
 	}
 }
 

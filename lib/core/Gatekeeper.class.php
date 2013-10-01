@@ -37,8 +37,9 @@ class Gatekeeper {
 			// Get redirect
 			$redirect = end($pdbc->fetch('SELECT `website`.`domain`, `host`.`path`
 			                              FROM `website`
-			                              RIGHT JOIN (SELECT `wid`,`path` FROM `host`
-			                              WHERE `domain` = "' . $pdbc->quote($request->getHost()) . '") AS `host`
+			                              RIGHT JOIN (SELECT `wid`,`path`
+								  FROM `host`
+								  WHERE `domain` = "' . $pdbc->quote($request->getHost()) . '") AS `host`
 			                              ON `website`.`id` = `host`.`wid`'));
 
 			// Check redirect
@@ -57,7 +58,9 @@ class Gatekeeper {
 	 */
 	private function getUser(PDBC $pdbc, Request $request, $id) {
 		// Get user location
-		$user = end($pdbc->fetch('SELECT `location` FROM `user` WHERE `id` = ' . $id));
+		$user = end($pdbc->fetch('SELECT `location`
+					  FROM `user`
+					  WHERE `id` = ' . $id));
 
 		// Check user
 		if(empty($user)) {
