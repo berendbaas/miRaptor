@@ -12,13 +12,33 @@ class Logger {
 	 *
 	 */
 	public static function log(PDBC $pdbc, $statuscode, $bandwidth) {
-		$time = $pdbc->quote($_SERVER['REQUEST_TIME_FLOAT']);
+		// Time
+		$time = $_SERVER['REQUEST_TIME_FLOAT'];
 		$runtime = (microtime(TRUE) - $time) * 1000;
+		
+		// Request
 		$request = $pdbc->quote($_SERVER['REQUEST_URI']);
 		$referal = empty($_SERVER['HTTP_REFERER']) ? 'NULL' : '"' . $pdbc->quote($_SERVER['HTTP_REFERER']) . '"';
 		$ip = $pdbc->quote($_SERVER['REMOTE_ADDR']);
 
-		$pdbc->execute('INSERT INTO `log` (`id`, `time`, `runtime`, `bandwidth`, `statuscode`, `request`, `referal`, `ip`)
-				VALUES (NULL, "' . $time . '", "' . $runtime . '", "' . $bandwidth . '", "' . $statuscode . '", "' . $request . '", ' . $referal . ', "' . $ip . '")');
+		$pdbc->execute('INSERT INTO `log` (
+					`id`,
+					`time`,
+					`runtime`,
+					`bandwidth`,
+					`statuscode`,
+					`request`,
+					`referal`,
+					`ip`)
+				VALUES (
+					NULL,
+					"' . $time . '",
+					"' . $runtime . '",
+					"' . $bandwidth . '",
+					"' . $statuscode . '",
+					"' . $request . '",
+					' . $referal . ',
+					"' . $ip . '")
+				');
 	}
 }
