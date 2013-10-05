@@ -56,7 +56,7 @@ class Module implements \lib\core\ModuleInterface {
 	public function run() {
 		switch($this->request->getUri()->getFilename()) {
 			case '':
-				$this->result = 'home';
+				throw new \Exception($this->request->getHost() . $this->request->getUri()->getPath() . 'overview', 301);
 			break;
 			case 'login':
 				$this->result = 'login';
@@ -74,7 +74,7 @@ class Module implements \lib\core\ModuleInterface {
 				$this->result = 'settings';
 			break;
 			default:
-				$this->result = 'default';
+				throw new \Exception('Method not supported');
 			break;
 		}
 	}

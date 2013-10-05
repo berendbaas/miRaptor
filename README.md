@@ -21,4 +21,4 @@ When contributing to the codebase, please keep the following style guidelines fo
 - Default indentation is a tab.
 - strings are single-quoted
 - HTML arguments are double-quoted
-- HTML & SQL are heredocs (<<<HTML & <<<SQL)
+- HTML is heredocs (<<<HTML)
