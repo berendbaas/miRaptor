@@ -1,3 +1,8 @@
+# IDE Files #
+#############
+*.sublime-project
+*.sublime-workspace
+
 # Compiled source #
 ###################
 *.com
