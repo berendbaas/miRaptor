@@ -11,7 +11,7 @@ class Module implements \lib\core\ModuleInterface {
 	const USER_DB = 'miraptor_cms';
 
 	const PAGE_LOGIN = '';
-	const PAGE_LOGOUT = 'logout'
+	const PAGE_LOGOUT = 'logout';
 	const PAGE_OVERVIEW = 'overview';
 	const PAGE_SETTINGS = 'settings';
 	const PAGE_SITE = 'site';
@@ -66,34 +66,22 @@ class Module implements \lib\core\ModuleInterface {
 	 *
 	 */
 	public function run() {
-		switch($this->request->getUri()->getFilename()) {
-			case self::PAGE_LOGIN:
-				$this->result = $this->handleLogin();
-			break;
-			case self::PAGE_LOGOUT:
-				$this->result = $this->handleLogout();
-			break;
-			case self::PAGE_OVERVIEW:
-				$this->result = $this->handleOverview();
-			break;
-			case self::PAGE_SETTINGS:
-				$this->result = $this->handleSettings();
-			break;
-			case self::PAGE_SITE:
-				$this->result = $this->handleSite();
-			break;
+		if($this->user->isLoggedIn()) {
+			$this->result =$this->handleAdmin();
+		} else {
+			$this->result =$this->handleLogin();
 		}
-		
-		throw new \Exception('File name not supported');
 	}
 
 	/**
 	 *
 	 */
-	private function handleLogin() {
-		if($this->user->isLoggedIn()) {
-			throw new \Exception($this->request->getHost() . $this->request->getUri()->getPath() . self::PAGE_OVERVIEW, 301);
-		} else if(isset($_POST['username']) && isset($_POST['password'])) {
+	public function handleLogin() {
+		if($this->request->getUri()->getFilename() != self::PAGE_LOGIN) {
+			throw new \Exception($this->request->getHost() . $this->request->getUri()->getPath() . self::PAGE_LOGIN, 301);
+		}
+
+		if(isset($_POST['username']) && isset($_POST['password'])) {
 			if($this->user->logIn($_POST['username'], $_POST['password'])) {
 				throw new \Exception($this->request->getHost() . $this->request->getUri()->getPath() . self::PAGE_OVERVIEW, 301);
 			}
@@ -111,43 +99,69 @@ HTML;
 	/**
 	 *
 	 */
-	private function $this->handleLogout() {
+	public function handleAdmin() {
+		switch($this->request->getUri()->getFilename()) {
+			case self::PAGE_LOGIN:
+				throw new \Exception($this->request->getHost() . $this->request->getUri()->getPath() . self::PAGE_OVERVIEW, 301);
+			break;
+			case self::PAGE_LOGOUT:
+				return $this->handleLogout();
+			break;
+			case self::PAGE_OVERVIEW:
+				return $this->handleOverview();
+			break;
+			case self::PAGE_SETTINGS:
+				return $this->handleSettings();
+			break;
+			case self::PAGE_SITE:
+				return $this->handleSite();
+			break;
+			default:
+				throw new \Exception('Page not found', 404);
+			break;
+		}
+	}
+
+	/**
+	 *
+	 */
+	private function handleLogout() {
 		$this->user->logout();
-		throw new \Exception($this->request->getHost() . $this->request->getUri()->getPath() . 'login', 301);
+		throw new \Exception($this->request->getHost() . $this->request->getUri()->getPath() . self::PAGE_LOGIN, 301);
 	}
 
 	/**
 	 *
 	 */
-	private function $this->handleOverview() {
+	private function handleOverview() {
+		return 'TODO overview';
+	}
+
+	/**
+	 *
+	 */
+	private function handleSettings() {
+		return 'TODO settings';
+	}
+
+	/**
+	 *
+	 */
+	private function parseMenuMain() {
 		return 'TODO';
 	}
 
 	/**
 	 *
 	 */
-	private function $this->handleSettings() {
-		return 'TODO';
+	private function handleSite() {
+		return 'TODO site';
 	}
 
 	/**
 	 *
 	 */
-	private function $this->parseMenuMain() {
-		return 'TODO';
-	}
-
-	/**
-	 *
-	 */
-	private function $this->handleSite() {
-		return 'TODO';
-	}
-
-	/**
-	 *
-	 */
-	private function $this->parseMenuSite() {
+	private function parseMenuSite() {
 		return 'TODO';
 	}
 }
