@@ -16,7 +16,8 @@ Steps:
 2) Go to the develop branch.
 3) Check the issues
 4) Start coding! ^_^
-5) Upstream
+5) Send a pull request.
+6) Done.
 
 Style Guide
 ---
