@@ -78,12 +78,12 @@ class Module implements \lib\core\ModuleInterface {
 	 */
 	public function handleLogin() {
 		if($this->request->getUri()->getFilename() != self::PAGE_LOGIN) {
-			throw new \Exception($this->request->getHost() . $this->request->getUri()->getPath() . self::PAGE_LOGIN, 301);
+			$this->redirect(self::PAGE_LOGIN);
 		}
 
 		if(isset($_POST['username']) && isset($_POST['password'])) {
 			if($this->user->logIn($_POST['username'], $_POST['password'])) {
-				throw new \Exception($this->request->getHost() . $this->request->getUri()->getPath() . self::PAGE_OVERVIEW, 301);
+				$this->redirect(self::PAGE_OVERVIEW);
 			}
 		}
 
@@ -102,7 +102,7 @@ HTML;
 	public function handleAdmin() {
 		switch($this->request->getUri()->getFilename()) {
 			case self::PAGE_LOGIN:
-				throw new \Exception($this->request->getHost() . $this->request->getUri()->getPath() . self::PAGE_OVERVIEW, 301);
+				$this->redirect(self::PAGE_OVERVIEW);
 			break;
 			case self::PAGE_LOGOUT:
 				return $this->handleLogout();
@@ -127,7 +127,7 @@ HTML;
 	 */
 	private function handleLogout() {
 		$this->user->logout();
-		throw new \Exception($this->request->getHost() . $this->request->getUri()->getPath() . self::PAGE_LOGIN, 301);
+		$this->redirect(self::PAGE_LOGIN);
 	}
 
 	/**
@@ -163,6 +163,13 @@ HTML;
 	 */
 	private function parseMenuSite() {
 		return 'TODO';
+	}
+
+	/**
+	 *
+	 */
+	private function redirect($file) {
+		throw new \Exception($this->request->getHost() . $this->request->getUri()->getPath() . $file, 301);
 	}
 }
 

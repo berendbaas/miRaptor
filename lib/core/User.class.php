@@ -10,15 +10,20 @@ namespace lib\core;
 class User {
 	private $pdbc;
 	private $credentials = array();
-	private $userID;
 
+	/**
+	 *
+	 *
+	 */
 	public function __construct(PDBC $pdbc) {
 		$this->pdbc = $pdbc;
 
 		session_start();
 
+var_dump($_SESSION);
+
 		if (isset($_SESSION['USER_ID'])) {
-			$this->userID = $this->pdbc->quote($_SESSION['USER_ID']);
+
 		}
 
 		$this->credentials = $this->pdbc->fetch('
@@ -28,6 +33,7 @@ class User {
 
 	/**
 	 * Attempts to login the user with the given credentials
+	 *
 	 * @param  String $username 
 	 * @param  String $password 
 	 * @return boolean           true if succesful, false on fail.
@@ -54,6 +60,7 @@ class User {
 
 	/**
 	 * Logs out the currently logged in user
+	 *
 	 * @return void
 	 */
 	public function logOut() {
@@ -63,15 +70,17 @@ class User {
 
 	/**
 	 * Checks if the user is currently logged in
+	 *
 	 * @return boolean login-status
 	 */
 	public function isLoggedIn() {
-		return isset($this->userID);
+		return isset($_SESSION['USER_ID']);
 	}
 
 
 	/**
 	 * Get a credential from the user
+	 *
 	 * @param  String $key 
 	 * @return mixed
 	 */
@@ -81,6 +90,7 @@ class User {
 
 	/**
 	 * Sets a credential to the current
+	 *
 	 * @param string $key   the column to reference in the row
 	 * @param mixed $value  should be the correct mysql type.
 	 */

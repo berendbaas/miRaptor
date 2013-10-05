@@ -12,12 +12,12 @@ The install file will be available as soon as possible! ;)
 Contribute?
 ---
 Steps:
-1) Fork the repository.
-2) Go to the develop branch.
-3) Check the issues
-4) Start coding! ^_^
-5) Send a pull request.
-6) Done.
+- Fork the repository.
+- Go to the develop branch.
+- Check the issues
+- Start coding! ^_^
+- Send a pull request.
+- Done.
 
 Style Guide
 ---
