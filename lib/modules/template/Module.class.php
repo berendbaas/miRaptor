@@ -50,17 +50,17 @@ class Module implements \lib\core\ModuleInterface {
 	 *
 	 */
 	public function run() {
-		$template = $this->pdbc->fetch('SELECT `content`
+		$template = end($this->pdbc->fetch('SELECT `content`
 		                                FROM `module_template`
 		                                WHERE `id` = (SELECT `tid`
 		                                              FROM `pages`
-	                                                      WHERE `id` = "' . $this->pdbc->quote($this->page) . '")');
+	                                                      WHERE `id` = "' . $this->pdbc->quote($this->page) . '")'));
 
 		if(empty($template)) {
 			throw new Exception('Template does not exists.');
 		}
 
-		$this->result = end(end($template));
+		$this->result = end($template));
 	}
 }
 

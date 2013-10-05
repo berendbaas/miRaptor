@@ -16,9 +16,10 @@ Just fork the repository and update the develop branch! We'll check the pull req
 Style Guide
 ---
 When contributing to the codebase, please keep the following style guidelines for convenience in mind:
-- Function and variables are camelCased
-- Constants are capitalized
+- Function and variables are camelCased.
+- Opening brackets come behind function declaration and statements.
+- Constants are capitalized.
 - Default indentation is a tab.
-- strings are single-quoted
-- HTML arguments are double-quoted
+- strings are single-quoted.
+- HTML arguments are double-quoted.
 - HTML is heredocs (<<<HTML)

@@ -96,40 +96,40 @@ class Module implements \lib\core\ModuleInterface {
 		          FROM `module_page_content`
 		          WHERE `pid` = ' . $this->pdbc->quote($this->page) . ' AND `nid`= ' . $query; // Get content
 
-		$content = $this->pdbc->fetch($query);
+		$content = end($this->pdbc->fetch($query));
 
 		if(empty($content)) {
 			throw new Exception('Content does not exists.');
 		}
 
-		return end(end($content));
+		return end($content);
 	}
 
 	private function parseContentNoName() {
-		$result = $this->pdbc->fetch('SELECT `content`
+		$result = end($this->pdbc->fetch('SELECT `content`
 		                              FROM `pages`
-		                              WHERE `id`=' .  $this->pdbc->quote($this->page));
+		                              WHERE `id`=' .  $this->pdbc->quote($this->page)));
 
 		if(empty($result)) {
 			throw new Exception('Content does not exists.');
 		}
 
-		return end(end($result));
+		return end($result);
 	}
 
 	/**
 	 *
 	 */
 	private function parseDescription() {
-		$result = $this->pdbc->fetch('SELECT `description`
+		$result = end($this->pdbc->fetch('SELECT `description`
 		                              FROM `pages`
-		                              WHERE `id`=' .  $this->pdbc->quote($this->page));
+		                              WHERE `id`=' .  $this->pdbc->quote($this->page)));
 
 		if(empty($result)) {
 			throw new Exception('Description does not exists.');
 		}
 
-		return end(end($result));
+		return end($result);
 	}
 
 	/**
@@ -152,28 +152,28 @@ class Module implements \lib\core\ModuleInterface {
 		          FROM `module_page_media`
 		          WHERE `pid` = ' . $this->pdbc->quote($this->page) . ' AND `nid`= ' . $query; // Get media url
 
-		$url = $this->pdbc->fetch($query);
+		$url = end($this->pdbc->fetch($query));
 
 		if(empty($url)) {
 			throw new Exception('Media does not exists.');
 		}
 
-		return '<!--{media type="' . $this->args['type'] . '" name="' . $this->args['name'] . '" url="' . end(end($url)) . '"}-->';
+		return '<!--{media type="' . $this->args['type'] . '" name="' . $this->args['name'] . '" url="' . end($url) . '"}-->';
 	}
 
 	/**
 	 *
 	 */
 	private function parseTitle() {
-		$result = $this->pdbc->fetch('SELECT `name`
+		$result = end($this->pdbc->fetch('SELECT `name`
 		                              FROM `pages`
-		                              WHERE `id`=' . $this->pdbc->quote($this->page));
+		                              WHERE `id`=' . $this->pdbc->quote($this->page)));
 
 		if(empty($result)) {
 			throw new Exception('Title does not exists.');
 		}
 
-		return end(end($result));
+		return end($result);
 	}
 }
 

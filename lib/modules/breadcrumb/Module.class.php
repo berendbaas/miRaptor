@@ -51,7 +51,8 @@ class Module implements \lib\core\ModuleInterface {
 	 */
 	public function run() {
 		$this->result = <<<HTML
-<ul>{$this->parseBreadcrumb($this->page)}</ul>
+<ul>{$this->parseBreadcrumb($this->page)}
+</ul>
 HTML;
 	}
 
@@ -74,9 +75,8 @@ HTML;
 		                                      FROM `pages`
 		                                      WHERE `id` = "' . $this->pdbc->quote($id) . '"'));
 
-		return empty($breadcrumb) ? PHP_EOL : $this->parseBreadcrumb($breadcrumb['pid']) . <<<HTML
+		return empty($breadcrumb) ? '' : $this->parseBreadcrumb($breadcrumb['pid']) . PHP_EOL . <<<HTML
 <li><a href="{$breadcrumb['uri']}">{$breadcrumb['name']}</a></li>
-
 HTML;
 	}
 }
