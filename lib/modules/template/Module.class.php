@@ -60,7 +60,7 @@ class Module implements \lib\core\ModuleInterface {
 			throw new Exception('Template does not exists.');
 		}
 
-		$this->result = end($template));
+		$this->result = end($template);
 	}
 }
 
