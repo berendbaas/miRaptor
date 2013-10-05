@@ -9,9 +9,13 @@ Install
 ---
 The install file will be available as soon as possible! ;)
 
-Contribute? =)
+Contribute?
 ---
-Just fork the repository and update the develop branch! We'll check the pull requests.
+Steps:
+1) Fork the repository.
+2) Go to the develop branch.
+3) Check the issues
+4) Start coding! ^_^
 
 Style Guide
 ---
