@@ -76,18 +76,22 @@ class Module implements \lib\core\ModuleInterface {
 	/**
 	 *
 	 */
-	public function handleLogin() {
+	private function handleLogin() {
 		if($this->request->getUri()->getFilename() != self::PAGE_LOGIN) {
 			$this->redirect(self::PAGE_LOGIN);
 		}
 
+		$message = '';
+
 		if(isset($_POST['username']) && isset($_POST['password'])) {
-			if($this->user->logIn($_POST['username'], $_POST['password'])) {
+			if($this->user->login($_POST['username'], $_POST['password'])) {
 				$this->redirect(self::PAGE_OVERVIEW);
 			}
+
+			$message = '<p>Invalid username or password.</p>';
 		}
 
-		return <<<HTML
+		return $message . <<<HTML
 <form method="post" action="">
 	<label for="username">Username: <input type="text" id="username" name="username" /></label>
 	<label for="password">Password: <input type="password" id="password" name="password" /></label>
@@ -99,7 +103,7 @@ HTML;
 	/**
 	 *
 	 */
-	public function handleAdmin() {
+	private function handleAdmin() {
 		switch($this->request->getUri()->getFilename()) {
 			case self::PAGE_LOGIN:
 				$this->redirect(self::PAGE_OVERVIEW);
