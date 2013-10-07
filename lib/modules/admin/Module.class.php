@@ -16,6 +16,10 @@ class Module implements \lib\core\ModuleInterface {
 	const PAGE_SETTINGS = 'settings';
 	const PAGE_SITE = 'site';
 
+	const OVERVIEW_RENAME = 'rename';
+	const OVERVIEW_DOMAIN = 'domain';
+	const OVERVIEW_ACTIVE = 'active';
+
 	private $pdbc;
 	private $request;
 	private $page;
@@ -67,9 +71,9 @@ class Module implements \lib\core\ModuleInterface {
 	 */
 	public function run() {
 		if($this->user->isLoggedIn()) {
-			$this->result =$this->handleAdmin();
+			$this->result = $this->handleAdmin();
 		} else {
-			$this->result =$this->handleLogin();
+			$this->result = $this->handleLogin();
 		}
 	}
 
@@ -88,7 +92,9 @@ class Module implements \lib\core\ModuleInterface {
 				$this->redirect(self::PAGE_OVERVIEW);
 			}
 
-			$message = '<p>Invalid username or password.</p>';
+			$message = <<<HTML
+<p class="error">Invalid username or password.</p>
+HTML;
 		}
 
 		return $message . <<<HTML
@@ -108,18 +114,23 @@ HTML;
 			case self::PAGE_LOGIN:
 				$this->redirect(self::PAGE_OVERVIEW);
 			break;
+
 			case self::PAGE_LOGOUT:
 				return $this->handleLogout();
 			break;
+
 			case self::PAGE_OVERVIEW:
 				return $this->handleOverview();
 			break;
+
 			case self::PAGE_SETTINGS:
 				return $this->handleSettings();
 			break;
+
 			case self::PAGE_SITE:
 				return $this->handleSite();
 			break;
+
 			default:
 				throw new \Exception('Page not found', 404);
 			break;
@@ -138,7 +149,144 @@ HTML;
 	 *
 	 */
 	private function handleOverview() {
-		return 'TODO overview';
+		if(isset($_GET['action']) && isset($_GET['id'])) {
+			$id = intval($_GET['id']);
+
+			if($id != 0) {
+				switch($_GET['action']) {
+					case self::OVERVIEW_RENAME:
+						return $this->handleOverviewRename($id);
+					break;
+
+					case self::OVERVIEW_DOMAIN:
+						return $this->handleOverviewDomain($id);
+					break;
+
+					case self::OVERVIEW_ACTIVE:
+						return $this->handleOverviewActive($id);
+					break;
+				}
+			}
+		}
+
+		return $this->handleOverviewDefaut();
+	}
+
+	/**
+	 *
+	 */
+	private function handleOverviewRename($id) {
+		$message = '';
+
+		if(isset($_POST['name'])) {
+			$this->userPdbc->query('UPDATE `website`
+			                        SET `name` =  "' . $this->userPdbc->quote($_POST['name']) . '"
+			                        WHERE `id` = "' . $this->userPdbc->quote($id) . '"
+			                        AND `uid` = "' . $this->userPdbc->quote($this->user->getID()) . '"');
+
+			if($this->userPdbc->rowCount() > 0) {
+				$this->redirect(self::PAGE_OVERVIEW);
+			} else {
+				$message = <<<HTML
+<p class="error">Can't modify name.</p>
+HTML;
+			}
+		}
+
+		$cancel = $this->request->getUri()->getPath() . self::PAGE_OVERVIEW;
+
+		return $message . <<<HTML
+<form method="post" action="">
+	<label for="name">Name<input type="text" id="name" name="name" /></label>
+	<a href="{$cancel}"><input type="button" name="cancel" value="Cancel" /></a>
+	<input type='submit' value='submit' />
+</form>
+HTML;
+	}
+
+	/**
+	 *
+	 */
+	private function handleOverviewDomain($id) {
+		$message = '';
+
+		if(isset($_POST['domain'])) {
+			$this->userPdbc->query('UPDATE `website`
+			                        SET `domain` =  "' . $this->userPdbc->quote($_POST['domain']) . '"
+			                        WHERE `id` = "' . $this->userPdbc->quote($id) . '"
+			                        AND `uid` = "' . $this->userPdbc->quote($this->user->getID()) . '"');
+
+			if($this->userPdbc->rowCount() > 0) {
+				$this->redirect(self::PAGE_OVERVIEW);
+			} else {
+				$message = <<<HTML
+<p class="error">Can't modify domain.</p>
+HTML;
+			}
+		}
+
+		$cancel = $this->request->getUri()->getPath() . self::PAGE_OVERVIEW;
+
+		return $message . <<<HTML
+<form method="post" action="">
+	<label for="domain">Domain<input type="text" id="domain" name="domain" /></label>
+	<a href="{$cancel}"><input type="button" name="cancel" value="Cancel" /></a>
+	<input type='submit' value='submit' />
+</form>
+HTML;
+	}
+
+	/**
+	 *
+	 */
+	private function handleOverviewActive($id) {
+// Als er is gepost aanpassen en redirecten, anders formulier laten zien.
+		return 'active';
+	}
+
+	/**
+	 *
+	 */
+	private function handleOverviewDefaut() {
+		$this->userPdbc->query('SELECT `id`,`name`,`active`
+		                        FROM `website`
+		                        WHERE `uid` = ' . $this->userPdbc->quote($this->user->getID()));
+
+		$websites = $this->userPdbc->fetchAll();
+
+		if(empty($websites)) {
+			return <<<HTML
+<p>This user has no websites.</p>
+HTML;
+		}
+
+		$result = '';
+
+		foreach($websites as $website) {
+			$result .= PHP_EOL . <<<HTML
+<tr>
+	<td><a href="">{$website['name']}</a></td>
+	<td><a href="?action=rename&id={$website['id']}"><img src="_media/template/icon-overview-rename.jpg" alt="Overview rename icon" /></a></td>
+	<td><a href="?action=domain&id={$website['id']}"><img src="_media/template/icon-overview-domain.jpg" alt="Overview domain icon" /></a></td>
+	<td><a href="?action=active&id={$website['id']}"><img src="_media/template/icon-overview-active-{$website['active']}.jpg" alt="Overview active icon" /></a></td>
+</tr>
+HTML;
+		}
+
+		return <<<HTML
+<table>
+<thead>
+<tr>
+	<th>Name</th>
+	<th>Rename</th>
+	<th>Domain</th>
+	<th>Active</th>
+</tr>
+</thead>
+<tbody>{$result}
+</tbody>
+</table>
+HTML;
 	}
 
 	/**

@@ -9,7 +9,6 @@ namespace lib\core;
  */
 class User {
 	private $pdbc;
-	private $credentials = array();
 
 	/**
 	 * Construct a session object to manage the session of the user.
@@ -36,16 +35,18 @@ class User {
 	 * @return boolean true if succesful, false on fail.
 	 */
 	public function login($username, $password) {
-		$result = end($this->pdbc->fetch('SELECT `id`
-		                                  FROM user
-		                                  WHERE username = "' . $this->pdbc->quote($username) . '"
-		                                  AND password = "' . $this->pdbc->quote($password) . '"'));
+		$this->pdbc->query('SELECT `id`
+		                    FROM user
+		                    WHERE username = "' . $this->pdbc->quote($username) . '"
+		                    AND password = "' . $this->pdbc->quote($password) . '"');
 
-		if(empty($result)) {
+		$user = $this->pdbc->fetch();
+
+		if(empty($user)) {
 			return false;
 		}
 
-		$_SESSION['id'] = $result['id'];
+		$_SESSION['id'] = $user['id'];
 		return true;
 	}
 
@@ -72,7 +73,7 @@ class User {
 	 *
 	 * @return boolean the user ID if the user is logged in or 0 if the user is not logged in.
 	 */
-	public function getUserId() {
+	public function getID() {
 		return $this->isLoggedIn() ? $_SESSION['id'] : 0;
 	}
 }

@@ -110,25 +110,32 @@ class Module implements \lib\core\ModuleInterface {
 		}
 
 		// Get pages
-		$pages = $this->pdbc->fetch('SELECT `id`,`name`,`description`,`uri`
-		                             FROM `pages`
-		                             WHERE `pid` = ' . $pid .
-		                            ' ORDER BY `order` ASC');
+		$this->pdbc->query('SELECT `id`,`name`,`description`,`uri`
+		                    FROM `pages`
+		                    WHERE `pid` = ' . $pid . '
+		                    ORDER BY `order` ASC');
+
+		$pages = $this->pdbc->fetchAll();
 
 		if(empty($pages)) {
 			return '';
 		}
 
 		// Parse menu
-		$menu = '<ul>' . PHP_EOL;
+		$result = '';
 
 		foreach($pages as $page) {
-			$menu .= '<li' . ($this->page == $page['id'] ? ' class="current"' : '') .  '><a href="' . $page['uri'] . '" alt="' . $page['description'] . '">' . $page['name'] . '</a>' .
-			             $this->parseMenuDefault($page['id'], ($level - 1)) . 
-			         '</li>' . PHP_EOL;
+			$current = ($this->page == $page['id'] ? ' class="current"' : '');
+
+			$result .= PHP_EOL . <<<HTML
+<li {$current}><a href="{$page['uri']}" alt="{$page['description']}">{$page['name']}</a>{$this->parseMenuDefault($page['id'], ($level - 1))}</li>
+HTML;
 		}
 
-		return $menu . '</ul>';
+		return <<<HTML
+<ul>{$result}
+</ul>
+HTML;
 	}
 
 	/**
@@ -141,25 +148,32 @@ class Module implements \lib\core\ModuleInterface {
 		}
 
 		// Get pages
-		$pages = $this->pdbc->fetch('SELECT `id`,`name`,`description`,`uri`
-		                             FROM `pages`
-		                             WHERE `pid` = ' . $pid . '
-		                             ORDER BY `order` ASC');
+		$this->pdbc->query('SELECT `id`,`name`,`description`,`uri`
+		                    FROM `pages`
+		                    WHERE `pid` = ' . $pid . '
+		                    ORDER BY `order` ASC');
+
+		$pages = $this->pdbc->fetchAll();
 
 		if(empty($pages)) {
 			return '';
 		}
 
 		// Parse menu
-		$menu = '<ul>' . PHP_EOL;
+		$result = '';
 
 		foreach($pages as $page) {
-			$menu .= '<li' . ($this->page == $page['id'] ? ' class="current"' : '') .  '><a href="' . $page['uri'] . '">' . $page['name'] . '<span>' . $page['description'] . '</span></a>' .
-			            $this->parseMenuDescription($page['id'], ($level - 1)) .
-			         '</li>' . PHP_EOL;
+			$current = ($this->page == $page['id'] ? ' class="current"' : '');
+
+			$result .= PHP_EOL . <<<HTML
+<li {$current}><a href="{$page['uri']}" alt="{$page['description']}">{$page['name']}<span>{$page['description']}</span></a>{$this->parseMenuDefault($page['id'], ($level - 1))}</li>
+HTML;
 		}
 
-		return $menu . '</ul>';
+		return <<<HTML
+<ul>{$result}
+</ul>
+HTML;
 	}
 }
 

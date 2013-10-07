@@ -21,17 +21,27 @@ interface PDBC {
 	/**
 	 *
 	 */
-	public function execute($query);
-
-	/**
-	 *
-	 */
-	public function fetch($query);
-
-	/**
-	 *
-	 */
 	public function quote($string);
+
+	/**
+	 *
+	 */
+	public function query($query);
+
+	/**
+	 *
+	 */
+	public function fetch();
+
+	/**
+	 *
+	 */
+	public function fetchAll();
+
+	/**
+	 *
+	 */
+	public function rowCount();
 }
 
 ?>

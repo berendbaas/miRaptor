@@ -64,7 +64,7 @@ class Module implements \lib\core\ModuleInterface {
 				$this->result = $this->parseTitle();
 			break;
 			default:
-				throw new Exception('get="' . $this->args['get']. '" does not exists.');
+				throw new \Exception('get="' . $this->args['get']. '" does not exists.');
 			break;
 		}
 	}
@@ -77,103 +77,105 @@ class Module implements \lib\core\ModuleInterface {
 			return $this->args['get'];
 		}
 
-		throw new Exception('get="" required.');
+		throw new \Exception('get="" required.');
 	}
 
 	/**
 	 *
 	 */
 	private function parseContent() {
-		return isset($this->args['name']) ? $this->parseContentName($this->args['name'])  : $this->parseContentNoName() ;
+		return isset($this->args['name']) ? $this->parseContentName($this->args['name'])  : $this->parseContentDefault() ;
 	}
 
 	private function parseContentName($name) {
-		$query = '(SELECT `id`
-		           FROM `module_page_content_name`
-		           WHERE `name` = "' . $this->pdbc->quote($name) . '")'; // Get name ID
+		$this->pdbc->query('SELECT `content`
+		                    FROM `module_page_content`
+		                    WHERE `pid` = ' . $this->pdbc->quote($this->page) . '
+		                    AND `nid`= (SELECT `id`
+		                                FROM `module_page_content_name`
+		                                WHERE `name` = "' . $this->pdbc->quote($name) . '")');
 
-		$query = 'SELECT `content`
-		          FROM `module_page_content`
-		          WHERE `pid` = ' . $this->pdbc->quote($this->page) . ' AND `nid`= ' . $query; // Get content
-
-		$content = end($this->pdbc->fetch($query));
+		$content = $this->pdbc->fetch();
 
 		if(empty($content)) {
-			throw new Exception('Content does not exists.');
+			throw new \Exception('Content does not exists.');
 		}
 
 		return end($content);
 	}
 
-	private function parseContentNoName() {
-		$result = end($this->pdbc->fetch('SELECT `content`
-		                              FROM `pages`
-		                              WHERE `id`=' .  $this->pdbc->quote($this->page)));
+	private function parseContentDefault() {
+		$this->pdbc->query('SELECT `content`
+		                    FROM `pages`
+		                    WHERE `id` = ' .  $this->pdbc->quote($this->page));
 
-		if(empty($result)) {
-			throw new Exception('Content does not exists.');
+		$content = $this->pdbc->fetch();
+
+		if(empty($content)) {
+			throw new \Exception('Content does not exists.');
 		}
 
-		return end($result);
+		return end($content);
 	}
 
 	/**
 	 *
 	 */
 	private function parseDescription() {
-		$result = end($this->pdbc->fetch('SELECT `description`
-		                              FROM `pages`
-		                              WHERE `id`=' .  $this->pdbc->quote($this->page)));
+		$this->pdbc->query('SELECT `description`
+		                    FROM `pages`
+		                    WHERE `id`=' .  $this->pdbc->quote($this->page));
 
-		if(empty($result)) {
-			throw new Exception('Description does not exists.');
+		$description = $this->pdbc->fetch();
+
+		if(empty($description)) {
+			throw new \Exception('Description does not exists.');
 		}
 
-		return end($result);
+		return end($description);
 	}
 
 	/**
 	 *
 	 */
 	private function parseMedia() {
-		if(!isset($this->args['type'])) {
-			throw new Exception('type="" required.');
-		}
-
 		if(!isset($this->args['name'])) {
 			throw new Exception('name="" required.');
 		}
 
-		$query = '(SELECT `id`
-		           FROM `module_page_media_name`
-		           WHERE `name` = "' . $this->pdbc->quote($this->args['name']) . '")'; // Get name ID
-
-		$query = 'SELECT `url`
+		$this->pdbc->query('SELECT `url`
 		          FROM `module_page_media`
-		          WHERE `pid` = ' . $this->pdbc->quote($this->page) . ' AND `nid`= ' . $query; // Get media url
+		          WHERE `pid` = ' . $this->pdbc->quote($this->page) . '
+		          AND `nid`= (SELECT `id`
+		                      FROM `module_page_media_name`
+		                      WHERE `name` = "' . $this->pdbc->quote($this->args['name']) . '")');
 
-		$url = end($this->pdbc->fetch($query));
+		$media = $this->pdbc->fetch();
 
-		if(empty($url)) {
-			throw new Exception('Media does not exists.');
+		if(empty($media)) {
+			throw new \Exception('Media does not exists.');
 		}
 
-		return '<!--{media type="' . $this->args['type'] . '" name="' . $this->args['name'] . '" url="' . end($url) . '"}-->';
+		return <<<HTML
+<img src="{end($url)}" alt="{$this->args['name']}" />
+HTML;
 	}
 
 	/**
 	 *
 	 */
 	private function parseTitle() {
-		$result = end($this->pdbc->fetch('SELECT `name`
-		                              FROM `pages`
-		                              WHERE `id`=' . $this->pdbc->quote($this->page)));
+		$this->pdbc->query('SELECT `name`
+		                    FROM `pages`
+		                    WHERE `id`=' . $this->pdbc->quote($this->page));
 
-		if(empty($result)) {
-			throw new Exception('Title does not exists.');
+		$title = $this->pdbc->fetch();
+
+		if(empty($title)) {
+			throw new \Exception('Title does not exists.');
 		}
 
-		return end($result);
+		return end($title);
 	}
 }
 

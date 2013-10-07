@@ -71,9 +71,11 @@ HTML;
 	 *
 	 */
 	private function parseBreadcrumb($id) {
-		$breadcrumb = end($this->pdbc->fetch('SELECT `pid`,`name`,`uri`
-		                                      FROM `pages`
-		                                      WHERE `id` = "' . $this->pdbc->quote($id) . '"'));
+		$this->pdbc->query('SELECT `pid`,`name`,`uri`
+		                    FROM `pages`
+		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"');
+
+		$breadcrumb = $this->pdbc->fetch();
 
 		return empty($breadcrumb) ? '' : $this->parseBreadcrumb($breadcrumb['pid']) . PHP_EOL . <<<HTML
 <li><a href="{$breadcrumb['uri']}">{$breadcrumb['name']}</a></li>

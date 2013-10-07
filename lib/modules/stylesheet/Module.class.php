@@ -50,33 +50,30 @@ class Module implements \lib\core\ModuleInterface {
 	 *
 	 */
 	public function run() {
-		// Query
-		$query = '(SELECT `tid`
-		           FROM `pages`
-		           WHERE `id` = "' . $this->pdbc->quote($this->page) . '")'; // Get template id
+		$this->pdbc->query('SELECT `name`, `content`
+		                    FROM `module_stylesheet`
+		                    RIGHT JOIN (SELECT `sid`,`order`
+		                                FROM `module_stylesheet_template`
+		                                WHERE `tid` = (SELECT `tid`
+		                                               FROM `pages`
+		                                               WHERE `id` = "' . $this->pdbc->quote($this->page) . '")) AS `stylesheets`
+		                    ON `module_stylesheet`.`id` = `stylesheets`.`sid`
+		                    ORDER BY `order` ASC');
 
-		$query = '(SELECT `sid`,`order`
-		           FROM `module_stylesheet_template`
-		           WHERE `tid` = ' . $query . ')'; // Get stylesheet id's
-
-		$query = '(SELECT `name`, `content`
-		           FROM `module_stylesheet`
-		           RIGHT JOIN ' . $query . ' AS `stylesheets` ON `module_stylesheet`.`id` = `stylesheets`.`sid`
-		           ORDER BY `order` ASC)'; // Get stylesheets
-
-		// Fetch
-		$stylesheets = $this->pdbc->fetch($query);
-
-		// HTML
-		$result = '';
+		$stylesheets = $this->pdbc->fetchAll();
 
 		foreach($stylesheets as $stylesheet) {
-			$result .= PHP_EOL . '/* ' . $stylesheet['name'] . ' start */' . PHP_EOL
-				. $stylesheet['content'] . PHP_EOL
-				. '/* ' . $stylesheet['name'] . ' end */' . PHP_EOL; 
+			$this->result .= PHP_EOL . <<<HTML
+/* {$stylesheet['name']} start */
+{$stylesheet['content']}
+/* {$stylesheet['name']} end */
+HTML;
 		}
 
-		$this->result = '<style>' . $result . '</style>';
+		$this->result = <<<HTML
+<style>{$this->result}
+</style>
+HTML;
 	}
 }
 

@@ -61,19 +61,21 @@ class Module implements \lib\core\ModuleInterface {
 			return $this->args['get'];
 		}
 
-		throw new Exception('get="" required.');
+		throw new \Exception('get="" required.');
 	}
 
 	private function parseSite($get) {
-		$result = end($this->pdbc->fetch('SELECT `content`
-		                              FROM `module_site`
-		                              WHERE `name` = "' . $this->pdbc->quote($get) . '"'));
+		$this->pdbc->query('SELECT `content`
+		                    FROM `module_site`
+		                    WHERE `name` = "' . $this->pdbc->quote($get) . '"');
 
-		if(empty($result)) {
-			throw new Exception('get="' . $get . '" does not exists.');
+		$site = $this->pdbc->fetch();
+
+		if(empty($site)) {
+			throw new \Exception('get="' . $get . '" does not exists.');
 		}
 
-		return end($result);
+		return end($site);
 	}
 }
 

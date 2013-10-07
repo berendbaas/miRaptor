@@ -9,6 +9,7 @@ namespace lib\core;
  */
 class Mysql implements PDBC {
 	private $link;
+	private $resource;
 
 	/**
 	 *
@@ -31,25 +32,35 @@ class Mysql implements PDBC {
 	/**
 	 *
 	 */
-	public function execute($query) {
-		$resource = mysql_query($query, $this->link);
-
-		if(!$resource) {
-			throw new \Exception('Mysql: Can\'t execute query - ' . mysql_error(), 500);
-		}
-
-		return $resource;
+	public function quote($string) {
+		return mysql_real_escape_string($string);
 	}
 
 	/**
 	 *
 	 */
-	public function fetch($query) {
-		$resource = $this->execute($query);
+	public function query($query) {
+		$this->resource = mysql_query($query, $this->link);
 
+		if(!$this->resource) {
+			throw new \Exception('Mysql: Can\'t execute query - ' . $query, 500);
+		}
+	}
+
+	/**
+	 *
+	 */
+	public function fetch() {
+		return mysql_fetch_assoc($this->resource);
+	}
+
+	/**
+	 *
+	 */
+	public function fetchAll() {
 		$rows = array();
 
-		while($row = mysql_fetch_assoc($resource)) {
+		while($row = $this->fetch()) {
 			$rows[] = $row;
 		}
 
@@ -59,8 +70,8 @@ class Mysql implements PDBC {
 	/**
 	 *
 	 */
-	public function quote($string) {
-		return mysql_real_escape_string($string);
+	public function rowCount() {
+		return mysql_affected_rows($this->link);
 	}
 }
 

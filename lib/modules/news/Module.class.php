@@ -50,12 +50,7 @@ class Module implements \lib\core\ModuleInterface {
 	 *
 	 */
 	public function run() {
-/*
-		$query = 'SELECT `id`FROM `module_news_category` WHERE `name` = ' . mysql_;
-		$query = 
 
-		$this->pdbc->fetch($query);
-*/
 	}
 }
 

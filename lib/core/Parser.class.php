@@ -66,9 +66,11 @@ class Parser implements Runnable {
 	 *
 	 */
 	private function page() {
-		$page = end($this->pdbc->fetch('SELECT `id`
-		                                FROM `pages`
-		                                WHERE `uri`="' . $this->pdbc->quote($this->request->getUri()->getPath()) . '"'));
+		$this->pdbc->query('SELECT `id`
+		                    FROM `pages`
+		                    WHERE `uri`="' . $this->pdbc->quote($this->request->getUri()->getPath()) . '"');
+
+		$page = $this->pdbc->fetch();
 
 		if(empty($page)) {
 			throw new \Exception('Parser: uri doesnt exists - ' . $this->request->getUri()->getPath() . $this->request->getUri()->getFilename() , 404);
@@ -81,7 +83,9 @@ class Parser implements Runnable {
 	 *
 	 */
 	private function modules() {
-		$modules = $this->pdbc->fetch('SELECT `name` FROM `modules`');
+		$this->pdbc->query('SELECT `name` FROM `modules`');
+
+		$modules = $this->pdbc->fetchAll();
 
 		foreach($modules as $module) {
 			$result[] = $module['name'];
