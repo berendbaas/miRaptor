@@ -263,9 +263,11 @@ HTML;
 		$result = '';
 
 		foreach($websites as $website) {
+			$site = $this->request->getUri()->getPath() . self::PAGE_SITE;
+
 			$result .= PHP_EOL . <<<HTML
 <tr>
-	<td><a href="">{$website['name']}</a></td>
+	<td><a href="{$site}?id={$website['id']}">{$website['name']}</a></td>
 	<td><a href="?action=rename&id={$website['id']}"><img src="_media/template/icon-overview-rename.jpg" alt="Overview rename icon" /></a></td>
 	<td><a href="?action=domain&id={$website['id']}"><img src="_media/template/icon-overview-domain.jpg" alt="Overview domain icon" /></a></td>
 	<td><a href="?action=active&id={$website['id']}"><img src="_media/template/icon-overview-active-{$website['active']}.jpg" alt="Overview active icon" /></a></td>

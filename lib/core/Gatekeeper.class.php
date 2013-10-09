@@ -36,7 +36,7 @@ class Gatekeeper {
 		$host = $pdbc->fetch();
 
 		if(empty($host)) {
-			$this->getHostRedirect();
+			$this->getHostRedirect($pdbc, $request);
 		}
 
 		return $host;
@@ -45,7 +45,7 @@ class Gatekeeper {
 	/**
 	 *
 	 */
-	private function getHostRedirect() {
+	private function getHostRedirect(PDBC $pdbc, Request $request) {
 		$pdbc->query('SELECT `website`.`domain`, `host`.`path`
 		              FROM `website`
 		              RIGHT JOIN (SELECT `wid`,`path`
