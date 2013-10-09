@@ -71,10 +71,21 @@ class Module implements \lib\core\ModuleInterface {
 	 */
 	public function run() {
 		if($this->user->isLoggedIn()) {
+			if(isset($this->args['get'])) {
+				switch($this->args['get']) {
+					case 'logbox':
+						$this->result = $this->handleLogBox();
+					break;
+					case 'menu':
+						$this->result = $this->handleMenu();
+					break;
+				}
+			}
+
 			$this->result = $this->handleAdmin();
-		} else {
-			$this->result = $this->handleLogin();
 		}
+
+		$this->result = $this->handleLogin();
 	}
 
 	/**
@@ -309,14 +320,38 @@ HTML;
 	 *
 	 */
 	private function handleMenu() {
-		return 'TODO';
+		switch($this->request->getUri()->getFilename()) {
+			case self::PAGE_LOGIN:
+				return $this->parseMenuLogin();
+			break;
+
+			case self::PAGE_LOGOUT:
+				return $this->parseMenuLogout();
+			break;
+
+			case self::PAGE_OVERVIEW:
+				return $this->parseMenuOverview();
+			break;
+
+			case self::PAGE_SETTINGS:
+				return $this->parseMenuSettings();
+			break;
+
+			case self::PAGE_SITE:
+				return $this->parseMenuSite();
+			break;
+
+			default:
+				throw new \Exception('Page not found', 404);
+			break;
+		}
 	}
 
 	/**
 	 *
 	 */
 	private function parseMenuLogin() {
-		return 'TODO';
+		return '';
 	}
 
 	/**
@@ -330,7 +365,15 @@ HTML;
 	 *
 	 */
 	private function parseMenuOverview() {
-		return 'TODO';
+		$overview = $this->uri(self::PAGE_OVERVIEW);
+		$settings = $this->uri(self::PAGE_SETTINGS);
+
+		return <HTML
+<ul>
+<li><a href="{$overview}">Overview</a></li>
+<li><a href="{$settings}">Settings</a></li>
+</ul>
+HTML;
 	}
 
 	/**
@@ -344,14 +387,99 @@ HTML;
 	 *
 	 */
 	private function parseMenuSite() {
-		return 'TODO';
+		return 'Website menu';
+	}
+
+	/**
+	 *
+	 */
+	private function handleLogBox() {
+		switch($this->request->getUri()->getFilename()) {
+			case self::PAGE_LOGIN:
+				return $this->parseLogBoxLogin();
+			break;
+
+			case self::PAGE_LOGOUT:
+				return $this->parseLogBoxLogout();
+			break;
+
+			case self::PAGE_OVERVIEW:
+				return $this->parseLogBoxOverview();
+			break;
+
+			case self::PAGE_SETTINGS:
+				return $this->parseLogBoxSettings();
+			break;
+
+			case self::PAGE_SITE:
+				return $this->parseLogBoxSite();
+			break;
+
+			default:
+				throw new \Exception('Page not found', 404);
+			break;
+		}
+	}
+
+	/**
+	 *
+	 */
+	private function parseLogBoxLogin() {
+		return '';
+	}
+
+	/**
+	 *
+	 */
+	private function parseLogBoxLogout() {
+		return parseLogBoxLogout();
+	}
+
+	/**
+	 *
+	 */
+	private function parseLogBoxOverview() {
+		return <<<HTML
+<ul>
+<li><a href="/logout">Logout</a></li>
+</ul>
+HTML;
+	}
+
+	/**
+	 *
+	 */
+	private function parseLogBoxSettings() {
+		return $this->parseLogBoxOverview();
+	}
+
+	/**
+	 *
+	 */
+	private function parseLogBoxSite() {
+		$overview = $this->uri(self::PAGE_OVERVIEW);
+		$logout = $this->uri(self::PAGE_LOGOUT);
+
+		return <<<HTML
+<ul>
+<li><a href="{$overview}">Overview</a></li>
+<li><a href="{$logout}">Logout</a></li>
+</ul>
+HTML;
+	}
+
+	/**
+	 *
+	 */
+	private function uri($file) {
+		return $this->request->getUri()->getPath() . $file;
 	}
 
 	/**
 	 *
 	 */
 	private function redirect($file) {
-		throw new \Exception($this->request->getHost() . $this->request->getUri()->getPath() . $file, 301);
+		throw new \Exception($this->request->getHost() . $this->uri($file), 301);
 	}
 }
 

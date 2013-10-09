@@ -128,7 +128,7 @@ class Module implements \lib\core\ModuleInterface {
 			$current = ($this->page == $page['id'] ? ' class="current"' : '');
 
 			$result .= PHP_EOL . <<<HTML
-<li {$current}><a href="{$page['uri']}" alt="{$page['description']}">{$page['name']}</a>{$this->parseMenuDefault($page['id'], ($level - 1))}</li>
+<li {$current}><a href="{$page['uri']}" title="{$page['description']}">{$page['name']}</a>{$this->parseMenuDefault($page['id'], ($level - 1))}</li>
 HTML;
 		}
 
@@ -166,7 +166,7 @@ HTML;
 			$current = ($this->page == $page['id'] ? ' class="current"' : '');
 
 			$result .= PHP_EOL . <<<HTML
-<li {$current}><a href="{$page['uri']}" alt="{$page['description']}">{$page['name']}<span>{$page['description']}</span></a>{$this->parseMenuDefault($page['id'], ($level - 1))}</li>
+<li {$current}><a href="{$page['uri']}" title="{$page['description']}">{$page['name']}<span>{$page['description']}</span></a>{$this->parseMenuDefault($page['id'], ($level - 1))}</li>
 HTML;
 		}
 
