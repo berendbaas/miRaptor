@@ -299,15 +299,43 @@ HTML;
 	/**
 	 *
 	 */
-	private function parseMenuMain() {
+	private function handleSite() {
+		return 'TODO site';
+	}
+
+	/**
+	 *
+	 */
+	private function handleMenu() {
 		return 'TODO';
 	}
 
 	/**
 	 *
 	 */
-	private function handleSite() {
-		return 'TODO site';
+	private function parseMenuLogin() {
+		return 'TODO';
+	}
+
+	/**
+	 *
+	 */
+	private function parseMenuLogout() {
+		return $this->parseMenuLogin();
+	}
+
+	/**
+	 *
+	 */
+	private function parseMenuOverview() {
+		return 'TODO';
+	}
+
+	/**
+	 *
+	 */
+	private function parseMenuSettings() {
+		return $this->parseMenuOverview();
 	}
 
 	/**
