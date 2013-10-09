@@ -46,7 +46,7 @@ class User {
 			return false;
 		}
 
-		$_SESSION['id'] = $user['id'];
+		$_SESSION['userId'] = $user['id'];
 		return true;
 	}
 
@@ -56,7 +56,7 @@ class User {
 	 * @return void
 	 */
 	public function logout() {
-		unset($_SESSION['id']);
+		unset($_SESSION['userId']);
 	}
 
 	/**
@@ -65,7 +65,7 @@ class User {
 	 * @return boolean true if the user is logged in.
 	 */
 	public function isLoggedIn() {
-		return isset($_SESSION['id']);
+		return isset($_SESSION['userId']);
 	}
 
 	/**
@@ -73,8 +73,24 @@ class User {
 	 *
 	 * @return boolean the user ID if the user is logged in or 0 if the user is not logged in.
 	 */
+	public function getUserID() {
+		return $this->isLoggedIn() ? $_SESSION['userId'] : 0;
+	}
 	public function getID() {
-		return $this->isLoggedIn() ? $_SESSION['id'] : 0;
+		return $this->isLoggedIn() ? $_SESSION['userId'] : 0;
+	}
+
+
+	public function isWebsite() {
+		return isset($_SESSION['website']);
+	}
+
+	public function setWebsiteId($id) {
+		$_SESSION['websiteId'] = $id;
+	}
+
+	public function getWebsiteID() {
+		return $this->isLoggedIn() && $this->isWebsite() ? $_SESSION['websiteId'] : 0;
 	}
 }
 
