@@ -26,16 +26,19 @@ class Main implements Runnable {
 		ob_start();
 
 		try {
-			$request = $this->parseRequest();
+			// Init
+			$url = $this->parseURL();
 			$pdbc = $this->parsePDBC($this->config['mysql']);
-			$gatekeeper = $this->parseGatekeeper($pdbc, $request);
-			new Guide($pdbc, $request, $this->config['main']['user_location'] . $gatekeeper->getLocation());
+
+			// Run
+			$gatekeeper = $this->parseGatekeeper($pdbc, $url);
+			new Guide($pdbc, $url, $this->config['main']['user_location'] . $gatekeeper->getLocation());
 		} catch(\Exception $e) {
 			$this->statuscode = $e->getCode();
 			echo new Error($e);
 		}
 		
-		if($pdbc != null) {
+		if(isset($pdbc)) {
 			Logger::log($pdbc, $this->statuscode, ob_get_length());
 		}
 
@@ -45,12 +48,11 @@ class Main implements Runnable {
 	/**
 	 * 
 	 */
-	private function parseRequest() {
-		$method = $_SERVER['REQUEST_METHOD'];
+	private function parseURL() {
+		$scheme = isset($_SERVER['HTTPS']) ? 'https' : 'http';
 		$host = empty($_SERVER['HTTP_HOST']) ? $this->config['main']['default_host'] : $_SERVER['HTTP_HOST'];
-		$uri = new URI($_SERVER['REQUEST_URI']);
 
-		return new Request($method, $host, $uri);
+		return new URL($scheme, $host, $_SERVER['REQUEST_URI']);
 	}
 
 	/**
@@ -66,8 +68,8 @@ class Main implements Runnable {
 	/**
 	 * 
 	 */
-	private function parseGatekeeper(PDBC $pdbc, Request $request) {
-		$gatekeeper = new Gatekeeper($pdbc, $request);
+	private function parseGatekeeper(PDBC $pdbc, URL $url) {
+		$gatekeeper = new Gatekeeper($pdbc, $url);
 		$pdbc->selectDatabase($gatekeeper->getDatabase());
 
 		return $gatekeeper;

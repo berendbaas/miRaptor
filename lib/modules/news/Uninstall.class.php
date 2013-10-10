@@ -1,5 +1,5 @@
 <?php
-namespace lib/modules/news;
+namespace lib\modules\news;
 
 /**
  * @author miWebb <info@miwebb.com>

@@ -16,12 +16,8 @@ class Module implements \lib\core\ModuleInterface {
 	const PAGE_SETTINGS = 'settings';
 	const PAGE_SITE = 'site';
 
-	const OVERVIEW_RENAME = 'rename';
-	const OVERVIEW_DOMAIN = 'domain';
-	const OVERVIEW_ACTIVE = 'active';
-
 	private $pdbc;
-	private $request;
+	private $url;
 	private $page;
 	private $args;
 	private $result;
@@ -32,9 +28,9 @@ class Module implements \lib\core\ModuleInterface {
 	/**
 	 *
 	 */
-	public function __construct(\lib\core\PDBC $pdbc, \lib\core\Request $request, $page, array $args) {
+	public function __construct(\lib\core\PDBC $pdbc, \lib\core\URL $url, $page, array $args) {
 		$this->pdbc = $pdbc;
-		$this->request = $request;
+		$this->url = $url;
 		$this->page = $page;
 		$this->args = $args;
 		$this->result = '';
@@ -80,27 +76,31 @@ class Module implements \lib\core\ModuleInterface {
 						$this->result = $this->handleMenu();
 					break;
 				}
+			} else {
+				$this->result = $this->handleAdmin();
 			}
-
-			$this->result = $this->handleAdmin();
+		} else {
+			if(isset($this->args['get'])) {
+				$this->result = '';
+			} else {
+				$this->result = $this->handleLogin();
+			}
 		}
-
-		$this->result = $this->handleLogin();
 	}
 
 	/**
 	 *
 	 */
 	private function handleLogin() {
-		if($this->request->getUri()->getFilename() != self::PAGE_LOGIN) {
-			$this->redirect(self::PAGE_LOGIN);
+		if($this->url->getFile() != self::PAGE_LOGIN) {
+			throw new \Exception($this->url->getURLBase() . self::PAGE_LOGIN, 301);
 		}
 
 		$message = '';
 
 		if(isset($_POST['username']) && isset($_POST['password'])) {
 			if($this->user->login($_POST['username'], $_POST['password'])) {
-				$this->redirect(self::PAGE_OVERVIEW);
+				throw new \Exception($this->url->getURLBase() . self::PAGE_OVERVIEW, 301);
 			}
 
 			$message = <<<HTML
@@ -121,9 +121,9 @@ HTML;
 	 *
 	 */
 	private function handleAdmin() {
-		switch($this->request->getUri()->getFilename()) {
+		switch($this->url->getFile()) {
 			case self::PAGE_LOGIN:
-				$this->redirect(self::PAGE_OVERVIEW);
+				throw new \Exception($this->url->getURLBase() . self::PAGE_OVERVIEW, 301);
 			break;
 
 			case self::PAGE_LOGOUT:
@@ -131,7 +131,8 @@ HTML;
 			break;
 
 			case self::PAGE_OVERVIEW:
-				return $this->handleOverview();
+				$result = new ModuleOverview($this->pdbc, $this->url, $this->userPdbc, $this->user);
+				return $result->get();
 			break;
 
 			case self::PAGE_SETTINGS:
@@ -153,153 +154,7 @@ HTML;
 	 */
 	private function handleLogout() {
 		$this->user->logout();
-		$this->redirect(self::PAGE_LOGIN);
-	}
-
-	/**
-	 *
-	 */
-	private function handleOverview() {
-		if(isset($_GET['action']) && isset($_GET['id'])) {
-			$id = intval($_GET['id']);
-
-			if($id != 0) {
-				switch($_GET['action']) {
-					case self::OVERVIEW_RENAME:
-						return $this->handleOverviewRename($id);
-					break;
-
-					case self::OVERVIEW_DOMAIN:
-						return $this->handleOverviewDomain($id);
-					break;
-
-					case self::OVERVIEW_ACTIVE:
-						return $this->handleOverviewActive($id);
-					break;
-				}
-			}
-		}
-
-		return $this->handleOverviewDefault();
-	}
-
-	/**
-	 *
-	 */
-	private function handleOverviewRename($id) {
-		$message = '';
-
-		if(isset($_POST['name'])) {
-			$this->userPdbc->query('UPDATE `website`
-			                        SET `name` =  "' . $this->userPdbc->quote($_POST['name']) . '"
-			                        WHERE `id` = "' . $this->userPdbc->quote($id) . '"
-			                        AND `uid` = "' . $this->userPdbc->quote($this->user->getID()) . '"');
-
-			if($this->userPdbc->rowCount() > 0) {
-				$this->redirect(self::PAGE_OVERVIEW);
-			} else {
-				$message = <<<HTML
-<p class="error">Can't modify name.</p>
-HTML;
-			}
-		}
-
-		$cancel = $this->request->getUri()->getPath() . self::PAGE_OVERVIEW;
-
-		return $message . <<<HTML
-<form method="post" action="">
-	<label for="name">Name<input type="text" id="name" name="name" /></label>
-	<a href="{$cancel}"><input type="button" name="cancel" value="Cancel" /></a>
-	<input type='submit' value='submit' />
-</form>
-HTML;
-	}
-
-	/**
-	 *
-	 */
-	private function handleOverviewDomain($id) {
-		$message = '';
-
-		if(isset($_POST['domain'])) {
-			$this->userPdbc->query('UPDATE `website`
-			                        SET `domain` =  "' . $this->userPdbc->quote($_POST['domain']) . '"
-			                        WHERE `id` = "' . $this->userPdbc->quote($id) . '"
-			                        AND `uid` = "' . $this->userPdbc->quote($this->user->getID()) . '"');
-
-			if($this->userPdbc->rowCount() > 0) {
-				$this->redirect(self::PAGE_OVERVIEW);
-			} else {
-				$message = <<<HTML
-<p class="error">Can't modify domain.</p>
-HTML;
-			}
-		}
-
-		$cancel = $this->request->getUri()->getPath() . self::PAGE_OVERVIEW;
-
-		return $message . <<<HTML
-<form method="post" action="">
-	<label for="domain">Domain<input type="text" id="domain" name="domain" /></label>
-	<a href="{$cancel}"><input type="button" name="cancel" value="Cancel" /></a>
-	<input type='submit' value='submit' />
-</form>
-HTML;
-	}
-
-	/**
-	 *
-	 */
-	private function handleOverviewActive($id) {
-// Als er is gepost aanpassen en redirecten, anders formulier laten zien.
-		return 'active';
-	}
-
-	/**
-	 *
-	 */
-	private function handleOverviewDefault() {
-		$this->userPdbc->query('SELECT `id`,`name`,`active`
-		                        FROM `website`
-		                        WHERE `uid` = ' . $this->userPdbc->quote($this->user->getID()));
-
-		$websites = $this->userPdbc->fetchAll();
-
-		if(empty($websites)) {
-			return <<<HTML
-<p>This user has no websites.</p>
-HTML;
-		}
-
-		$result = '';
-
-		foreach($websites as $website) {
-			$site = $this->request->getUri()->getPath() . self::PAGE_SITE;
-
-			$result .= PHP_EOL . <<<HTML
-<tr>
-	<td><a href="{$site}?id={$website['id']}">{$website['name']}</a></td>
-	<td><a href="?action=rename&amp;id={$website['id']}"><img src="_media/template/icon-overview-rename.jpg" alt="Overview rename icon" /></a></td>
-	<td><a href="?action=domain&amp;id={$website['id']}"><img src="_media/template/icon-overview-domain.jpg" alt="Overview domain icon" /></a></td>
-	<td><a href="?action=active&amp;id={$website['id']}"><img src="_media/template/icon-overview-active-{$website['active']}.jpg" alt="Overview active icon" /></a></td>
-</tr>
-HTML;
-		}
-
-		return <<<HTML
-<table>
-<thead>
-<tr>
-	<th>Name</th>
-	<th>Rename</th>
-	<th>Domain</th>
-	<th>Active</th>
-</tr>
-</thead>
-<tbody>{$result}
-</tbody>
-</table>
-HTML;
+		throw new \Exception($this->url->getURLBase() . self::PAGE_LOGIN, 301);
 	}
 
 	/**
@@ -339,7 +194,7 @@ HTML;
 									SET `password` = "' . $this->userPdbc->quote($_POST['password']) . '"
 									WHERE `id` = "' . $this->userPdbc->quote($this->user->getID()) . '"');
 			if ($this->userPdbc->rowCount() > 0) {
-				$this->redirect(self::PAGE_SETTINGS);
+				throw new \Exception($this->url->getURLBase() . self::SETTINGS, 301);
 			}
 			else {
 				$message .= <<<HTML
@@ -348,7 +203,7 @@ HTML;
 			}
 		}
 
-		$cancel= $this->request->getUri()->getPath() . self::PAGE_SETTINGS;
+		$cancel= $this->url->getDirectory() . self::PAGE_SETTINGS;
 		$result = <<<HTML
 <form action="" method="POST">
 	<label for="password"><input type="password" name="password">
@@ -367,7 +222,7 @@ HTML;
 									SET `email` = "' . $this->userPdbc->quote($_POST['email']) . '"
 									WHERE `id` = "' . $this->userPdbc->quote($this->user->getID()) . '"');
 			if ($this->userPdbc->rowCount() >0) {
-				$this->redirect(self::PAGE_SETTINGS);
+				throw new \Exception($this->url->getURLBase() . self::PAGE_SETTINGS, 301);
 			}
 			else {
 				$message .= <<<HTML
@@ -375,7 +230,7 @@ HTML;
 HTML;
 			}
 		}
-		$cancel = $this->request->getUri()->getPath() . self::PAGE_SETTINGS;
+		$cancel = $this->url->getDirectory() . self::PAGE_SETTINGS;
 		$form = <<<HTML
 <form action="" method="POST">
 	<label for="email"><input type="text" name="email">
@@ -390,6 +245,14 @@ HTML;
 	 *
 	 */
 	private function handleSite() {
+/* If()
+ * 	Geen id terug naar overview
+ * 	Geen mid laat alle modules zien in een lijst of iets dergelijks!
+ *	Roep de bij behorende admin van de module aan.
+ *
+ * Update AdminInterface URI class -> Request class
+ * Eventueel de GET class meegeven die we ook in de admin gaan gebruiken.
+ */
 		return 'TODO site';
 	}
 
@@ -397,7 +260,7 @@ HTML;
 	 *
 	 */
 	private function handleMenu() {
-		switch($this->request->getUri()->getFilename()) {
+		switch($this->url->getFile()) {
 			case self::PAGE_LOGIN:
 				return $this->parseMenuLogin();
 			break;
@@ -416,10 +279,6 @@ HTML;
 
 			case self::PAGE_SITE:
 				return $this->parseMenuSite();
-			break;
-
-			default:
-				throw new \Exception('Page not found', 404);
 			break;
 		}
 	}
@@ -442,10 +301,10 @@ HTML;
 	 *
 	 */
 	private function parseMenuOverview() {
-		$overview = $this->uri(self::PAGE_OVERVIEW);
-		$settings = $this->uri(self::PAGE_SETTINGS);
+		$overview = $this->url->getDirectory() . self::PAGE_OVERVIEW;
+		$settings = $this->url->getDirectory() . self::PAGE_SETTINGS;
 
-		return <HTML
+		return <<<HTML
 <ul>
 <li><a href="{$overview}">Overview</a></li>
 <li><a href="{$settings}">Settings</a></li>
@@ -464,14 +323,14 @@ HTML;
 	 *
 	 */
 	private function parseMenuSite() {
-		return 'Website menu';
+		return 'TODO Website menu';
 	}
 
 	/**
 	 *
 	 */
 	private function handleLogBox() {
-		switch($this->request->getUri()->getFilename()) {
+		switch($this->url->getFile()) {
 			case self::PAGE_LOGIN:
 				return $this->parseLogBoxLogin();
 			break;
@@ -491,10 +350,6 @@ HTML;
 			case self::PAGE_SITE:
 				return $this->parseLogBoxSite();
 			break;
-
-			default:
-				throw new \Exception('Page not found', 404);
-			break;
 		}
 	}
 
@@ -502,23 +357,26 @@ HTML;
 	 *
 	 */
 	private function parseLogBoxLogin() {
-		return '';
+		return <<<HTML
+HTML;
 	}
 
 	/**
 	 *
 	 */
 	private function parseLogBoxLogout() {
-		return parseLogBoxLogout();
+		return $this->parseLogBoxLogin();
 	}
 
 	/**
 	 *
 	 */
 	private function parseLogBoxOverview() {
+		$logout = $this->url->getDirectory() . self::PAGE_LOGOUT;
+
 		return <<<HTML
 <ul>
-<li><a href="/logout">Logout</a></li>
+<li><a href="{$logout}">Logout</a></li>
 </ul>
 HTML;
 	}
@@ -534,8 +392,8 @@ HTML;
 	 *
 	 */
 	private function parseLogBoxSite() {
-		$overview = $this->uri(self::PAGE_OVERVIEW);
-		$logout = $this->uri(self::PAGE_LOGOUT);
+		$overview = $this->url->getDirectory() . self::PAGE_OVERVIEW;
+		$logout = $this->url->getDirectory() . self::PAGE_LOGOUT;
 
 		return <<<HTML
 <ul>
@@ -543,20 +401,6 @@ HTML;
 <li><a href="{$logout}">Logout</a></li>
 </ul>
 HTML;
-	}
-
-	/**
-	 *
-	 */
-	private function uri($file) {
-		return $this->request->getUri()->getPath() . $file;
-	}
-
-	/**
-	 *
-	 */
-	private function redirect($file) {
-		throw new \Exception($this->request->getHost() . $this->uri($file), 301);
 	}
 }
 

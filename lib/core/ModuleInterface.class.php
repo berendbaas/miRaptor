@@ -11,7 +11,7 @@ interface ModuleInterface extends Runnable {
 	/**
 	 *
 	 */
-	public function __construct(PDBC $pdbc, Request $request, $page, array $args);
+	public function __construct(PDBC $pdbc, URL $url, $page, array $args);
 
 	/**
 	 *

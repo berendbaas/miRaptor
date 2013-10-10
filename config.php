@@ -7,10 +7,6 @@
  * @version 1.0
  */
 
-// Globals
-define('MIRAPTOR_CACHE', FALSE);
-define('MIRAPTOR_DEBUG', FALSE);
-
 // Init config
 $config = array();
 

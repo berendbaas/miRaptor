@@ -1,5 +1,5 @@
 <?php
-namespace lib/modules/stylesheet;
+namespace lib\modules\stylesheet;
 
 /**
  * @author miWebb <info@miwebb.com>

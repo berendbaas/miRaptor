@@ -1,5 +1,5 @@
 <?php
-namespace lib/modules/media;
+namespace lib\modules\media;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -9,15 +9,15 @@ namespace lib/modules/media;
  */
 class Admin implements /lib/core/AdminInterface {
 	private $pdbc;
-	private $uri;
+	private $url;
 	private $result;
 
 	/**
 	 *
 	 */
-	public function __construct(/lib/core/PDBC $pdbc, /lib/core/URI $uri) {
+	public function __construct(/lib/core/PDBC $pdbc, /lib/core/URL $url) {
 		$this->pdbc = $pdbc;
-		$this->uri = $uri;
+		$this->url = $url;
 		$this->result = '';
 	}
 

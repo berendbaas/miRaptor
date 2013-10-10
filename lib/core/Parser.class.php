@@ -12,8 +12,8 @@ class Parser implements Runnable {
 	const MODULE_CLASS = '\\Module';
 	const MODULE_NAMESPACE = 'lib\\modules\\';
 
-	private $request;
 	private $pdbc;
+	private $url;
 	private $tokenizer;
 
 	private $isStatic;
@@ -22,9 +22,9 @@ class Parser implements Runnable {
 	/**
 	 *
 	 */
-	public function __construct(PDBC $pdbc, Request $request) {
+	public function __construct(PDBC $pdbc, URL $url) {
 		$this->pdbc = $pdbc;
-		$this->request = $request;
+		$this->url = $url;
 		$this->tokenizer = new Tokenizer(Token::DEFAULT_START . self::TOKEN_DEFAULT . Token::DEFAULT_END);
 
 		$this->isStatic = TRUE;
@@ -50,8 +50,8 @@ class Parser implements Runnable {
 		}
 
 		// The page exists, but is considered not found because the filename was not required.
-		if(!$this->isNamespace && $this->request->getUri()->getFilename() != '') {
-			throw new \Exception('Parser: uri doesnt exists - ' . $this->request->getUri()->getPath() . $this->request->getUri()->getFilename() , 404);
+		if(!$this->isNamespace && $this->url->getFile() != '') {
+			throw new \Exception('Parser: File doesn\'t exists - ' . $this->url->getPath() , 404);
 		}
 	}
 
@@ -68,12 +68,12 @@ class Parser implements Runnable {
 	private function page() {
 		$this->pdbc->query('SELECT `id`
 		                    FROM `pages`
-		                    WHERE `uri`="' . $this->pdbc->quote($this->request->getUri()->getPath()) . '"');
+		                    WHERE `uri`="' . $this->pdbc->quote($this->url->getDirectory()) . '"');
 
 		$page = $this->pdbc->fetch();
 
 		if(empty($page)) {
-			throw new \Exception('Parser: uri doesnt exists - ' . $this->request->getUri()->getPath() . $this->request->getUri()->getFilename() , 404);
+			throw new \Exception('Parser: File doesnt exists - ' . $this->url->getPath() , 404);
 		}
 
 		return end($page);
@@ -100,7 +100,7 @@ class Parser implements Runnable {
 	private function module(array $modules, Token $token, $page) {
 		$module = self::MODULE_NAMESPACE . $token->getModule() . self::MODULE_CLASS;
 
-		$result = new $module($this->pdbc, $this->request, $page, $token->getArgs());
+		$result = new $module($this->pdbc, $this->url, $page, $token->getArgs());
 		$result->run();
 
 		$this->isStatic = $this->isStatic && $result->isStatic();

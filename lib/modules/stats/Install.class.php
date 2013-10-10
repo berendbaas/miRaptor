@@ -1,5 +1,5 @@
 <?php
-namespace lib/modules/stats;
+namespace lib\modules\stats;
 
 /**
  * @author miWebb <info@miwebb.com>

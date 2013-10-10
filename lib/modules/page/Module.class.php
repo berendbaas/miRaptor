@@ -9,7 +9,7 @@ namespace lib\modules\page;
  */
 class Module implements \lib\core\ModuleInterface {
 	private $pdbc;
-	private $request;
+	private $url;
 	private $page;
 	private $args;
 	private $result;
@@ -17,9 +17,9 @@ class Module implements \lib\core\ModuleInterface {
 	/**
 	 *
 	 */
-	public function __construct(\lib\core\PDBC $pdbc, \lib\core\Request $request, $page, array $args) {
+	public function __construct(\lib\core\PDBC $pdbc, \lib\core\URL $url, $page, array $args) {
 		$this->pdbc = $pdbc;
-		$this->request = $request;
+		$this->url = $url;
 		$this->page = $page;
 		$this->args = $args;
 		$this->result = '';
@@ -97,7 +97,7 @@ class Module implements \lib\core\ModuleInterface {
 
 		$content = $this->pdbc->fetch();
 
-		if(empty($content)) {
+		if(!$content) {
 			throw new \Exception('Content does not exists.');
 		}
 
@@ -111,7 +111,7 @@ class Module implements \lib\core\ModuleInterface {
 
 		$content = $this->pdbc->fetch();
 
-		if(empty($content)) {
+		if(!$content) {
 			throw new \Exception('Content does not exists.');
 		}
 
@@ -128,7 +128,7 @@ class Module implements \lib\core\ModuleInterface {
 
 		$description = $this->pdbc->fetch();
 
-		if(empty($description)) {
+		if(!$description) {
 			throw new \Exception('Description does not exists.');
 		}
 
@@ -152,7 +152,7 @@ class Module implements \lib\core\ModuleInterface {
 
 		$media = $this->pdbc->fetch();
 
-		if(empty($media)) {
+		if(!$media) {
 			throw new \Exception('Media does not exists.');
 		}
 
@@ -171,7 +171,7 @@ HTML;
 
 		$title = $this->pdbc->fetch();
 
-		if(empty($title)) {
+		if(!$title) {
 			throw new \Exception('Title does not exists.');
 		}
 

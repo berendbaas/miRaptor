@@ -14,10 +14,10 @@ class Gatekeeper {
 	/**
 	 *
 	 */
-	public function __construct(PDBC $pdbc, Request $request) {
+	public function __construct(PDBC $pdbc, URL $url) {
 		// Get website location & database
-		$host = $this->getHost($pdbc, $request);
-		$user = $this->getUser($pdbc, $request, $host['uid']);
+		$host = $this->getHost($pdbc, $url);
+		$user = $this->getUser($pdbc, $url, $host['uid']);
 
 		// Set website location & database
 		$this->location = $user['location'] . $host['location'];
@@ -27,16 +27,16 @@ class Gatekeeper {
 	/**
 	 *
 	 */
-	private function getHost(PDBC $pdbc, Request $request) {
+	private function getHost(PDBC $pdbc, URL $url) {
 		$pdbc->query('SELECT `uid`,`location`,`db`
 		              FROM `website`
 		              WHERE `active` = 1
-		              AND `domain` = "' . $pdbc->quote($request->getHost()) . '"');
+		              AND `domain` = "' . $pdbc->quote($url->getHost()) . '"');
 
 		$host = $pdbc->fetch();
 
-		if(empty($host)) {
-			$this->getHostRedirect($pdbc, $request);
+		if(!$host) {
+			$this->getHostRedirect($pdbc, $url);
 		}
 
 		return $host;
@@ -45,35 +45,35 @@ class Gatekeeper {
 	/**
 	 *
 	 */
-	private function getHostRedirect(PDBC $pdbc, Request $request) {
+	private function getHostRedirect(PDBC $pdbc, URL $url) {
 		$pdbc->query('SELECT `website`.`domain`, `host`.`path`
 		              FROM `website`
 		              RIGHT JOIN (SELECT `wid`,`path`
 		                          FROM `host`
-		                          WHERE `domain` = "' . $pdbc->quote($request->getHost()) . '") AS `host`
+		                          WHERE `domain` = "' . $pdbc->quote($url->getHost()) . '") AS `host`
 		              ON `website`.`id` = `host`.`wid`)');
 
 		$redirect = $pdbc->fetch();
 
-		if(empty($redirect)) {
-			throw new \Exception('Gatekeeper: unknown domain - ' . $request->getHost(), 404);
+		if(!$redirect) {
+			throw new \Exception('Gatekeeper: unknown domain - ' . $url->getHost(), 404);
 		}
 			
-		throw new \Exception($redirect['domain'] . $redirect['path'] . $request->getUri(), 301);
+		throw new \Exception($redirect['domain'] . $redirect['path'] . $url->getURI(), 301);
 	}
 
 	/**
 	 * 
 	 */
-	private function getUser(PDBC $pdbc, Request $request, $id) {
+	private function getUser(PDBC $pdbc, URL $url, $id) {
 		$pdbc->query('SELECT `location`
 		              FROM `user`
 		              WHERE `id` = ' . $id);
 
 		$user = $pdbc->fetch();
 
-		if(empty($user)) {
-			throw new \Exception('Gatekeeper: unknown domain - ' . $request->getHost(), 404);
+		if(!$user) {
+			throw new \Exception('Gatekeeper: unknown domain - ' . $url->getHost(), 404);
 		}
 
 		return $user;

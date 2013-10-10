@@ -67,7 +67,7 @@ class Error {
 		header($error['title'], TRUE, $error['statuscode']);
 
 		if($error['statuscode'] == 301) {
-			header('Location: http://' . $this->exception->getMessage());
+			header('Location: ' . $this->exception->getMessage());
 		}
 
 		$message = MIRAPTOR_DEBUG ? '<pre>' . $this->exception->getMessage() . PHP_EOL . PHP_EOL . $this->exception->getTraceAsString() . '</pre>' : '';

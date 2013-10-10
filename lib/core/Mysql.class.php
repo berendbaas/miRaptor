@@ -64,7 +64,7 @@ class Mysql implements PDBC {
 			$rows[] = $row;
 		}
 
-		return $rows;
+		return !$rows ? FALSE : $rows;
 	}
 
 	/**

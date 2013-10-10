@@ -1,5 +1,5 @@
 <?php
-namespace lib/modules/media;
+namespace lib\modules\media;
 
 /**
  * @author miWebb <info@miwebb.com>

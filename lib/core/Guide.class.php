@@ -13,18 +13,18 @@ class Guide {
 	/**
 	 *
 	 */
-	public function __construct(PDBC $pdbc, Request $request, $location) {
-		$filename = $location . $request->getUri()->getPath() . ($request->getUri()->getFilename() == '' ? self:: DEFAULT_FILE : $request->getUri()->getFilename());
+	public function __construct(PDBC $pdbc, URL $url, $location) {
+		$filename = $location . $url->getDirectory() . ($url->getFile() == '' ? self::DEFAULT_FILE : $url->getFile());
 
-		switch($request->getMethod()) {
-			case 'get':
+		switch(strtoupper($_SERVER['REQUEST_METHOD'])) {
+			case 'GET':
 				if(file_exists($filename)) {
-					$this->getRequest($filename);
+					$this->getPage($filename);
 					break;
 				}
 
-			case 'post':
-				$this->parseRequest($pdbc, $request, $filename);
+			case 'POST':
+				$this->parsePage($pdbc, $url, $filename);
 			break;
 
 			default:
@@ -36,7 +36,7 @@ class Guide {
 	/**
 	 *
 	 */
-	private function getRequest($filename) {
+	private function getPage($filename) {
 		// Header parse
 		$lastModified = filemtime($filename);
 
@@ -69,12 +69,12 @@ class Guide {
 	/**
 	 *
 	 */
-	private function parseRequest(PDBC $pdbc, Request $request, $filename) {
+	private function parsePage(PDBC $pdbc, URL $url, $filename) {
 		// Header
 		header('content-type: text/html');
 
 		// Content parse
-		$parser = new Parser($pdbc, $request);
+		$parser = new Parser($pdbc, $url);
 		$parser->run();
 
 		// Content echo

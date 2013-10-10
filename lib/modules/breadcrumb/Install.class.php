@@ -1,5 +1,5 @@
 <?php
-namespace lib/modules/breadcrumb;
+namespace lib\modules\breadcrumb;
 
 /**
  * @author miWebb <info@miwebb.com>

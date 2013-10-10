@@ -7,6 +7,10 @@
  * @version 1.0
  */
 
+// Globals
+define('MIRAPTOR_CACHE', FALSE);
+define('MIRAPTOR_DEBUG', FALSE);
+
 // Include config
 include_once('config.php');
 

@@ -1,5 +1,5 @@
 <?php
-namespace lib/modules/form;
+namespace lib\modules\form;
 
 /**
  * @author miWebb <info@miwebb.com>

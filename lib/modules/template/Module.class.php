@@ -9,7 +9,7 @@ namespace lib\modules\template;
  */
 class Module implements \lib\core\ModuleInterface {
 	private $pdbc;
-	private $request;
+	private $url;
 	private $page;
 	private $args;
 	private $result;
@@ -17,9 +17,9 @@ class Module implements \lib\core\ModuleInterface {
 	/**
 	 *
 	 */
-	public function __construct(\lib\core\PDBC $pdbc, \lib\core\Request $request, $page, array $args) {
+	public function __construct(\lib\core\PDBC $pdbc, \lib\core\URL $url, $page, array $args) {
 		$this->pdbc = $pdbc;
-		$this->request = $request;
+		$this->url = $url;
 		$this->page = $page;
 		$this->args = $args;
 		$this->result = '';
@@ -58,7 +58,7 @@ class Module implements \lib\core\ModuleInterface {
 
 		$template = $this->pdbc->fetch();
 
-		if(empty($template)) {
+		if(!$template) {
 			throw new \Exception('Template does not exists.');
 		}
 
