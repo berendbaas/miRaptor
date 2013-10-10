@@ -10,7 +10,6 @@ namespace lib\core;
 class URL {
 	const DELIMITER_SCHEME = '://';
 	const DELIMITER_QUERY = '?';
-	const DELIMITER_FRAGMENT = '#';
 
 	private $scheme;
 	private $host;
@@ -48,6 +47,9 @@ class URL {
 		return $this->scheme . self::DELIMITER_SCHEME . $this->host . $this->getURI();
 	}
 
+	/**
+	 *
+	 */
 	public function getURLBase() {
 		return $this->scheme . self::DELIMITER_SCHEME . $this->host . $this->directory;
 	}
