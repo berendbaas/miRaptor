@@ -8,11 +8,39 @@ namespace lib\modules\admin;
  * @version 1.0
  */
 class ModuleHandleSite extends ModuleHandleAbstract {
+	const ADMIN_CLASS = '\\Admin';
+	const ADMIN_NAMESPACE = 'lib\\modules\\';
+
 	/**
 	 *
 	 */
 	public function content() {
-		return 'TODO site';
+		if(isset($_GET['id']) && $this->hasAccess() && isset($_GET['module']) && $this->moduleExists()) {
+			$module = self::ADMIN_NAMESPACE . $_GET['module'] . self::ADMIN_CLASS;
+
+			$result = new $module($this->pdbc, $this->url);
+			$result->run();
+
+			return $result->__toString();
+		}
+
+		return 'Overzicht';
+
+		// throw new \Exception($this->url->getURLBase() . Module::PAGE_OVERVIEW, 301);
+	}
+
+	/**
+	 *
+	 */
+	public function hasAccess() {
+		return TRUE;
+	}
+
+	/**
+	 *
+	 */
+	public function moduleExists() {
+		return TRUE;
 	}
 
 	/**
