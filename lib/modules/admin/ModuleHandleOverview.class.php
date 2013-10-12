@@ -7,59 +7,39 @@ namespace lib\modules\admin;
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class ModuleOverview {
+class ModuleHandleOverview extends ModuleHandleAbstract {
 	const ACTION_RENAME = 'rename';
 	const ACTION_DOMAIN = 'domain';
 	const ACTION_ACTIVE = 'active';
 
-	private $pdbc;
-	private $url;
-
-	private $userPdbc;
-	private $user;
-
-	/**
-	 *
-	 */
-	public function __construct(\lib\core\PDBC $pdbc, \lib\core\URL $url, \lib\core\PDBC $userPdbc, \lib\core\User $user) {
-		$this->pdbc = $pdbc;
-		$this->url = $url;
-
-		$this->userPdbc = $userPdbc;
-		$this->user = $user;
-	}
-
-	/**
-	 *
-	 */
-	public function get() {
+	public function content() {
 		if(isset($_GET['action']) && isset($_GET['id'])) {
 			$id = intval($_GET['id']);
 
 			if($id != 0) {
 				switch($_GET['action']) {
 					case self::ACTION_RENAME:
-						return $this->handleOverviewRename($id);
+						return $this->rename($id);
 					break;
 
 					case self::ACTION_DOMAIN:
-						return $this->handleOverviewDomain($id);
+						return $this->domain($id);
 					break;
 
 					case self::ACTION_ACTIVE:
-						return $this->handleOverviewActive($id);
+						return $this->active($id);
 					break;
 				}
 			}
 		}
 
-		return $this->handleOverviewDefault();
+		return $this->main();
 	}
 
 	/**
 	 *
 	 */
-	private function handleOverviewRename($id) {
+	private function rename($id) {
 		$message = '';
 
 		if(isset($_POST['name'])) {
@@ -91,7 +71,7 @@ HTML;
 	/**
 	 *
 	 */
-	private function handleOverviewDomain($id) {
+	private function domain($id) {
 		$message = '';
 
 		if(isset($_POST['domain'])) {
@@ -123,24 +103,30 @@ HTML;
 	/**
 	 *
 	 */
-	private function handleOverviewActive($id) {
-// Als er is gepost aanpassen en redirecten, anders formulier laten zien.
-		return 'active';
+	private function active($id) {
+		$this->userPdbc->query('UPDATE `website`
+			                        SET `domain` =  "' . $this->userPdbc->quote($_POST['domain']) . '"
+			                        WHERE `id` = "' . $this->userPdbc->quote($id) . '"
+			                        AND `uid` = "' . $this->userPdbc->quote($this->user->getID()) . '"');
+
+		
+
+		throw new \Exception($this->url->getURLBase() . Module::PAGE_OVERVIEW, 301);
 	}
 
 	/**
 	 *
 	 */
-	private function handleOverviewDefault() {
+	private function main() {
 		$this->userPdbc->query('SELECT `id`,`name`,`active`
 		                        FROM `website`
 		                        WHERE `uid` = ' . $this->userPdbc->quote($this->user->getID()));
 
 		$websites = $this->userPdbc->fetchAll();
 
-		if(empty($websites)) {
+		if(!$websites) {
 			return <<<HTML
-<p>This user has no websites.</p>
+<p>No websites.</p>
 HTML;
 		}
 
@@ -172,6 +158,34 @@ HTML;
 <tbody>{$result}
 </tbody>
 </table>
+HTML;
+	}
+
+	/**
+	 *
+	 */
+	public function logBox() {
+		$logout = $this->url->getDirectory() . Module::PAGE_LOGOUT;
+
+		return <<<HTML
+<ul>
+<li><a href="{$logout}">Logout</a></li>
+</ul>
+HTML;
+	}
+
+	/**
+	 *
+	 */
+	public function menu() {
+		$overview = $this->url->getDirectory() . Module::PAGE_OVERVIEW;
+		$settings = $this->url->getDirectory() . Module::PAGE_SETTINGS;
+
+		return <<<HTML
+<ul>
+<li><a href="{$overview}">Overview</a></li>
+<li><a href="{$settings}">Settings</a></li>
+</ul>
 HTML;
 	}
 }
