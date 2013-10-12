@@ -33,8 +33,8 @@ class User {
 	public function login($pdbc, $username, $password) {
 		$pdbc->query('SELECT `id`
 		                    FROM user
-		                    WHERE username = "' . $this->pdbc->quote($username) . '"
-		                    AND password = "' . $this->pdbc->quote($password) . '"');
+		                    WHERE username = "' . $pdbc->quote($username) . '"
+		                    AND password = "' . $pdbc->quote($password) . '"');
 
 		$user = $pdbc->fetch();
 
