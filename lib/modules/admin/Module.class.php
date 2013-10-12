@@ -8,8 +8,6 @@ namespace lib\modules\admin;
  * @version 1.0
  */
 class Module implements \lib\core\ModuleInterface {
-	const USER_DB = 'miraptor_cms';
-
 	const PAGE_LOGIN = '';
 	const PAGE_LOGOUT = 'logout';
 	const PAGE_OVERVIEW = 'overview';
@@ -37,7 +35,7 @@ class Module implements \lib\core\ModuleInterface {
 
 		include('config.php');
 		$this->userPdbc = new \lib\core\Mysql($config['mysql']);
-		$this->userPdbc->selectDatabase(self::USER_DB);
+		$this->userPdbc->selectDatabase($config['mysql']['database']);
 		$this->user = new \lib\core\User($this->userPdbc);
 	}
 
@@ -85,19 +83,19 @@ class Module implements \lib\core\ModuleInterface {
 			break;
 
 			case self::PAGE_LOGOUT:
-				$result = new ModuleHandleLogout($this->pdbc, $this->url, $this->args, $this->userPdbc, $this->user);
+				$result = new ModuleHandleLogout($this->userPdbc, $this->url, $this->args, $this->user);
 			break;
 
 			case self::PAGE_OVERVIEW:
-				$result = new ModuleHandleOverview($this->pdbc, $this->url, $this->args, $this->userPdbc, $this->user);
+				$result = new ModuleHandleOverview($this->userPdbc, $this->url, $this->args, $this->user);
 			break;
 
 			case self::PAGE_SETTINGS:
-				$result = new ModuleHandleSettings($this->pdbc, $this->url, $this->args, $this->userPdbc, $this->user);
+				$result = new ModuleHandleSettings($this->userPdbc, $this->url, $this->args, $this->user);
 			break;
 
 			case self::PAGE_SITE:
-				$result = new ModuleHandleSite($this->pdbc, $this->url, $this->args, $this->userPdbc, $this->user);
+				$result = new ModuleHandleSite($this->userPdbc, $this->url, $this->args, $this->user);
 			break;
 
 			default:
@@ -113,7 +111,7 @@ class Module implements \lib\core\ModuleInterface {
 	 */
 	private function handleLogin() {
 		if($this->url->getFile() == Module::PAGE_LOGIN) {
-			$result = new ModuleHandleLogin($this->pdbc, $this->url, $this->args, $this->userPdbc, $this->user);
+			$result = new ModuleHandleLogin($this->userPdbc, $this->url, $this->args, $this->user);
 			return $result->get();
 		}
 

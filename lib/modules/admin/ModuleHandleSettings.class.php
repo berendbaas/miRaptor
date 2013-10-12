@@ -41,10 +41,10 @@ HTML;
 		$message = '';
 
 		if (isset($_POST['password'])) {
-			$this->userPdbc->query('UPDATE `user`
-			                        SET `password` = "' . $this->userPdbc->quote($_POST['password']) . '"
-			                        WHERE `id` = "' . $this->userPdbc->quote($this->user->getID()) . '"');
-			if ($this->userPdbc->rowCount() > 0) {
+			$this->pdbc->query('UPDATE `user`
+			                        SET `password` = "' . $this->pdbc->quote($_POST['password']) . '"
+			                        WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
+			if ($this->pdbc->rowCount() > 0) {
 				throw new \Exception($this->url->getURLBase() . Module::PAGE_SETTINGS, 301);
 			}
 			else {
@@ -69,10 +69,10 @@ HTML;
 		$message = '';
 
 		if (isset($_POST['email'])) {
-			$this->userPdbc->query('UPDATE `user`
-			                        SET `email` = "' . $this->userPdbc->quote($_POST['email']) . '"
-			                        WHERE `id` = "' . $this->userPdbc->quote($this->user->getID()) . '"');
-			if ($this->userPdbc->rowCount() >0) {
+			$this->pdbc->query('UPDATE `user`
+			                        SET `email` = "' . $this->pdbc->quote($_POST['email']) . '"
+			                        WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
+			if ($this->pdbc->rowCount() >0) {
 				throw new \Exception($this->url->getURLBase() . Module::PAGE_SETTINGS, 301);
 			}
 			else {
@@ -100,7 +100,7 @@ HTML;
 
 		return <<<HTML
 <ul>
-<li><a href="{$logout}">Logout</a></li>
+	<li><a href="{$logout}">Logout</a></li>
 </ul>
 HTML;
 	}
@@ -114,8 +114,8 @@ HTML;
 
 		return <<<HTML
 <ul>
-<li><a href="{$overview}">Overview</a></li>
-<li><a href="{$settings}">Settings</a></li>
+	<li><a href="{$overview}">Overview</a></li>
+	<li><a href="{$settings}">Settings</a></li>
 </ul>
 HTML;
 	}

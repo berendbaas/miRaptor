@@ -11,11 +11,38 @@ class ModuleHandleSite extends ModuleHandleAbstract {
 	const ADMIN_CLASS = '\\Admin';
 	const ADMIN_NAMESPACE = 'lib\\modules\\';
 
+	public function __construct(\lib\core\PDBC $pdbc, \lib\core\URL $url, array $args, \lib\core\User $user) {
+		parent::__construct($pdbc, $url, $args, $user);
+		$this->hasAccessWebsite();
+	}
+
+	/**
+	 *
+	 */
+	private function hasAccessWebsite() {
+		if(!isset($_GET['id'])) {
+			throw new \Exception($this->url->getURLBase() . Module::PAGE_OVERVIEW, 301);
+		}
+
+		$this->pdbc->query('SELECT `db`
+		                    FROM `website`
+		                    WHERE `id` = ' . $this->pdbc->quote($_GET['id']) . '
+		                    AND`uid` = ' . $this->pdbc->quote($this->user->getUserID()));
+
+		$db = $this->pdbc->fetch();
+
+		if(!$db) {
+			throw new \Exception($this->url->getURLBase() . Module::PAGE_OVERVIEW, 301);
+		}
+
+		$this->pdbc->selectDatabase(end($db));
+	}
+
 	/**
 	 *
 	 */
 	public function content() {
-		if(isset($_GET['id']) && $this->hasAccess() && isset($_GET['module']) && $this->moduleExists()) {
+		if($this->hasAccessModule()) {
 			$module = self::ADMIN_NAMESPACE . $_GET['module'] . self::ADMIN_CLASS;
 
 			$result = new $module($this->pdbc, $this->url);
@@ -24,34 +51,37 @@ class ModuleHandleSite extends ModuleHandleAbstract {
 			return $result->__toString();
 		}
 
-		return 'Overzicht';
-
-		// throw new \Exception($this->url->getURLBase() . Module::PAGE_OVERVIEW, 301);
+		return 'TODO module overzicht';
 	}
 
 	/**
 	 *
 	 */
-	public function hasAccess() {
-		return TRUE;
-	}
+	private function hasAccessModule() {
+		if(!isset($_GET['module'])) {
+			return FALSE;
+		}
 
-	/**
-	 *
-	 */
-	public function moduleExists() {
-		return TRUE;
+		$this->pdbc->query('SELECT `id`
+		                    FROM `modules`
+		                    WHERE `name` = "' . $_GET['module'] . '"');
+
+		$id = $this->pdbc->fetch();
+
+		return !empty($id);
 	}
 
 	/**
 	 *
 	 */
 	public function logBox() {
+		$overview = $this->url->getDirectory() . Module::PAGE_OVERVIEW;
 		$logout = $this->url->getDirectory() . Module::PAGE_LOGOUT;
 
 		return <<<HTML
 <ul>
-<li><a href="{$logout}">Logout</a></li>
+	<li><a href="{$overview}">Overview</a></li>
+	<li><a href="{$logout}">Logout</a></li>
 </ul>
 HTML;
 	}
@@ -60,13 +90,21 @@ HTML;
 	 *
 	 */
 	public function menu() {
-		$overview = $this->url->getDirectory() . Module::PAGE_OVERVIEW;
-		$settings = $this->url->getDirectory() . Module::PAGE_SETTINGS;
+		$this->pdbc->query('SELECT `name` FROM `modules`');
+
+		$modules = $this->pdbc->fetchAll();
+		$result = '';
+
+		foreach($modules as $module) {
+			$href = $this->url->getURLBase . Module::PAGE_SITE . '?id=' . $_GET['id'] . '&amp;module=' . $module['name'];
+
+			$result .= PHP_EOL . <<<HTML
+	<li><a href="{$href}">{$module['name']}</a></li>
+HTML;
+		}
 
 		return <<<HTML
-<ul>
-<li><a href="{$overview}">Overview</a></li>
-<li><a href="{$settings}">Settings</a></li>
+<ul>{$result}
 </ul>
 HTML;
 	}

@@ -32,7 +32,7 @@ class Admin implements \lib\core\AdminInterface {
 	 *
 	 */
 	public function run() {
-		$this->result = 'TODO template';
+		$this->result = 'TODO';
 	}
 }
 

@@ -15,7 +15,7 @@ class ModuleHandleLogin extends ModuleHandleAbstract {
 		$message = '';
 
 		if(isset($_POST['username']) && isset($_POST['password'])) {
-			if($this->user->login($_POST['username'], $_POST['password'])) {
+			if($this->user->login($this->pdbc, $_POST['username'], $_POST['password'])) {
 				throw new \Exception($this->url->getURLBase() . Module::PAGE_OVERVIEW, 301);
 			}
 
@@ -26,8 +26,8 @@ HTML;
 
 		return $message . <<<HTML
 <form method="post" action="">
-	<label for="username">Username: <input type="text" id="username" name="username" /></label>
-	<label for="password">Password: <input type="password" id="password" name="password" /></label>
+	<label for="username">Username:</label><input type="text" id="username" name="username" />
+	<label for="password">Password:</label><input type="password" id="password" name="password" />
 	<input type='submit' value='login' />
 </form>
 HTML;

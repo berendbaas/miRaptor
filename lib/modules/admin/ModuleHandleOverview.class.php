@@ -43,12 +43,12 @@ class ModuleHandleOverview extends ModuleHandleAbstract {
 		$message = '';
 
 		if(isset($_POST['name'])) {
-			$this->userPdbc->query('UPDATE `website`
-			                        SET `name` =  "' . $this->userPdbc->quote($_POST['name']) . '"
-			                        WHERE `id` = "' . $this->userPdbc->quote($id) . '"
-			                        AND `uid` = "' . $this->userPdbc->quote($this->user->getID()) . '"');
+			$this->pdbc->query('UPDATE `website`
+			                    SET `name` =  "' . $this->pdbc->quote($_POST['name']) . '"
+			                    WHERE `id` = "' . $this->pdbc->quote($id) . '"
+			                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
 
-			if($this->userPdbc->rowCount() > 0) {
+			if($this->pdbc->rowCount() > 0) {
 				throw new \Exception($this->url->getURLBase() . Module::PAGE_OVERVIEW, 301);
 			} else {
 				$message = <<<HTML
@@ -61,7 +61,7 @@ HTML;
 
 		return $message . <<<HTML
 <form method="post" action="">
-	<label for="name">Name<input type="text" id="name" name="name" /></label>
+	<label for="name">Name</label><input type="text" id="name" name="name" />
 	<a href="{$cancel}"><input type="button" name="cancel" value="Cancel" /></a>
 	<input type='submit' value='submit' />
 </form>
@@ -75,12 +75,12 @@ HTML;
 		$message = '';
 
 		if(isset($_POST['domain'])) {
-			$this->userPdbc->query('UPDATE `website`
-			                        SET `domain` =  "' . $this->userPdbc->quote($_POST['domain']) . '"
-			                        WHERE `id` = "' . $this->userPdbc->quote($id) . '"
-			                        AND `uid` = "' . $this->userPdbc->quote($this->user->getID()) . '"');
+			$this->pdbc->query('UPDATE `website`
+			                    SET `domain` =  "' . $this->pdbc->quote($_POST['domain']) . '"
+			                    WHERE `id` = "' . $this->pdbc->quote($id) . '"
+			                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
 
-			if($this->userPdbc->rowCount() > 0) {
+			if($this->pdbc->rowCount() > 0) {
 				throw new \Exception($this->url->getURLBase() . Module::PAGE_OVERVIEW, 301);
 			} else {
 				$message = <<<HTML
@@ -93,7 +93,7 @@ HTML;
 
 		return $message . <<<HTML
 <form method="post" action="">
-	<label for="domain">Domain<input type="text" id="domain" name="domain" /></label>
+	<label for="domain">Domain</label><input type="text" id="domain" name="domain" />
 	<a href="{$cancel}"><input type="button" name="cancel" value="Cancel" /></a>
 	<input type='submit' value='submit' />
 </form>
@@ -104,10 +104,10 @@ HTML;
 	 *
 	 */
 	private function active($id) {
-		$this->userPdbc->query('UPDATE `website`
-			                        SET `domain` =  "' . $this->userPdbc->quote($_POST['domain']) . '"
-			                        WHERE `id` = "' . $this->userPdbc->quote($id) . '"
-			                        AND `uid` = "' . $this->userPdbc->quote($this->user->getID()) . '"');
+		$this->pdbc->query('UPDATE `website`
+		                    SET `domain` =  "' . $this->pdbc->quote($_POST['domain']) . '"
+		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"
+		                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
 
 		
 
@@ -118,11 +118,11 @@ HTML;
 	 *
 	 */
 	private function main() {
-		$this->userPdbc->query('SELECT `id`,`name`,`active`
-		                        FROM `website`
-		                        WHERE `uid` = ' . $this->userPdbc->quote($this->user->getID()));
+		$this->pdbc->query('SELECT `id`,`name`,`active`
+		                    FROM `website`
+		                    WHERE `uid` = ' . $this->pdbc->quote($this->user->getID()));
 
-		$websites = $this->userPdbc->fetchAll();
+		$websites = $this->pdbc->fetchAll();
 
 		if(!$websites) {
 			return <<<HTML
@@ -169,7 +169,7 @@ HTML;
 
 		return <<<HTML
 <ul>
-<li><a href="{$logout}">Logout</a></li>
+	<li><a href="{$logout}">Logout</a></li>
 </ul>
 HTML;
 	}
@@ -183,8 +183,8 @@ HTML;
 
 		return <<<HTML
 <ul>
-<li><a href="{$overview}">Overview</a></li>
-<li><a href="{$settings}">Settings</a></li>
+	<li><a href="{$overview}">Overview</a></li>
+	<li><a href="{$settings}">Settings</a></li>
 </ul>
 HTML;
 	}

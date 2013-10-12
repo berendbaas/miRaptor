@@ -15,19 +15,15 @@ abstract class ModuleHandleAbstract {
 	protected $pdbc;
 	protected $url;
 	protected $args;
-
-	protected $userPdbc;
 	protected $user;
 
 	/**
 	 *
 	 */
-	public function __construct(\lib\core\PDBC $pdbc, \lib\core\URL $url, array $args, \lib\core\PDBC $userPdbc, \lib\core\User $user) {
+	public function __construct(\lib\core\PDBC $pdbc, \lib\core\URL $url, array $args, \lib\core\User $user) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
 		$this->args = $args;
-
-		$this->userPdbc = $userPdbc;
 		$this->user = $user;
 	}
 
