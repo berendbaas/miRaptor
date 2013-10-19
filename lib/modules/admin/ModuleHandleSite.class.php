@@ -96,7 +96,7 @@ HTML;
 		$result = '';
 
 		foreach($modules as $module) {
-			$href = $this->url->getURLBase . Module::PAGE_SITE . '?id=' . $_GET['id'] . '&amp;module=' . $module['name'];
+			$href = $this->url->getURLBase() . Module::PAGE_SITE . '?id=' . $_GET['id'] . '&amp;module=' . $module['name'];
 
 			$result .= PHP_EOL . <<<HTML
 	<li><a href="{$href}">{$module['name']}</a></li>
