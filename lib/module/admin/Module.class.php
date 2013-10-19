@@ -1,5 +1,5 @@
 <?php
-namespace lib\modules\admin;
+namespace lib\module\admin;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -14,23 +14,14 @@ class Module implements \lib\core\ModuleInterface {
 	const PAGE_SETTINGS = 'settings';
 	const PAGE_SITE = 'site';
 
-	private $pdbc;
-	private $url;
-	private $page;
-	private $args;
-	private $result;
-
 	private $userPdbc;
         private $user;
 
-	/**
-	 *
-	 */
-	public function __construct(\lib\core\PDBC $pdbc, \lib\core\URL $url, $page, array $args) {
+	public function __construct(\lib\core\PDBC $pdbc, \lib\core\URL $url, $pageID, array $arguments) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
-		$this->page = $page;
-		$this->args = $args;
+		$this->pageID = $pageID;
+		$this->arguments = $arguments;
 		$this->result = '';
 
 		include('config.php');
@@ -39,30 +30,6 @@ class Module implements \lib\core\ModuleInterface {
 		$this->user = new \lib\core\User($this->userPdbc);
 	}
 
-	/**
-	 *
-	 */
-	public function __toString() {
-		return $this->result;
-	}
-
-	/**
-	 *
-	 */
-	public function isStatic() {
-		return FALSE;
-	}
-
-	/**
-	 *
-	 */
-	public function isNamespace() {
-		return TRUE;
-	}
-
-	/**
-	 * 
-	 */
 	public function run() {
 		if($this->user->isLoggedIn()) {
 			$this->result = $this->handleAdmin();
@@ -83,19 +50,19 @@ class Module implements \lib\core\ModuleInterface {
 			break;
 
 			case self::PAGE_LOGOUT:
-				$result = new ModuleHandleLogout($this->userPdbc, $this->url, $this->args, $this->user);
+				$result = new ModuleHandleLogout($this->userPdbc, $this->url, $this->arguments, $this->user);
 			break;
 
 			case self::PAGE_OVERVIEW:
-				$result = new ModuleHandleOverview($this->userPdbc, $this->url, $this->args, $this->user);
+				$result = new ModuleHandleOverview($this->userPdbc, $this->url, $this->arguments, $this->user);
 			break;
 
 			case self::PAGE_SETTINGS:
-				$result = new ModuleHandleSettings($this->userPdbc, $this->url, $this->args, $this->user);
+				$result = new ModuleHandleSettings($this->userPdbc, $this->url, $this->arguments, $this->user);
 			break;
 
 			case self::PAGE_SITE:
-				$result = new ModuleHandleSite($this->userPdbc, $this->url, $this->args, $this->user);
+				$result = new ModuleHandleSite($this->userPdbc, $this->url, $this->arguments, $this->user);
 			break;
 
 			default:
@@ -114,7 +81,7 @@ class Module implements \lib\core\ModuleInterface {
 			throw new \Exception($this->url->getURLBase() . Module::PAGE_LOGIN, 301);
 		}
 
-		$result = new ModuleHandleLogin($this->userPdbc, $this->url, $this->args, $this->user);
+		$result = new ModuleHandleLogin($this->userPdbc, $this->url, $this->arguments, $this->user);
 		return $result->get();
 	}
 }

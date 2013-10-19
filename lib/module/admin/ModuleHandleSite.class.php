@@ -1,5 +1,5 @@
 <?php
-namespace lib\modules\admin;
+namespace lib\module\admin;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -11,7 +11,7 @@ class ModuleHandleSite extends ModuleHandleAbstract {
 	const ADMIN_CLASS = '\\Admin';
 	const ADMIN_NAMESPACE = 'lib\\modules\\';
 
-	public function __construct(\lib\core\PDBC $pdbc, \lib\core\URL $url, array $args, \lib\core\User $user) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, array $args, \lib\core\User $user) {
 		parent::__construct($pdbc, $url, $args, $user);
 		$this->hasAccessWebsite();
 	}
