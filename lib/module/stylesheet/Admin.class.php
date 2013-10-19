@@ -26,7 +26,7 @@ class Admin extends \lib\core\AbstractAdmin {
 	}
 
 	private function getOverview() {
-		$base = $this->url->getURLBase();
+		$base = $this->url->getURLDirectory();
 		$id = $_GET['id'];
 		$this->result .= 'Hello Stylesheets';
 		$this->result .= <<<HTML
@@ -63,7 +63,7 @@ HTML;
 	private function getRemove() {
 		$id = $_GET['id'];
 		$tid = $this->pdbc->quote($_GET['tid']);
-		$base = $this->url->getURLBase();
+		$base = $this->url->getURLDirectory();
 		$this->result .= <<<HTML
 <p>Are you sure you want to remove this stylesheet? This can not be undone!<p>
 <form action="" method="POST">
@@ -75,15 +75,15 @@ HTML;
 
 	private function postRemove() {
 		$tid = $this->pdbc->quote($_GET['tid']);
-		$base = $this->url->getURLBase();
+		$base = $this->url->getURLDirectory();
 		$this->pdbc->query('DELETE FROM module_stylesheet WHERE id ="'. $tid .'"');
 
 		$id = $_GET['id'];
-		throw new \Exception($base . "site?id={$id}&module=stylesheet", 301);
+		$this->redirectOverview();
 	}
 
 	private function getEdit() {
-		$base = $this->url->getURLBase();
+		$base = $this->url->getURLDirectory();
 		$tid = $this->pdbc->quote($_GET['tid']);
 		$id = $_GET['id'];
 		$this->pdbc->query('SELECT * 
@@ -136,7 +136,14 @@ HTML;
 		$this->pdbc->query('INSERT INTO module_stylesheet (name, content) values ("'. $name .'", "'. $content .'")');
 	
 
-		$base = $this->url->getURLBase();
+		$base = $this->url->getURLDirectory();
+		$id = $_GET['id'];
+		$this->redirectOverview();
+	}
+
+	private function redirecOverview()
+	{
+		$base = $this->url->getURLDirectory();
 		$id = $_GET['id'];
 		throw new \Exception($base . "site?id={$id}&module=stylesheet", 301);
 	}
