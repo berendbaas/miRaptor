@@ -1,5 +1,5 @@
 <?php
-namespace lib\module\breadcrumb;
+namespace lib\module\admin;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -9,7 +9,7 @@ namespace lib\module\breadcrumb;
  */
 class Admin extends \lib\core\AbstractAdmin {
 	public function run() {
-		$this->result = 'TODO breadcrumb admin';
+		$this->result = 'TODO admin admin';
 	}
 }
 

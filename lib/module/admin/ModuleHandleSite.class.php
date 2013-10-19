@@ -9,7 +9,7 @@ namespace lib\module\admin;
  */
 class ModuleHandleSite extends ModuleHandleAbstract {
 	const ADMIN_CLASS = '\\Admin';
-	const ADMIN_NAMESPACE = 'lib\\modules\\';
+	const ADMIN_NAMESPACE = 'lib\\module\\';
 
 	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, array $args, \lib\core\User $user) {
 		parent::__construct($pdbc, $url, $args, $user);
@@ -21,7 +21,7 @@ class ModuleHandleSite extends ModuleHandleAbstract {
 	 */
 	private function hasAccessWebsite() {
 		if(!isset($_GET['id'])) {
-			throw new \Exception($this->url->getURLBase() . Module::PAGE_OVERVIEW, 301);
+			throw new \Exception($this->url->getURLDirectory() . Module::PAGE_OVERVIEW, 301);
 		}
 
 		$this->pdbc->query('SELECT `db`
@@ -32,7 +32,7 @@ class ModuleHandleSite extends ModuleHandleAbstract {
 		$db = $this->pdbc->fetch();
 
 		if(!$db) {
-			throw new \Exception($this->url->getURLBase() . Module::PAGE_OVERVIEW, 301);
+			throw new \Exception($this->url->getURLDirectory() . Module::PAGE_OVERVIEW, 301);
 		}
 
 		$this->pdbc->selectDatabase(end($db));
@@ -96,7 +96,7 @@ HTML;
 		$result = '';
 
 		foreach($modules as $module) {
-			$href = $this->url->getURLBase() . Module::PAGE_SITE . '?id=' . $_GET['id'] . '&amp;module=' . $module['name'];
+			$href = $this->url->getURLPath() . '?id=' . $_GET['id'] . '&amp;module=' . $module['name'];
 
 			$result .= PHP_EOL . <<<HTML
 	<li><a href="{$href}">{$module['name']}</a></li>

@@ -47,7 +47,7 @@ class ModuleHandleSettings extends ModuleHandleAbstract {
 		                    WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
 
 		if($this->pdbc->rowCount() > 0) {
-			throw new \Exception($this->url->getURLBase() . Module::PAGE_SETTINGS, 301);
+			throw new \Exception($this->url->getURLPath(), 301);
 		}
 		
 		return <<<HTML
@@ -84,7 +84,7 @@ HTML;
 		                    WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
 
 		if($this->pdbc->rowCount() >0) {
-			throw new \Exception($this->url->getURLBase() . Module::PAGE_SETTINGS, 301);
+			throw new \Exception($this->url->getURLPath(), 301);
 		}
 
 		return <<<HTML
