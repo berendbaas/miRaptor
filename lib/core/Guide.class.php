@@ -9,22 +9,33 @@ namespace lib\core;
  */
 class Guide {
 	const DEFAULT_FILE = 'index.html';
+	const METHOD_GET = 'GET';
+	const METHOD_POST = 'POST';
+
+	private $pdbc;
+	private $url;
+	private $filename;
 
 	/**
 	 *
 	 */
-	public function __construct(PDBC $pdbc, URL $url, $location) {
-		$filename = $location . $url->getDirectory() . ($url->getFile() == '' ? self::DEFAULT_FILE : $url->getFile());
+	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $location) {
+		$this->pdbc = $pdbc;
+		$this->url = $url;
+		$this->filename = $location . $url->getDirectory() . ($url->getFile() == '' ? self::DEFAULT_FILE : $url->getFile());
+		$this->run();
+	}
 
+	public function run() {
 		switch(strtoupper($_SERVER['REQUEST_METHOD'])) {
-			case 'GET':
-				if(file_exists($filename)) {
-					$this->getPage($filename);
+			case self::METHOD_GET:
+				if(file_exists($this->filename)) {
+					$this->getPage();
 					break;
 				}
 
-			case 'POST':
-				$this->parsePage($pdbc, $url, $filename);
+			case self::METHOD_POST:
+				$this->parsePage();
 			break;
 
 			default:
@@ -36,20 +47,20 @@ class Guide {
 	/**
 	 *
 	 */
-	private function getPage($filename) {
+	private function getPage() {
 		// Header parse
-		$lastModified = filemtime($filename);
+		$lastModified = filemtime($this->filename);
 
 		if(!$this->isModified($lastModified)) {
 			throw new \Exception('Not Modified', 304);
 		}
 
 		// Header echo
-		header('content-type: ' . mime_content_type($filename));
+		header('content-type: ' . mime_content_type($this->filename));
 		header('last-modified: ' . gmdate("D, d M Y H:i:s", $lastModified) . " GMT");
 
 		// Content echo
-		echo file_get_contents($filename);
+		echo file_get_contents($this->filename);
 
 	}
 
@@ -69,12 +80,12 @@ class Guide {
 	/**
 	 *
 	 */
-	private function parsePage(PDBC $pdbc, URL $url, $filename) {
+	private function parsePage() {
 		// Header
 		header('content-type: text/html');
 
 		// Content parse
-		$parser = new Parser($pdbc, $url);
+		$parser = new Parser($this->pdbc, $this->url);
 		$parser->run();
 
 		// Content echo
@@ -83,7 +94,7 @@ class Guide {
 		// Content cache
 		if($parser->isStatic() && MIRAPTOR_CACHE) {
 			// Create folder(s)
-			$folder = dirname($filename);
+			$folder = dirname($this->filename);
 
 			if(!file_exists($folder)) {
 				$old = umask(002);
@@ -92,7 +103,7 @@ class Guide {
 			}
 
 			// Create file
-			file_put_contents($filename, $parser->__toString());
+			file_put_contents($this->filename, $parser->__toString());
 		}
 	}
 }

@@ -10,7 +10,7 @@ namespace lib\core;
 class Parser implements Runnable {
 	const TOKEN_DEFAULT = 'template';
 	const MODULE_CLASS = '\\Module';
-	const MODULE_NAMESPACE = 'lib\\modules\\';
+	const MODULE_NAMESPACE = 'lib\\module\\';
 
 	private $pdbc;
 	private $url;
@@ -20,9 +20,12 @@ class Parser implements Runnable {
 	private $isNamespace;
 
 	/**
+	 * Construct a Parser object with the given PDBC & URL.
 	 *
+	 * @param \lib\pdbc\PDBC $pdbc
+	 * @param URL            $url
 	 */
-	public function __construct(PDBC $pdbc, URL $url) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
 		$this->tokenizer = new Tokenizer(Token::DEFAULT_START . self::TOKEN_DEFAULT . Token::DEFAULT_END);
@@ -32,21 +35,20 @@ class Parser implements Runnable {
 	}
 
 	/**
+	 * Returns a string representation of the Parser object.
 	 *
+	 * @return String a string representation of the Parser object.
 	 */
 	public function __toString() {
 		return $this->tokenizer->__toString();
 	}
 
-	/**
-	 *
-	 */
 	public function run() {
 		$page = $this->page();
 		$modules = $this->modules();
 
 		while($token = $this->tokenizer->token()) {
-			$this->tokenizer->replace($token, $this->module($modules, $token, $page));
+			$this->tokenizer->replace($token, $this->module($token, $page, $modules));
 		}
 
 		// The page exists, but is considered not found because the filename was not required.
@@ -56,7 +58,9 @@ class Parser implements Runnable {
 	}
 
 	/**
+	 * Returns true if the parser if static.
 	 *
+	 * @return boolean true if the parser is static.
 	 */
 	public function isStatic() {
 		return $this->isStatic;
@@ -72,7 +76,7 @@ class Parser implements Runnable {
 
 		$page = $this->pdbc->fetch();
 
-		if(empty($page)) {
+		if(!$page) {
 			throw new \Exception('Parser: File doesnt exists - ' . $this->url->getPath() , 404);
 		}
 
@@ -86,6 +90,7 @@ class Parser implements Runnable {
 		$this->pdbc->query('SELECT `name` FROM `modules`');
 
 		$modules = $this->pdbc->fetchAll();
+		$result = array();
 
 		foreach($modules as $module) {
 			$result[] = $module['name'];
@@ -97,8 +102,12 @@ class Parser implements Runnable {
 	/**
 	 *
 	 */
-	private function module(array $modules, Token $token, $page) {
-		$module = self::MODULE_NAMESPACE . $token->getModule() . self::MODULE_CLASS;
+	private function module(Token $token, $page, array $modules = array()) {
+		if(!in_array($token->getName(), $modules)) {
+			throw new \Exception('Module doesn\'t exists', 500);
+		}
+
+		$module = self::MODULE_NAMESPACE . $token->getName() . self::MODULE_CLASS;
 
 		$result = new $module($this->pdbc, $this->url, $page, $token->getArgs());
 		$result->run();

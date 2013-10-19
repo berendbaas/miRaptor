@@ -9,7 +9,10 @@ namespace lib\core;
  */
 interface Runnable {
 	/**
+	 * Run a separate part of the program.
 	 *
+	 * @return void
+	 * @throws implementations may throw exceptions and are ought to be documented properly.
 	 */
 	public function run();
 }

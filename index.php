@@ -20,7 +20,7 @@ function __autoload($class) {
 }
 
 // Create and run main object
-$main = new lib\core\Main($config);
+$main = new \lib\core\Main($config);
 $main->run();
 
 ?>

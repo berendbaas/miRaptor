@@ -10,16 +10,16 @@
 // Init config
 $config = array();
 
-// Main
+// Main class
 $config['main'] = array();
 $config['main']['default_host'] = 'www.example.org';
 $config['main']['user_location'] = 'users';
 
-// Mysql
-$config['mysql'] = array();
-$config['mysql']['username'] = 'username';
-$config['mysql']['password'] = 'password';
-$config['mysql']['database'] = 'database';
-$config['mysql']['hostname'] = 'localhost';
+// PDBC class
+$config['pdbc'] = array();
+$config['pdbc']['username'] = 'username';
+$config['pdbc']['password'] = 'password';
+$config['pdbc']['database'] = 'database';
+$config['pdbc']['hostname'] = 'localhost';
 
 ?>

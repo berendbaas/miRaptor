@@ -34,8 +34,8 @@ class Module implements \lib\core\ModuleInterface {
 		$this->result = '';
 
 		include('config.php');
-		$this->userPdbc = new \lib\core\Mysql($config['mysql']);
-		$this->userPdbc->selectDatabase($config['mysql']['database']);
+		$this->userPdbc = clone $pdbc;
+		$this->userPdbc->selectDatabase($config['pdbc']['database']);
 		$this->user = new \lib\core\User($this->userPdbc);
 	}
 
@@ -110,12 +110,12 @@ class Module implements \lib\core\ModuleInterface {
 	 *
 	 */
 	private function handleLogin() {
-		if($this->url->getFile() == Module::PAGE_LOGIN) {
-			$result = new ModuleHandleLogin($this->userPdbc, $this->url, $this->args, $this->user);
-			return $result->get();
+		if($this->url->getFile() != Module::PAGE_LOGIN) {
+			throw new \Exception($this->url->getURLBase() . Module::PAGE_LOGIN, 301);
 		}
 
-		throw new \Exception($this->url->getURLBase() . Module::PAGE_LOGIN, 301);
+		$result = new ModuleHandleLogin($this->userPdbc, $this->url, $this->args, $this->user);
+		return $result->get();
 	}
 }
 

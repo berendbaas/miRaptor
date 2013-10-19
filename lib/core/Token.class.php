@@ -11,14 +11,19 @@ class Token {
 	const DEFAULT_START = '<!--{';
 	const DEFAULT_END = '}-->';
 
-	private $module;
-	private $args;
 	private $token;
 	private $token_start;
 	private $token_end;
 
+	private $name;
+	private $args;
+
 	/**
+	 * Construct a Token object with the given token.
 	 *
+	 * @param String $token
+	 * @param String $token_start = Token::DEFAULT_START
+	 * @param String $token_end = Token::DEFAULT_END
 	 */
 	public function __construct($token, $token_start = self::DEFAULT_START, $token_end = self::DEFAULT_END) {
 		// Set token
@@ -28,7 +33,7 @@ class Token {
 
 		// Parse module
 		$input = explode(' ', substr($token, strlen($token_start), -strlen($token_end)), 2);
-		$this->module = array_shift($input);
+		$this->name = array_shift($input);
 
 		// Parse arguments
 		$this->args = array();
@@ -47,21 +52,27 @@ class Token {
 	}
 
 	/**
+	 * Returns a string representation of the Token object.
 	 *
+	 * @return String a string representation of the Token object.
 	 */
 	public function __toString() {
 		return $this->token;
 	}
 
 	/**
+	 * Returns the name.
 	 *
+	 * @return String the name.
 	 */
-	public function getModule() {
-		return $this->module;
+	public function getName() {
+		return $this->name;
 	}
 
 	/**
+	 * Returns the arguments.
 	 *
+	 * @return Array the arguments
 	 */
 	public function getArgs() {
 		return $this->args;

@@ -104,6 +104,7 @@ HTML;
 		}
 
 		return <<<HTML
+<h2>Modules</h2>
 <ul>{$result}
 </ul>
 HTML;

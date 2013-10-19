@@ -20,15 +20,17 @@ class ModuleHandleLogin extends ModuleHandleAbstract {
 			}
 
 			$message = <<<HTML
-<p class="error">Invalid username or password.</p>
+	<p class="error">Invalid username or password. Please try again.</p>
 HTML;
 		}
 
-		return $message . <<<HTML
+		return <<<HTML
+<h2>Login</h2>
+{$message}
 <form method="post" action="">
-	<label for="username">Username:</label><input type="text" id="username" name="username" />
-	<label for="password">Password:</label><input type="password" id="password" name="password" />
-	<input type='submit' value='login' />
+	<div><label for="username">Username</label><input type="text" name="username" placeholder="Username" /></div>
+	<div><label for="password">Password</label><input type="password" name="password" placeholder="Password" /></div>
+	<div><button type="submit">Login</button></div>
 </form>
 HTML;
 	}

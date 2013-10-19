@@ -9,28 +9,32 @@ namespace lib\core;
  */
 class User {
 	/**
-	 * Construct a session object to manage the session of the user.
+	 * Construct a User object.
+	 *
+	 * This object manages the session of the user.
 	 */
 	public function __construct() {
 		session_start();
 	}
 
 	/**
-	 * Only one script can use session at a time. Use this to improve performance.
+	 * Destruct the user object.
+	 *
+	 * Only one script can use session at a time. You can use this to improve performance.
 	 */
 	public function __destruct() {
 		session_write_close();
 	}
 
 	/**
-	 * Attempts to login the user with the given credentials
+	 * Returns true if the user can successfully login with the given credentials.
 	 *
-	 * @param  PDBC   $pdbc
-	 * @param  String $username 
-	 * @param  String $password 
-	 * @return boolean true if succesful, false on fail.
+	 * @param  \lib\pdbc\PDBC $pdbc
+	 * @param  String         $username
+	 * @param  String         $password
+	 * @return boolean        true if the user can successfully login with the given credentials.
 	 */
-	public function login($pdbc, $username, $password) {
+	public function login(\lib\pdbc\PDBC $pdbc, $username, $password) {
 		$pdbc->query('SELECT `id`
 		                    FROM user
 		                    WHERE username = "' . $pdbc->quote($username) . '"
@@ -39,11 +43,11 @@ class User {
 		$user = $pdbc->fetch();
 
 		if(empty($user)) {
-			return false;
+			return FALSE;
 		}
 
 		$_SESSION['userId'] = $user['id'];
-		return true;
+		return TRUE;
 	}
 
 	/**
@@ -56,7 +60,7 @@ class User {
 	}
 
 	/**
-	 * Returns true if the user is logged in
+	 * Returns true if the user is logged in.
 	 *
 	 * @return boolean true if the user is logged in.
 	 */

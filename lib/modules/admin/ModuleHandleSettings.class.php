@@ -8,88 +8,113 @@ namespace lib\modules\admin;
  * @version 1.0
  */
 class ModuleHandleSettings extends ModuleHandleAbstract {
+	const EDIT = 'edit';
+	const EDIT_PASSWORD = 'password';
+	const EDIT_MAIL = 'mail';
+
 	/**
 	 *
 	 */
 	public function content() {
-		if (isset($_GET['action'])) {
-			switch ($_GET['action']) {
-				case 'changepassword':
-					return $this->handleChangePassword();
-					break;
+		if (isset($_GET[self::EDIT])) {
+			switch ($_GET[self::EDIT]) {
+				case self::EDIT_PASSWORD:
+					return $this->handleEditPassword();
+				break;
 				
-				case 'changeemail':
-					return $this->handleChangeEmail();
-					break;
+				case self::EDIT_MAIL:
+					return $this->handleEditMail();
+				break;
 			}
 		}
-		return $this->handleSettingsDefault();
+
+		return $this->handleEditDefault();
 	}
 
-
-	private function handleSettingsDefault() {
-		$result = <<<HTML
-<tr>
-	<td><a href="?action=changepassword"> Change Password</a></td>
-	<td><a href="?action=changeemail"> Change E-mail adress</a></td>
-</tr>
-HTML;
-		return $result;
-	}
-
-	private function handleChangePassword() {
+	private function handleEditPassword() {
 		$message = '';
 
-		if (isset($_POST['password'])) {
-			$this->pdbc->query('UPDATE `user`
-			                        SET `password` = "' . $this->pdbc->quote($_POST['password']) . '"
-			                        WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
-			if ($this->pdbc->rowCount() > 0) {
-				throw new \Exception($this->url->getURLBase() . Module::PAGE_SETTINGS, 301);
-			}
-			else {
-				$message .= <<<HTML
+		if(isset($_POST['password'])) {
+			$message = $this->handleEditPasswordPost();
+		}
+
+		return $this->handleEditPasswordGet($message);
+	}
+
+	private function handleEditPasswordPost() {
+		$this->pdbc->query('UPDATE `user`
+		                    SET `password` = "' . $this->pdbc->quote($_POST['password']) . '"
+		                    WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
+
+		if($this->pdbc->rowCount() > 0) {
+			throw new \Exception($this->url->getURLBase() . Module::PAGE_SETTINGS, 301);
+		}
+		
+		return <<<HTML
 <p class="error">Can't change password.</p>
 HTML;
-			}
-		}
-
-		$cancel= $this->url->getDirectory() . Module::PAGE_SETTINGS;
-		$result = <<<HTML
-<form action="" method="POST">
-	<label for="password"><input type="password" name="password">
-	<input type="submit"><a href="{$cancel}">Back</a>
-</form>
-HTML;
-
-	return $message . $result;
 	}
 
-	private function handleChangeEmail() {
-		$message = '';
+	private function handleEditPasswordGet($message = '') {
+		$cancel= $this->url->getDirectory() . Module::PAGE_SETTINGS;
 
-		if (isset($_POST['email'])) {
-			$this->pdbc->query('UPDATE `user`
-			                        SET `email` = "' . $this->pdbc->quote($_POST['email']) . '"
-			                        WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
-			if ($this->pdbc->rowCount() >0) {
-				throw new \Exception($this->url->getURLBase() . Module::PAGE_SETTINGS, 301);
-			}
-			else {
-				$message .= <<<HTML
-<p class="error">Can't change email</p>
-HTML;
-			}
-		}
-		$cancel = $this->url->getDirectory() . Module::PAGE_SETTINGS;
-		$form = <<<HTML
-<form action="" method="POST">
-	<label for="email"><input type="text" name="email">
-	<input type="submit"><a href="{$cancel}">Back</a>
+		return <<<HTML
+<h2>Edit password</h2>
+{$message}
+<form method="POST" action="">
+	<div><label for="password">Password</label><input type="password" name="password" placeholder="Password" /></div>
+	<div><a href="{$cancel}"><button type="button">Back</button></a><button type="submit">Submit</button></div>
 </form>
 HTML;
+	}
 
-	return $message . $form;
+	private function handleEditMail() {
+		$message = '';
+
+		if(isset($_POST['email'])) {
+			$message = $this->handleEditMailPost();
+		}
+
+		return $this->handleEditMailGet($message);
+	}
+
+	private function handleEditMailPost() {
+		$this->pdbc->query('UPDATE `user`
+		                    SET `email` = "' . $this->pdbc->quote($_POST['email']) . '"
+		                    WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
+
+		if($this->pdbc->rowCount() >0) {
+			throw new \Exception($this->url->getURLBase() . Module::PAGE_SETTINGS, 301);
+		}
+
+		return <<<HTML
+<p class="error">Can't change email</p>
+HTML;
+	}
+
+	private function handleEditMailGet($message = '') {
+		$cancel = $this->url->getDirectory() . Module::PAGE_SETTINGS;
+
+		return <<<HTML
+<h2>Edit email address</h2>
+{$message}
+<form action="" method="POST">
+	<div><label for="email">Email</label><input type="text" name="email" placeholder="Email address" /></div>
+	<div><a href="{$cancel}"><button type="button">Cancel</button></a><button type="submit">Submit</button></div>
+</form>
+HTML;
+	}
+
+	private function handleEditDefault() {
+		$password = $this->url->getDirectory() . Module::PAGE_SETTINGS . '?' . self::EDIT . '=' . self::EDIT_PASSWORD;
+		$mail = $this->url->getDirectory() . Module::PAGE_SETTINGS . '?' . self::EDIT . '=' . self::EDIT_MAIL;
+
+		$result = <<<HTML
+<h2>Settings</h2>
+<p><a href="{$password}">Edit password</a><br />
+<a href="{$mail}">Edit email address</a></p>
+HTML;
+		return $result;
 	}
 
 	/**
@@ -113,6 +138,7 @@ HTML;
 		$settings = $this->url->getDirectory() . Module::PAGE_SETTINGS;
 
 		return <<<HTML
+<h2>Menu</h2>
 <ul>
 	<li><a href="{$overview}">Overview</a></li>
 	<li><a href="{$settings}">Settings</a></li>
