@@ -1,5 +1,5 @@
 <?php
-namespace lib\modules\admin;
+namespace lib\module\admin;
 
 /**
  * @author miWebb <info@miwebb.com>

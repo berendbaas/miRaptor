@@ -1,5 +1,5 @@
 <?php
-namespace lib\modules\admin;
+namespace lib\module\admin;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -20,7 +20,7 @@ abstract class ModuleHandleAbstract {
 	/**
 	 *
 	 */
-	public function __construct(\lib\core\PDBC $pdbc, \lib\core\URL $url, array $args, \lib\core\User $user) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, array $args, \lib\core\User $user) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
 		$this->args = $args;
