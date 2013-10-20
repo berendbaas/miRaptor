@@ -27,7 +27,7 @@ class ModuleHandleSite extends ModuleHandleAbstract {
 		$this->pdbc->query('SELECT `db`
 		                    FROM `website`
 		                    WHERE `id` = ' . $this->pdbc->quote($_GET['id']) . '
-		                    AND`uid` = ' . $this->pdbc->quote($this->user->getUserID()));
+		                    AND`uid` = ' . $this->pdbc->quote($this->user->getID()));
 
 		$db = $this->pdbc->fetch();
 

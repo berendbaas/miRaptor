@@ -24,6 +24,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		$base = $this->url->getURLDirectory();
 		$id = $_GET['id'];
 		$this->result .= <<<HTML
+<h1>Stylesheet</h1>
 <table>
 <tr>
 	<th>ID</th>

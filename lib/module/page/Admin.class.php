@@ -26,7 +26,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		$id = $_GET['id'];
 	
 		$this->result .= <<<HTML
-<h1>Pages</h1>
+<h1>Page</h1>
 <table>
 <tr>
 	<th>ID</th>
@@ -163,6 +163,7 @@ HTML;
 	private function getNew(array $fields = array())
 	{
 		$base = $this->url->getURLDirectory();
+		$id = $_GET['id'];
 		$name = isset($fields['name']) ? $fields['name'] : "";
 		$template = isset($fields['template']) ? $fields['template'] : "";
 		$uri = isset($fields['uri']) ? $fields['uri'] : "";
@@ -189,7 +190,7 @@ HTML;
 	<textarea name="content">{$content}</textarea>
 
 	<input type="submit" />
-	<a href="">Back</a>
+	<a href="{$base}site?id={$id}&amp;module=page">Back</a>
 </form>
 HTML;
 	}

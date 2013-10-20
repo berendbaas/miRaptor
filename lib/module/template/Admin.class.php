@@ -42,7 +42,7 @@ class Admin extends \lib\core\AbstractAdmin {
 </tr>
 HTML;
 
-		$this->pdbc->query('SELECT * FROM module_template');
+		$this->pdbc->query('SELECT * FROM template');
 		$templates = $this->pdbc->fetchAll();
 		foreach ($templates as $key => $template) {
 			$this->result .= <<<HTML
@@ -68,7 +68,7 @@ HTML;
 		$tid = $this->pdbc->quote($_GET['tid']);
 		$id = $_GET['tid'];
 		$this->pdbc->query('SELECT *
-							FROM module_template
+							FROM template
 							WHERE id = "'. $tid .'"');
 		$item = $this->pdbc->fetch();
 		$content = $item['content'];
@@ -92,7 +92,7 @@ HTML;
 		$name = $this->pdbc->quote($_POST['name']);
 		$content = $this->pdbc->quote($_POST['content']);
 
-		$this->pdbc->query('UPDATE `module_template`
+		$this->pdbc->query('UPDATE `template`
 							SET `name` = "'. $name .'",
 							`content` = "'. $content .'"
 							WHERE `id` = "'. $id .'"');
@@ -119,7 +119,7 @@ HTML;
 	{
 		$name = $this->pdbc->quote($_POST['name']);
 		$content = $this->pdbc->quote($_POST['content']);
-		$this->pdbc->query('INSERT INTO `module_template` (`name`, `content`) values ("'. $name .'", "'. $content .'")');
+		$this->pdbc->query('INSERT INTO `template` (`name`, `content`) values ("'. $name .'", "'. $content .'")');
 
 		$this->redirectOverview();
 	}
@@ -140,7 +140,7 @@ HTML;
 	private function postRemove()
 	{
 		$tid = $this->pdbc->quote($_GET['tid']);
-		$this->pdbc->query('DELETE FROM module_template WHERE `id` = "' . $tid .'"');
+		$this->pdbc->query('DELETE FROM template WHERE `id` = "' . $tid .'"');
 
 		$this->getRemove();
 	}

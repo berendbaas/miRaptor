@@ -106,6 +106,7 @@ HTML;
 	<input type="text" name="name" value="{$name}" />
 	<label for="content">Code</label>
 	<textarea name="content">{$content}</textarea>
+	<a href="{$base}?id={$id}&amp;module=block">Back</a>
 	<input type="submit" />
 </form>
 HTML;
@@ -123,8 +124,8 @@ HTML;
 <p class="error">There was an error saving your block</p>
 HTML;
 			$this->getEdit(array(
-					'name' => $_GET['name'],
-					'content' => $_GET['content']
+					'name' => $_POST['name'],
+					'content' => $_POST['content']
 			));
 			return;
 		}
@@ -144,7 +145,7 @@ HTML;
 
 		$this->result .= <<<HTML
 <h1>Removal notice</h1>
-<p>You are avout to remove the page "{$block['name']}"</p>
+<p>You are about to remove the page "{$block['name']}"</p>
 <p>Are you sure you want to remove this page?</p>
 <form action="" method="POST">
 	<a href="{$base}id={$id}&amp;module=block">Back</a>
