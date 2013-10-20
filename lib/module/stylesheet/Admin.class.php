@@ -22,13 +22,16 @@ class Admin extends \lib\core\AbstractAdmin {
 		}
 
 		$function = $request . $action;
-		$this->$function();
+		if (method_exists($this, $function)) {
+			$this->$function();
+		} else {
+			throw new \Exception('Action is not implemented', 501);
+		}
 	}
 
 	private function getOverview() {
 		$base = $this->url->getURLDirectory();
 		$id = $_GET['id'];
-		$this->result .= 'Hello Stylesheets';
 		$this->result .= <<<HTML
 <table>
 <tr>
@@ -68,7 +71,7 @@ HTML;
 <p>Are you sure you want to remove this stylesheet? This can not be undone!<p>
 <form action="" method="POST">
 	<a href="{$base}site?id={$id}&amp;module=stylesheet">Back</a>
-	<input type="submit" value="Delete">
+	<input type="submit" value="Delete" />
 </form>
 HTML;
 	}
@@ -97,7 +100,7 @@ HTML;
 {$item['content']}
 	</textarea>
 	<a href="{$base}site?id={$id}&amp;module=stylesheet">Back</a>
-	<input type="submit">
+	<input type="submit" />
 </form>
 HTML;
 	}
@@ -121,11 +124,11 @@ HTML;
 		$this->result .= <<<HTML
 <form action="" method="POST">
 	<label for="name">Name</label>
-	<input type="text" name="name">
+	<input type="text" name="name" />
 	<label for="content">Content</label>
 	<textarea name="content"></textarea>
 
-	<input type="submit">
+	<input type="submit" />
 </form>
 HTML;
 	}
@@ -141,7 +144,7 @@ HTML;
 		$this->redirectOverview();
 	}
 
-	private function redirecOverview()
+	private function redirectOverview()
 	{
 		$base = $this->url->getURLDirectory();
 		$id = $_GET['id'];
