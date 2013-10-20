@@ -17,7 +17,12 @@ class Guide {
 	private $filename;
 
 	/**
+	 * Construct a Guide object with the given PDBC, URL & location.
 	 *
+	 * @param  \lib\pdbc\PDBC $pdbc
+	 * @param  URL            $url
+	 * @param  String         $location
+	 * @throws \Exception     on failure.
 	 */
 	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $location) {
 		$this->pdbc = $pdbc;
@@ -45,7 +50,10 @@ class Guide {
 	}
 
 	/**
+	 * Echos the static page.
 	 *
+	 * @return void
+	 * @throws \Exception on failure.
 	 */
 	private function getPage() {
 		// Header parse
@@ -65,20 +73,23 @@ class Guide {
 	}
 
 	/**
+	 * Returns true if the file is modified.
 	 *
+	 * @return boolean true if the file is modified.
 	 */
 	private function isModified($lastModified) {
-		if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])) {
-			if(strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) == $lastModified) {
-				return false;
-			}
+		if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) == $lastModified) {
+			return false;
 		}
 
 		return true;
 	}
 
 	/**
+	 * Echos the dynamic page.
 	 *
+	 * @return void
+	 * @throw \Exception on failure.
 	 */
 	private function parsePage() {
 		// Header
