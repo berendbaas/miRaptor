@@ -9,17 +9,7 @@ namespace lib\module\menu;
  */
 class Module extends \lib\core\AbstractModule {
 	public function run() {
-		$pid = $this->parseId();
-		$levels = $this->parseLevel();
-
-		switch($this->parseStyle()) {
-			case 'description':
-				$this->result = $this->parseMenuDescription($pid, $levels);
-			break;
-			default:
-				$this->result = $this->parseMenuDefault($pid, $levels);
-			break;
-		}
+		$this->result = $this->parseMenu($this->parseId(), $this->parseDepth());
 	}
 
 	/**
@@ -29,7 +19,7 @@ class Module extends \lib\core\AbstractModule {
 		if(isset($this->arguments['id'])) {
 			$id = intval($this->arguments['id']);
 
-			return ($id < 0) ? $this->pageID : $id;
+			return ($id < 0) ? $this->routerID : $id;
 		}
 
 		return 0;
@@ -38,11 +28,11 @@ class Module extends \lib\core\AbstractModule {
 	/**
 	 *
 	 */
-	private function parseLevel() {
-		if(isset($this->arguments['levels'])) {
-			$level = intval($this->arguments['levels']);
+	private function parseDepth() {
+		if(isset($this->arguments['depth'])) {
+			$depth = intval($this->arguments['depth']);
 
-			return ($level < 1) ? -1 : $level;
+			return ($depth < 1) ? -1 : $depth;
 		}
 
 		return -1;
@@ -51,81 +41,33 @@ class Module extends \lib\core\AbstractModule {
 	/**
 	 *
 	 */
-	private function parseStyle() {
-		if(isset($this->arguments['style'])) {
-			return $this->arguments['style'];
-		}
-
-		return '';
-	}
-
-	/**
-	 *
-	 */
-	private function parseMenuDefault($pid, $level) {
-		// Check levels
-		if($level == 0) {
+	private function parseMenu($pid, $depth) {
+		// Check depth
+		if($depth == 0) {
 			return '';
 		}
 
-		// Get pages
+		// Get router
 		$this->pdbc->query('SELECT `id`,`name`,`uri`
 		                    FROM `router`
 		                    WHERE `pid` = ' . $pid . '
 		                    ORDER BY `index` ASC');
 
-		$pages = $this->pdbc->fetchAll();
+		$router = $this->pdbc->fetchAll();
 
-		if(!$pages) {
+		// Stop command
+		if(!$router) {
 			return '';
 		}
 
 		// Parse menu
 		$result = '';
 
-		foreach($pages as $page) {
-			$current = ($this->pageID == $page['id'] ? ' class="current"' : '');
+		foreach($router as $route) {
+			$current = ($this->routerID == $route['id'] ? ' class="current"' : '');
 
 			$result .= PHP_EOL . <<<HTML
-<li {$current}><a href="{$page['uri']}">{$page['name']}</a>{$this->parseMenuDefault($page['id'], ($level - 1))}</li>
-HTML;
-		}
-
-		return <<<HTML
-<ul>{$result}
-</ul>
-HTML;
-	}
-
-	/**
-	 *
-	 */
-	private function parseMenuDescription($pid, $level) {
-		// Check levels
-		if($level == 0) {
-			return '';
-		}
-
-		// Get pages
-		$this->pdbc->query('SELECT `id`,`name`,`uri`
-		                    FROM `router`
-		                    WHERE `pid` = ' . $pid . '
-		                    ORDER BY `index` ASC');
-
-		$pages = $this->pdbc->fetchAll();
-
-		if(!$pages) {
-			return '';
-		}
-
-		// Parse menu
-		$result = '';
-
-		foreach($pages as $page) {
-			$current = ($this->pageID == $page['id'] ? ' class="current"' : '');
-
-			$result .= PHP_EOL . <<<HTML
-<li {$current}><a href="{$page['uri']}">{$page['name']}<span></span></a>{$this->parseMenuDefault($page['id'], ($level - 1))}</li>
+<li {$current}><a href="{$route['uri']}">{$route['name']}</a>{$this->parseMenu($route['id'], ($depth - 1))}</li>
 HTML;
 		}
 

@@ -11,7 +11,7 @@ class Main implements Runnable {
 	private $pdbc;
 	private $url;
 	private $location;
-	private $statuscode;
+	private $statusCode;
 
 	/**
 	 * Construct a Main object with the given config.
@@ -22,7 +22,7 @@ class Main implements Runnable {
 		$this->pdbc = $this->initPDBC($config['pdbc']);
 		$this->url = $this->initURL($config['main']['default_host']);
 		$this->location = $config['main']['user_location'];
-		$this->statuscode = 200;
+		$this->statusCode = StatusCodeException::SUCCESFULL_OK;
 	}
 
 	/**
@@ -61,15 +61,19 @@ class Main implements Runnable {
 			$this->pdbc->selectDatabase($gatekeeper->getDatabase());
 
 			// Guide
-			new Guide($this->pdbc, $this->url, $this->location . $gatekeeper->getLocation());
-		} catch(lib\pdbc\PDBCException $e) {
-			// Handle PDBC exception
-			$this->statuscode = 500;
-			echo new Error($e);
+			echo new Guide($this->pdbc, $this->url, $this->location . $gatekeeper->getLocation());
+		} catch(StatusCodeException $e) {
+			$this->statusCode = $e->getCode();
+
+			$handler = new StatusCodeExceptionHandler($e);
+			$handler->setHeader();
+			echo $handler;
 		} catch(\Exception $e) {
-			// Handle exception
-			$this->statuscode = $e->getCode();
-			echo new Error($e);
+			$this->statusCode = StatusCodeException::ERROR_SERVER_INTERNAL_SERVER_ERROR;
+
+			$handler = new StatusCodeExceptionHandler($e);
+			$handler->setHeader();
+			echo $handler;
 		}
 		
 		// Log & end buffer
@@ -105,7 +109,7 @@ class Main implements Runnable {
 		                                       "' . $time . '",
 		                                       "' . $runtime . '",
 		                                       "' . ob_get_length() . '",
-		                                       "' . $this->statuscode . '",
+		                                       "' . $this->statusCode . '",
 		                                       "' . $request . '",
 		                                       ' . $referal . ',
 		                                       "' . $ip . '")');
