@@ -76,7 +76,7 @@ HTML;
 		$this->redirectOverview();
 	}
 
-	private function getEdit() {
+	private function getEdit(array $fields = array()) {
 		$base = $this->url->getURLDirectory();
 		$tid = $this->pdbc->quote($_GET['tid']);
 		$id = $_GET['id'];
@@ -84,11 +84,16 @@ HTML;
 							FROM module_stylesheet
 							WHERE id = "' . $tid . '"');
 		$item = $this->pdbc->fetch();
+
+		$name = isset($fields['name']) ? $fields['name'] : $item['name'];
+		$content = isset($fields['content']) ? $fields['content'] : $item['content'];
+
 		$this->result .= <<<HTML
+<h1>Edit Stylesheet</h1>
 <form action="" method="POST">
-	<label for="name">Name</label><input type="text" name="name" value="{$item['name']}">
+	<label for="name">Name</label><input type="text" name="name" value="{$name}">
 	<label for="content">Style</label><textarea name="content">
-{$item['content']}
+{$content}
 	</textarea>
 	<a href="{$base}site?id={$id}&amp;module=stylesheet">Back</a>
 	<input type="submit" />
@@ -98,16 +103,18 @@ HTML;
 
 
 	private function postEdit() {
-		$id = $this->pdbc->quote($_GET['tid']);
-
-		$name = $this->pdbc->quote($_POST['name']);
-		$content = $this->pdbc->quote($_POST['content']);
-
 		$this->pdbc->query('UPDATE `module_stylesheet`
-							SET `name` = "' . $name .  '",
-							`content` = "' . $content . '"
-							WHERE `id` = ' . $id . '
+							SET `name` = "' . $this->pdbc->quote($_POST['name']) .  '",
+							`content` = "' . $this->pdbc->quote($_POST['content']) . '"
+							WHERE `id` = ' . $this->pdbc->quote($_GET['id']) . '
 							');
+		if ($this->pdbc->rowCount == 0) {
+			$this->getEdit(array(
+					'name' => $_POST['name'],
+					'content' => $_POST['content']
+				));
+			return;
+		}
 		$this->getEdit();
 	}
 
