@@ -44,11 +44,10 @@ class Parser implements Runnable {
 	}
 
 	public function run() {
-		$page = $this->page();
-		$modules = $this->modules();
+		$routerID = $this->routerID();
 
 		while($token = $this->tokenizer->token()) {
-			$this->tokenizer->replace($token, $this->module($token, $page, $modules));
+			$this->tokenizer->replace($token, $this->module($token, $routerID));
 		}
 
 		// The page exists, but is considered not found because the filename was not required.
@@ -67,49 +66,37 @@ class Parser implements Runnable {
 	}
 
 	/**
+	 * Returns the router ID of the requested namespace / directory.
 	 *
+	 * @Returns int the router ID of the requested namespace / directory.
+	 * @throws  Exception on failure.
 	 */
-	private function page() {
+	private function routerID() {
 		$this->pdbc->query('SELECT `id`
-		                    FROM `pages`
-		                    WHERE `uri`="' . $this->pdbc->quote($this->url->getDirectory()) . '"');
+		                    FROM `router`
+		                    WHERE `namespace` = "' . $this->pdbc->quote($this->url->getDirectory()) . '"');
 
-		$page = $this->pdbc->fetch();
+		$routerID = $this->pdbc->fetch();
 
-		if(!$page) {
+		if(!$routerID) {
 			throw new \Exception('Parser: File doesnt exists - ' . $this->url->getPath() , 404);
 		}
 
-		return end($page);
+		return end($routerID);
 	}
 
 	/**
+	 * Returns the string representation of the module that belongs with the given token & router ID.
 	 *
+	 * @param   Token  $token
+	 * @param   int    $routerID
+	 * @returns String the string representation of the module that belongs with the given token & router ID.
+	 * @throws  Exception on failure.
 	 */
-	private function modules() {
-		$this->pdbc->query('SELECT `name` FROM `modules`');
-
-		$modules = $this->pdbc->fetchAll();
-		$result = array();
-
-		foreach($modules as $module) {
-			$result[] = $module['name'];
-		}
-
-		return $result;
-	}
-
-	/**
-	 *
-	 */
-	private function module(Token $token, $page, array $modules = array()) {
-		if(!in_array($token->getName(), $modules)) {
-			throw new \Exception('Module doesn\'t exists', 500);
-		}
-
+	private function module(Token $token, $routerID) {
 		$module = self::MODULE_NAMESPACE . $token->getName() . self::MODULE_CLASS;
 
-		$result = new $module($this->pdbc, $this->url, $page, $token->getArgs());
+		$result = new $module($this->pdbc, $this->url, $routerID, $token->getArgs());
 		$result->run();
 
 		$this->isStatic = $this->isStatic && $result->isStatic();

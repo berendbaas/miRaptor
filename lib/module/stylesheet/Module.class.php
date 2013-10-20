@@ -11,28 +11,28 @@ class Module extends \lib\core\AbstractModule {
 	public function run() {
 		$this->pdbc->query('SELECT `name`, `content`
 		                    FROM `module_stylesheet`
-		                    RIGHT JOIN (SELECT `sid`,`order`
-		                                FROM `module_stylesheet_template`
-		                                WHERE `tid` = (SELECT `tid`
-		                                               FROM `pages`
-		                                               WHERE `id` = "' . $this->pdbc->quote($this->pageID) . '")) AS `stylesheets`
-		                    ON `module_stylesheet`.`id` = `stylesheets`.`sid`
-		                    ORDER BY `order` ASC');
+		                    WHERE `id` = ' . $this->parseID());
 
-		$stylesheets = $this->pdbc->fetchAll();
+		$stylesheet = $this->pdbc->fetch();
 
-		foreach($stylesheets as $stylesheet) {
-			$this->result .= PHP_EOL . <<<HTML
+		$this->result = <<<HTML
+<style>
 /* {$stylesheet['name']} start */
 {$stylesheet['content']}
 /* {$stylesheet['name']} end */
-HTML;
-		}
-
-		$this->result = <<<HTML
-<style>{$this->result}
 </style>
 HTML;
+	}
+
+	/**
+	 *
+	 */
+	private function parseID() {
+		if(isset($this->arguments['id']) && ($id = intval($this->arguments['id'])) != 0) {
+			return $id;
+		}
+
+		throw new \Exception('get="" required');
 	}
 }
 

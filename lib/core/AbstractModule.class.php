@@ -10,7 +10,7 @@ namespace lib\core;
 abstract class AbstractModule implements Runnable {
 	protected $pdbc;
 	protected $url;
-	protected $pageID;
+	protected $routerID;
 	protected $arguments;
 	protected $result;
 
@@ -25,10 +25,10 @@ abstract class AbstractModule implements Runnable {
 	 * @param int             $pageID
 	 * @param Array           $arguments
 	 */
-	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $pageID, Array $arguments) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $routerID, Array $arguments) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
-		$this->pageID = $pageID;
+		$this->routerID = $routerID;
 		$this->arguments = $arguments;
 		$this->result = '';
 

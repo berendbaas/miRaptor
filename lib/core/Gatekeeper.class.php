@@ -39,7 +39,7 @@ class Gatekeeper {
 			$this->getHostRedirect($pdbc, $url);
 		}
 
-		return $host;
+		return $host;r
 	}
 
 	/**

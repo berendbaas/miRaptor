@@ -28,7 +28,7 @@ class Module extends \lib\core\AbstractModule {
 	 */
 	private function parseSite($get) {
 		$this->pdbc->query('SELECT `content`
-		                    FROM `module_site`
+		                    FROM `module_block`
 		                    WHERE `name` = "' . $this->pdbc->quote($get) . '"');
 
 		$site = $this->pdbc->fetch();
