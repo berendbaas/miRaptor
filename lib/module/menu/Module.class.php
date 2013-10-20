@@ -19,7 +19,7 @@ class Module extends \lib\core\AbstractModule {
 		if(isset($this->arguments['id'])) {
 			$id = intval($this->arguments['id']);
 
-			return ($id < 0) ? $this->pageID : $id;
+			return ($id < 0) ? $this->routerID : $id;
 		}
 
 		return 0;
@@ -41,24 +41,13 @@ class Module extends \lib\core\AbstractModule {
 	/**
 	 *
 	 */
-	private function parseStyle() {
-		if(isset($this->arguments['style'])) {
-			return $this->arguments['style'];
-		}
-
-		return '';
-	}
-
-	/**
-	 *
-	 */
 	private function parseMenu($pid, $depth) {
 		// Check depth
 		if($depth == 0) {
 			return '';
 		}
 
-		// Get pages
+		// Get router
 		$this->pdbc->query('SELECT `id`,`name`,`uri`
 		                    FROM `router`
 		                    WHERE `pid` = ' . $pid . '
@@ -66,6 +55,7 @@ class Module extends \lib\core\AbstractModule {
 
 		$router = $this->pdbc->fetchAll();
 
+		// Stop command
 		if(!$router) {
 			return '';
 		}
@@ -74,7 +64,7 @@ class Module extends \lib\core\AbstractModule {
 		$result = '';
 
 		foreach($router as $route) {
-			$current = ($this->pageID == $route['id'] ? ' class="current"' : '');
+			$current = ($this->routerID == $route['id'] ? ' class="current"' : '');
 
 			$result .= PHP_EOL . <<<HTML
 <li {$current}><a href="{$route['uri']}">{$route['name']}</a>{$this->parseMenu($route['id'], ($depth - 1))}</li>
