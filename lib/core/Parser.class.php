@@ -8,12 +8,12 @@ namespace lib\core;
  * @version 1.0
  */
 class Parser implements Runnable {
-	const TOKEN_DEFAULT = 'template';
 	const MODULE_CLASS = '\\Module';
 	const MODULE_NAMESPACE = 'lib\\module\\';
 
 	private $pdbc;
 	private $url;
+	private $routerID;
 	private $tokenizer;
 
 	private $isStatic;
@@ -28,10 +28,53 @@ class Parser implements Runnable {
 	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
-		$this->tokenizer = new Tokenizer(Token::DEFAULT_START . self::TOKEN_DEFAULT . Token::DEFAULT_END);
+		$this->routerID = $this->getRouterID();
+		$this->tokenizer = $this->getTokenizer();
 
 		$this->isStatic = TRUE;
 		$this->isNamespace = FALSE;
+	}
+
+	/**
+	 * Returns the router ID.
+	 *
+	 * @Returns int the router ID.
+	 * @throws  Exception on failure.
+	 */
+	private function getRouterID() {
+		$this->pdbc->query('SELECT `id`
+		                    FROM `router`
+		                    WHERE `namespace` = "' . $this->pdbc->quote($this->url->getDirectory()) . '"');
+
+		$routerID = $this->pdbc->fetch();
+
+		if(!$routerID) {
+			throw new \Exception('Parser: File doesnt exists - ' . $this->url->getPath() , 404);
+		}
+
+		return end($routerID);
+	}
+
+	/**
+	 * Returns a tokenizer object.
+	 *
+	 * @Returns Tokenizer Returns a tokenizer object.
+	 * @throws  Exception on failure.
+	 */
+	private function getTokenizer() {
+		$this->pdbc->query('SELECT `content`
+		                    FROM `template`
+		                    WHERE `id` = (SELECT `tid`
+		                                  FROM `router`
+	                                          WHERE `id` = "' . $this->pdbc->quote($this->routerID) . '")');
+
+		$template = $this->pdbc->fetch();
+
+		if(!$template) {
+			throw new \Exception('Parser: Template does not exists.');
+		}
+
+		return new Tokenizer(end($template));
 	}
 
 	/**
@@ -44,10 +87,8 @@ class Parser implements Runnable {
 	}
 
 	public function run() {
-		$routerID = $this->routerID();
-
 		while($token = $this->tokenizer->token()) {
-			$this->tokenizer->replace($token, $this->module($token, $routerID));
+			$this->tokenizer->replace($token, $this->module($token));
 		}
 
 		// The page exists, but is considered not found because the filename was not required.
@@ -66,26 +107,6 @@ class Parser implements Runnable {
 	}
 
 	/**
-	 * Returns the router ID of the requested namespace / directory.
-	 *
-	 * @Returns int the router ID of the requested namespace / directory.
-	 * @throws  Exception on failure.
-	 */
-	private function routerID() {
-		$this->pdbc->query('SELECT `id`
-		                    FROM `router`
-		                    WHERE `namespace` = "' . $this->pdbc->quote($this->url->getDirectory()) . '"');
-
-		$routerID = $this->pdbc->fetch();
-
-		if(!$routerID) {
-			throw new \Exception('Parser: File doesnt exists - ' . $this->url->getPath() , 404);
-		}
-
-		return end($routerID);
-	}
-
-	/**
 	 * Returns the string representation of the module that belongs with the given token & router ID.
 	 *
 	 * @param   Token  $token
@@ -93,10 +114,10 @@ class Parser implements Runnable {
 	 * @returns String the string representation of the module that belongs with the given token & router ID.
 	 * @throws  Exception on failure.
 	 */
-	private function module(Token $token, $routerID) {
+	private function module(Token $token) {
 		$module = self::MODULE_NAMESPACE . $token->getName() . self::MODULE_CLASS;
 
-		$result = new $module($this->pdbc, $this->url, $routerID, $token->getArgs());
+		$result = new $module($this->pdbc, $this->url, $this->routerID, $token->getArgs());
 		$result->run();
 
 		$this->isStatic = $this->isStatic && $result->isStatic();
