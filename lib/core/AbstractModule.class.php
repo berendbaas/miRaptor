@@ -8,14 +8,19 @@ namespace lib\core;
  * @version 1.0
  */
 abstract class AbstractModule implements Runnable {
+	const DEFAULT_NAMESPACE = FALSE;
+	const DEFAULT_PARSABLE = TRUE;
+	const DEFAULT_STATIC = TRUE;
+
 	protected $pdbc;
 	protected $url;
 	protected $routerID;
 	protected $arguments;
 	protected $result;
 
-	protected $static;
 	protected $namespace;
+	protected $parsable;
+	protected $static;
 
 	/**
 	 * Construct an Module object with the given PDBC, URL, pageID & arguments.
@@ -32,8 +37,9 @@ abstract class AbstractModule implements Runnable {
 		$this->arguments = $arguments;
 		$this->result = '';
 
-		$this->static = TRUE;
-		$this->namespace = FALSE;
+		$this->namespace = self::DEFAULT_NAMESPACE;
+		$this->parsable = self::DEFAULT_PARSABLE;
+		$this->static = self::DEFAULT_STATIC;
 	}
 
 	/**
@@ -46,21 +52,30 @@ abstract class AbstractModule implements Runnable {
 	}
 
 	/**
-	 * Returns true if the module is static.
-	 *
-	 * @return boolean true if the module is static.
-	 */
-	public function isStatic() {
-		return $this->static;
-	}
-
-	/**
 	 * Returns true if the module uses namespaces.
 	 *
 	 * @return boolean true if the module uses namespace.
 	 */
 	public function isNamespace() {
 		return $this->namespace;
+	}
+
+	/**
+	 * Returns true if the module can be parsed.
+	 *
+	 * @return boolean true if the module can be parsed.
+	 */
+	public function isParsable() {
+		return $this->parsable;
+	}
+
+	/**
+	 * Returns true if the module is static.
+	 *
+	 * @return boolean true if the module is static.
+	 */
+	public function isStatic() {
+		return $this->static;
 	}
 
 	public abstract function run();
