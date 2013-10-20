@@ -9,10 +9,10 @@ namespace lib\core;
  */
 interface Runnable {
 	/**
-	 * Run a separate part of the program.
+	 * Run a separate part of the program. We use this abstraction to make a clear distinction between tasks.
 	 *
 	 * @return void
-	 * @throws implementations may throw exceptions and are ought to be documented properly.
+	 * @throws \Exception implementations may throw exceptions and are ought to be documented properly.
 	 */
 	public function run();
 }

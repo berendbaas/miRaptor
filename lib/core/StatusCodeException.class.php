@@ -21,7 +21,7 @@ class StatusCodeException extends \Exception {
 	/**
 	 * Construct a status code exception with the given message, code & previous exception if any.
 	 *
-	 * @param String     $message = ''
+	 * @param string     $message = ''
 	 * @param int        $code = self::ERROR_SERVER_INTERNAL_SERVER_ERROR
 	 * @param \Exception $previous = NULL
 	 */

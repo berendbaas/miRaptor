@@ -27,7 +27,7 @@ abstract class AbstractAdmin implements Runnable {
 	/**
 	 * Returns the string representation of the Admin object.
 	 *
-	 * @return String the string representation of the Admin object.
+	 * @return string the string representation of the Admin object.
 	 */
 	public function __toString() {
 		return $this->result;

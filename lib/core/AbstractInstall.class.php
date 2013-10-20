@@ -24,7 +24,7 @@ abstract class AbstractInstall implements Runnable {
 	/**
 	 * Returns the string representation of the Install object.
 	 *
-	 * @return String the string representation of the Install object.
+	 * @return string the string representation of the Install object.
 	 */
 	public function __toString() {
 		return $this->result;

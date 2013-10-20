@@ -22,8 +22,10 @@ class Parser implements Runnable {
 	/**
 	 * Construct a Parser object with the given PDBC & URL.
 	 *
-	 * @param \lib\pdbc\PDBC $pdbc
-	 * @param URL            $url
+	 * @param  \lib\pdbc\PDBC      $pdbc
+	 * @param  URL                 $url
+	 * @throws StatusCodeException on failure.
+	 * @throws PDBCException       on PDBC failure.
 	 */
 	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url) {
 		$this->pdbc = $pdbc;
@@ -38,8 +40,9 @@ class Parser implements Runnable {
 	/**
 	 * Returns the router ID.
 	 *
-	 * @Returns int the router ID.
-	 * @throws  Exception on failure.
+	 * @return int                 the router ID.
+	 * @throws StatusCodeException on failure.
+	 * @throws PDBCException       on PDBC failure.
 	 */
 	private function getRouterID() {
 		$this->pdbc->query('SELECT `id`
@@ -49,7 +52,7 @@ class Parser implements Runnable {
 		$routerID = $this->pdbc->fetch();
 
 		if(!$routerID) {
-			throw new \Exception('Parser: File doesnt exists - ' . $this->url->getPath() , 404);
+			throw new StatusCodeException('Parser: URI doesn\'t exist - ' . $this->url->getPath(), StatusCodeException::ERROR_CLIENT_NOT_FOUND);
 		}
 
 		return end($routerID);
@@ -58,8 +61,8 @@ class Parser implements Runnable {
 	/**
 	 * Returns a tokenizer object.
 	 *
-	 * @Returns Tokenizer Returns a tokenizer object.
-	 * @throws  Exception on failure.
+	 * @return Tokenizer         returns a tokenizer object.
+	 * @throws PDBCException     on PDBC failure.
 	 */
 	private function getTokenizer() {
 		$this->pdbc->query('SELECT `content`
@@ -68,51 +71,49 @@ class Parser implements Runnable {
 		                                  FROM `router`
 	                                          WHERE `id` = "' . $this->pdbc->quote($this->routerID) . '")');
 
-		$template = $this->pdbc->fetch();
-
-		if(!$template) {
-			throw new \Exception('Parser: Template does not exists.');
-		}
-
-		return new Tokenizer(end($template));
+		return new Tokenizer(end($this->pdbc->fetch()));
 	}
 
 	/**
 	 * Returns a string representation of the Parser object.
 	 *
-	 * @return String a string representation of the Parser object.
+	 * @return string a string representation of the Parser object.
 	 */
 	public function __toString() {
 		return $this->tokenizer->__toString();
 	}
 
-	public function run() {
-		while($token = $this->tokenizer->token()) {
-			$this->tokenizer->replace($token, $this->module($token));
-		}
-
-		// The page exists, but is considered not found because the filename was not required.
-		if(!$this->isNamespace && $this->url->getFile() != '') {
-			throw new \Exception('Parser: File doesn\'t exists - ' . $this->url->getPath() , 404);
-		}
-	}
-
 	/**
-	 * Returns true if the parser if static.
+	 * Returns true if the parsed data is static.
 	 *
-	 * @return boolean true if the parser is static.
+	 * @return boolean true if the parsed data is static.
 	 */
 	public function isStatic() {
 		return $this->isStatic;
 	}
 
 	/**
-	 * Returns the string representation of the module that belongs with the given token & router ID.
+	 * Returns true if the parsed data is namespaced.
 	 *
-	 * @param   Token  $token
-	 * @param   int    $routerID
-	 * @returns String the string representation of the module that belongs with the given token & router ID.
-	 * @throws  Exception on failure.
+	 * @return boolean true if the parsed data is namespaced.
+	 */
+	public function isNamespace() {
+		return $this->isNamespace;
+	}
+
+	public function run() {
+		while($token = $this->tokenizer->token()) {
+			$this->tokenizer->replace($token, $this->module($token));
+		}
+	}
+
+	/**
+	 * Returns the string representation of the module that belongs with the given token.
+	 *
+	 * @param  Token               $token
+	 * @return string              the string representation of the module that belongs with the given token.
+	 * @throws StatusCodeException on failure.
+	 * @throws PDBCException       on PDBC failure.
 	 */
 	private function module(Token $token) {
 		$module = self::MODULE_NAMESPACE . $token->getName() . self::MODULE_CLASS;

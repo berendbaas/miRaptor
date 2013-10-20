@@ -16,7 +16,8 @@ class Main implements Runnable {
 	/**
 	 * Construct a Main object with the given config.
 	 *
-	 * @param Array $config
+	 * @param array $config
+	 * @throws PDBCException on failure.
 	 */
 	public function __construct(array $config) {
 		$this->pdbc = $this->initPDBC($config['pdbc']);
@@ -28,8 +29,9 @@ class Main implements Runnable {
 	/**
 	 * Returns a PDBC object.
 	 *
-	 * @param  Array          $config
+	 * @param  array          $config
 	 * @return \lib\pdbc\PDBC a PDBC object.
+	 * @throws PDBCException  on failure.
 	 */
 	public function initPDBC(Array $config) {
 		$pdbc = new \lib\pdbc\Mysql($config['hostname'], $config['username'], $config['password']);
@@ -41,7 +43,7 @@ class Main implements Runnable {
 	/**
 	 * Returns a URL object.
 	 *
-	 * @param  String $defaultHost
+	 * @param  string $defaultHost
 	 * @return URL    a URL object.
 	 */
 	public function initURL($defaultHost) {
@@ -61,7 +63,8 @@ class Main implements Runnable {
 			$this->pdbc->selectDatabase($gatekeeper->getDatabase());
 
 			// Guide
-			echo new Guide($this->pdbc, $this->url, $this->location . $gatekeeper->getLocation());
+			$guide = new Guide($this->pdbc, $this->url, $this->location . $gatekeeper->getLocation());
+			$guide->run();
 		} catch(StatusCodeException $e) {
 			$this->statusCode = $e->getCode();
 
@@ -85,6 +88,7 @@ class Main implements Runnable {
 	 * Log time & request related data.
 	 *
 	 * @return void
+	 * @throws PDBCException on failure.
 	 */
 	private function log() {
 		// Time

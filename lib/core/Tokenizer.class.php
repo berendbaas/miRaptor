@@ -9,26 +9,26 @@ namespace lib\core;
  */
 class Tokenizer {
 	private $string;
-	private $token_start;
-	private $token_end;
+	private $tokenStart;
+	private $tokenEnd;
 
 	/**
 	 * Construct a Tokenizer object with the given string.
 	 *
-	 * @param String $string
-	 * @param String $token_start = Token::DEFAULT_START
-	 * @param String $token_end = Token::DEFAULT_END
+	 * @param string $string
+	 * @param string $tokenStart = Token::DEFAULT_START
+	 * @param string $tokenEnd = Token::DEFAULT_END
 	 */
-	public function __construct($string = '', $token_start = Token::DEFAULT_START, $token_end = Token::DEFAULT_END) {
+	public function __construct($string = '', $tokenStart = Token::DEFAULT_START, $tokenEnd = Token::DEFAULT_END) {
 		$this->string = $string;
-		$this->token_start = $token_start;
-		$this->token_end = $token_end;
+		$this->tokenStart = $tokenStart;
+		$this->tokenEnd = $tokenEnd;
 	}
 
 	/**
 	 * Returns a string representation of the Tokenizer object.
 	 *
-	 * @return String a string representation of the Tokenizer object.
+	 * @return string a string representation of the Tokenizer object.
 	 */
 	public function __toString() {
 		return $this->string;
@@ -37,8 +37,8 @@ class Tokenizer {
 	/**
 	 * Replace the given token with the given replace.
 	 *
-	 * @param  String $token
-	 * @param  String $replace = ''
+	 * @param  string $token
+	 * @param  string $replace = ''
 	 * @return void
 	 */
 	public function replace($token, $replace = '') {
@@ -53,7 +53,7 @@ class Tokenizer {
 	public function token() {
 		$tokens = array();
 
-		if(preg_match('/' . $this->token_start . '(.+?)' . $this->token_end .  '/i', $this->string, $tokens)) {
+		if(preg_match('/' . $this->tokenStart . '(.+?)' . $this->tokenEnd .  '/i', $this->string, $tokens)) {
 			 return new Token($tokens[0]);
 		}
 
@@ -63,13 +63,13 @@ class Tokenizer {
 	/**
 	 * Returns an array containing all remaining tokens.
 	 *
-	 * @return Array an array containing all remaining tokens.
+	 * @return array an array containing all remaining tokens.
 	 */
 	public function tokens() {
 		$result = array();
 		$tokens = array();
 
-		if(preg_match_all('/' . $this->token_start . '(.+?)' . $this->token_end .  '/i', $this->string, $tokens)) {
+		if(preg_match_all('/' . $this->tokenStart . '(.+?)' . $this->tokenEnd .  '/i', $this->string, $tokens)) {
 			foreach($tokens[0] as $token) {
 				$result[] = new Token($token);
 			}

@@ -23,7 +23,7 @@ abstract class AbstractModule implements Runnable {
 	 * @param \lib\pdbc\PDBC  $pdbc
 	 * @param URL             $url
 	 * @param int             $pageID
-	 * @param Array           $arguments
+	 * @param array           $arguments
 	 */
 	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $routerID, Array $arguments) {
 		$this->pdbc = $pdbc;
@@ -39,7 +39,7 @@ abstract class AbstractModule implements Runnable {
 	/**
 	 * Returns the string representation of the Module object.
 	 *
-	 * @return String the string representation of the Module object.
+	 * @return string the string representation of the Module object.
 	 */
 	public function __toString() {
 		return $this->result;

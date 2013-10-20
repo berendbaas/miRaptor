@@ -80,7 +80,7 @@ class StatusCodeExceptionHandler {
 	/**
 	 * Returns the string representation of the StatusCodeExceptionHandler object.
 	 *
-	 * @return String the string representation of the status code exception handler object.
+	 * @return string the string representation of the status code exception handler object.
 	 */
 	public function __toString() {
 		return <<<HTML
@@ -123,7 +123,8 @@ HTML;
 	/**
 	 * Returns debug information if MIRAPTOR_DEBUG is true.
 	 *
-	 * @return String debug information if MIRAPTOR_DEBUG is true.
+	 * @global boolean MIRAPTOR_DEBUG
+	 * @return string  debug information if MIRAPTOR_DEBUG is true.
 	 */
 	private function debug() {
 		return !MIRAPTOR_DEBUG ? '' : PHP_EOL . PHP_EOL . <<<HTML
@@ -139,6 +140,8 @@ HTML;
 
 	/**
 	 * Set the correct HTTP headers using the PHP header() method.
+	 *
+	 * @return void
 	 */
 	public function setHeader() {
 		header($this->phrase, TRUE, $this->statusCode);

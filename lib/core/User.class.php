@@ -30,8 +30,8 @@ class User {
 	 * Returns true if the user can successfully login with the given credentials.
 	 *
 	 * @param  \lib\pdbc\PDBC $pdbc
-	 * @param  String         $username
-	 * @param  String         $password
+	 * @param  string         $username
+	 * @param  string         $password
 	 * @return boolean        true if the user can successfully login with the given credentials.
 	 */
 	public function login(\lib\pdbc\PDBC $pdbc, $username, $password) {
@@ -73,9 +73,6 @@ class User {
 	 *
 	 * @return boolean the user ID if the user is logged in or 0 if the user is not logged in.
 	 */
-	public function getUserID() {
-		return $this->isLoggedIn() ? $_SESSION['userId'] : 0;
-	}
 	public function getID() {
 		return $this->isLoggedIn() ? $_SESSION['userId'] : 0;
 	}

@@ -24,7 +24,7 @@ abstract class AbstractUninstall implements Runnable {
 	/**
 	 * Returns the string representation of the Uninstall object.
 	 *
-	 * @return String the string representation of the Uninstall object.
+	 * @return string the string representation of the Uninstall object.
 	 */
 	public function __toString() {
 		return $this->result;

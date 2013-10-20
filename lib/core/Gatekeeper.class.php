@@ -14,27 +14,29 @@ class Gatekeeper {
 	/**
 	 * Construct a Gatekeeper object with the given PDBC & URL.
 	 *
-	 * @param  \lib\pdbc\PDBC $pdbc
-	 * @param  URL            $url
-	 * @throws \Exception     on failure.
+	 * @param  \lib\pdbc\PDBC      $pdbc
+	 * @param  URL                 $url
+	 * @throws StatusCodeException on failure.
+	 * @throws PDBCException       on PDBC failure.
 	 */
 	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url) {
 		// Get website location & database
 		$host = $this->getHost($pdbc, $url);
-		$user = $this->getUser($pdbc, $url, $host['uid']);
+		$location = $this->getUser($pdbc, $url, $host['uid']);
 
 		// Set website location & database
-		$this->location = $user['location'] . $host['location'];
+		$this->location = $location . $host['location'];
 		$this->database = $host['db'];
 	}
 
 	/**
 	 * Returns an array with the user ID, location & database of the host.
 	 *
-	 * @param  \lib\pdbc\PDBC $pdbc
-	 * @param  URL            $url
-	 * @return array          an array with the user ID, location & database of the host.
-	 * @throws \Exception     on failure.
+	 * @param  \lib\pdbc\PDBC      $pdbc
+	 * @param  URL                 $url
+	 * @return array               an array with the user ID, location & database of the host.
+	 * @throws StatusCodeException on failure.
+	 * @throws PDBCException       on PDBC failure.
 	 */
 	private function getHost(\lib\pdbc\PDBC $pdbc, URL $url) {
 		$pdbc->query('SELECT `uid`,`location`,`db`
@@ -54,34 +56,38 @@ class Gatekeeper {
 	/**
 	 * This function helps getHost() determines whether he has to throw a 301 or 404 exception.
 	 *
-	 * @param  \lib\pdbc\PDBC $pdbc
-	 * @param  URL            $url
+	 * @param  \lib\pdbc\PDBC      $pdbc
+	 * @param  URL                 $url
 	 * @return void
-	 * @throws \Exception     always! :P
+	 * @throws StatusCodeException on failure.
+	 * @throws PDBCException       on PDBC failure.
 	 */
 	private function getHostException(\lib\pdbc\PDBC $pdbc, URL $url) {
-		$pdbc->query('SELECT `website`.`domain`, `host`.`path`
+		$pdbc->query('SELECT `website`.`domain`, `redirect`.`path`
 		              FROM `website`
 		              RIGHT JOIN (SELECT `wid`,`path`
-		                          FROM `host`
-		                          WHERE `domain` = "' . $pdbc->quote($url->getHost()) . '") AS `host`
-		              ON `website`.`id` = `host`.`wid`');
+		                          FROM `redirect`
+		                          WHERE `domain` = "' . $pdbc->quote($url->getHost()) . '") AS `redirect`
+		              ON `website`.`id` = `redirect`.`wid`');
 
 		$redirect = $pdbc->fetch();
 
 		if(!$redirect) {
-			throw new \Exception('Gatekeeper: unknown domain - ' . $url->getHost(), 404);
+			throw new StatusCodeException('Gatekeeper: unknown domain - ' . $url->getHost(), StatusCodeException::ERROR_CLIENT_NOT_FOUND);
 		}
 			
-		throw new \Exception($url->getScheme() . URL::DELIMITER_SCHEME . $redirect['domain'] . $redirect['path'] . $url->getURI(), 301);
+		throw new StatusCodeException($url->getScheme() . URL::DELIMITER_SCHEME . $redirect['domain'] . $redirect['path'] . $url->getURI(), StatusCodeException::REDIRECTION_MOVED_PERMANENTLY);
 	}
 
 	/**
-	 * Returns an array with the user ID, location & database of the host.
+	 * Returns the user location.
 	 *
-	 * @param  \lib\pdbc\PDBC $pdbc
-	 * @param  URL            $url
-	 * @return array          an array with the user ID, location & database of the host.
+	 * @param  \lib\pdbc\PDBC      $pdbc
+	 * @param  URL                 $url
+	 * @param  int                 $id
+	 * @return string              the user location.
+	 * @throws StatusCodeException on failure.
+	 * @throws PDBCException       on PDBC failure.
 	 */
 	private function getUser(\lib\pdbc\PDBC $pdbc, URL $url, $id) {
 		$pdbc->query('SELECT `location`
@@ -91,16 +97,16 @@ class Gatekeeper {
 		$user = $pdbc->fetch();
 
 		if(!$user) {
-			throw new \Exception('Gatekeeper: unknown user - ' . $url->getHost(), 404);
+			throw new StatusCodeException('Gatekeeper: unknown user - ' . $url->getHost(), StatusCodeException::ERROR_CLIENT_NOT_FOUND);
 		}
 
-		return $user;
+		return end($user);
 	}
 
 	/**
 	 * Returns the location of the website.
 	 * 
-	 * @return String the location of the website.
+	 * @return string the location of the website.
 	 */
 	public function getLocation() {
 		return $this->location;
@@ -109,7 +115,7 @@ class Gatekeeper {
 	/**
 	 * Returns the database name of the website.
 	 * 
-	 * @return String the database name of the website.
+	 * @return string the database name of the website.
 	 */
 	public function getDatabase() {
 		return $this->database;

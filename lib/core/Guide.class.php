@@ -7,7 +7,7 @@ namespace lib\core;
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class Guide {
+class Guide implements Runnable {
 	const DEFAULT_FILE = 'index.html';
 	const METHOD_GET = 'GET';
 	const METHOD_POST = 'POST';
@@ -21,14 +21,12 @@ class Guide {
 	 *
 	 * @param  \lib\pdbc\PDBC $pdbc
 	 * @param  URL            $url
-	 * @param  String         $location
-	 * @throws \Exception     on failure.
+	 * @param  string         $location
 	 */
 	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $location) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
 		$this->filename = $location . $url->getDirectory() . ($url->getFile() == '' ? self::DEFAULT_FILE : $url->getFile());
-		$this->run();
 	}
 
 	public function run() {
@@ -44,7 +42,7 @@ class Guide {
 			break;
 
 			default:
-				throw new \Exception('Bad request: Method not supported.', 400);
+				throw new StatusCodeException('Guide: Method not supported.', StatusCodeException::ERROR_CLIENT_BAD_REQUEST);
 			break;
 		}
 	}
@@ -53,14 +51,15 @@ class Guide {
 	 * Echos the static page.
 	 *
 	 * @return void
-	 * @throws \Exception on failure.
+	 * @throws StatusCodeException on failure.
+	 * @throws PDBCException   on PDBC failure.
 	 */
 	private function getPage() {
 		// Header parse
 		$lastModified = filemtime($this->filename);
 
 		if(!$this->isModified($lastModified)) {
-			throw new \Exception('Not Modified', 304);
+			throw new StatusCodeException('Guide: Page not Modified', StatusCodeException::REDIRECTION_NOT_MODIFIED);
 		}
 
 		// Header echo
@@ -88,8 +87,10 @@ class Guide {
 	/**
 	 * Echos the dynamic page.
 	 *
+	 * @global boolean             MIRAPTOR_CACHE
 	 * @return void
-	 * @throw \Exception on failure.
+	 * @throws StatusCodeException on failure.
+	 * @throws PDBCException   on PDBC failure.
 	 */
 	private function parsePage() {
 		// Header
@@ -98,6 +99,11 @@ class Guide {
 		// Content parse
 		$parser = new Parser($this->pdbc, $this->url);
 		$parser->run();
+
+		// Check namespacing
+		if(!$parser->isNamespace() && $this->url->getFile() != '') {
+			throw new StatusCodeException('Parser: Namespacing not used, but requested - ' . $this->url->getPath(), StatusCodeException::ERROR_CLIENT_NOT_FOUND);
+		}
 
 		// Content echo
 		echo $parser->__toString();

@@ -20,9 +20,9 @@ class URL {
 	/**
 	 * Construct a URL object with the given scheme, host & URI.
 	 *
-	 * @param String $scheme
-	 * @param String $host
-	 * @param String $uri
+	 * @param string $scheme
+	 * @param string $host
+	 * @param string $uri
 	 */
 	public function __construct($scheme, $host, $uri) {
 		// Set scheme & host.
@@ -44,7 +44,7 @@ class URL {
 	 *
 	 * scheme + DELIMITER_SCHEME + host + directory + file + DELIMITER_QUERY + query
 	 *
-	 * @return String a string representation of the URL object.
+	 * @return string a string representation of the URL object.
 	 */
 	public function __toString() {
 		return $this->getURL();
@@ -55,7 +55,7 @@ class URL {
 	 *
 	 * scheme + DELIMITER_SCHEME + host + directory + file + DELIMITER_QUERY + query
 	 *
-	 * @return String the URL.
+	 * @return string the URL.
 	 */
 	public function getURL() {
 		return $this->getURLHost() . $this->getURI();
@@ -66,7 +66,7 @@ class URL {
 	 *
 	 * scheme + DELIMITER_SCHEME + host + directory + file
 	 * 
-	 * @return String the URL scheme, host & path.
+	 * @return string the URL scheme, host & path.
 	 */
 	public function getURLPath() {
 		return $this->getURLHost() . $this->getPath();
@@ -77,7 +77,7 @@ class URL {
 	 *
 	 * scheme + DELIMITER_SCHEME + host + directory
 	 *
-	 * @return String the URL scheme, host & directory.
+	 * @return string the URL scheme, host & directory.
 	 */
 	public function getURLDirectory() {
 		return $this->getURLHost() . $this->directory;
@@ -88,7 +88,7 @@ class URL {
 	 *
 	 * scheme + DELIMITER_SCHEME + host
 	 *
-	 * @return String the URL scheme, host.
+	 * @return string the URL scheme, host.
 	 */
 	public function getURLHost() {
 		return ($this->scheme == '' ? '' : $this->scheme . self::DELIMITER_SCHEME) . $this->host;
@@ -99,7 +99,7 @@ class URL {
 	 *
 	 * directory + file + DELIMITER_QUERY + query
 	 *
-	 * @return String the URI.
+	 * @return string the URI.
 	 */
 	public function getURI() {
 		return $this->getPath() . ($this->query == '' ? '' : self::DELIMITER_QUERY . $this->query);
@@ -110,7 +110,7 @@ class URL {
 	 *
 	 * directory + file
 	 *
-	 * @return String the path.
+	 * @return string the path.
 	 */
 	public function getPath() {
 		return $this->directory . $this->file;
@@ -119,7 +119,7 @@ class URL {
 	/**
 	 * Returns the scheme.
 	 *
-	 * @return String the scheme.
+	 * @return string the scheme.
 	 */
 	public function getScheme() {
 		return $this->scheme;
@@ -128,7 +128,7 @@ class URL {
 	/**
 	 * Returns the host.
 	 *
-	 * @return String the host.
+	 * @return string the host.
 	 */
 	public function getHost() {
 		return $this->host;
@@ -137,7 +137,7 @@ class URL {
 	/**
 	 * Returns the directory.
 	 *
-	 * @return String the directory.
+	 * @return string the directory.
 	 */
 	public function getDirectory() {
 		return $this->directory;
@@ -146,7 +146,7 @@ class URL {
 	/**
 	 * Returns the file.
 	 *
-	 * @return String the file.
+	 * @return string the file.
 	 */
 	public function getFile() {
 		return $this->file;
@@ -155,7 +155,7 @@ class URL {
 	/**
 	 * Returns the query.
 	 *
-	 * @return String the query.
+	 * @return string the query.
 	 */
 	public function getQuery() {
 		return $this->query;
