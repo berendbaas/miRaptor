@@ -7,7 +7,7 @@ namespace lib\module\admin;
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class Admin extends \lib\core\AbstractInstall {
+class Install extends \lib\core\AbstractInstall {
 	public function run() {
 		$this->result = 'TODO admin install';
 	}
