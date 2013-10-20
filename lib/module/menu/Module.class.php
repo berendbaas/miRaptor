@@ -69,9 +69,10 @@ class Module extends \lib\core\AbstractModule {
 		}
 
 		// Get pages
-		$this->pdbc->query('SELECT `id`,`name`,`namespace`
+		$this->pdbc->query('SELECT `id`,`name`,`uri`
 		                    FROM `router`
-		                    WHERE `pid` = ' . $pid);
+		                    WHERE `pid` = ' . $pid . '
+		                    ORDER BY `index` ASC');
 
 		$pages = $this->pdbc->fetchAll();
 
@@ -106,9 +107,10 @@ HTML;
 		}
 
 		// Get pages
-		$this->pdbc->query('SELECT `id`,`name`,`namespace`
+		$this->pdbc->query('SELECT `id`,`name`,`uri`
 		                    FROM `router`
-		                    WHERE `pid` = ' . $pid);
+		                    WHERE `pid` = ' . $pid . '
+		                    ORDER BY `index` ASC');
 
 		$pages = $this->pdbc->fetchAll();
 
