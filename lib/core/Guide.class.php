@@ -102,7 +102,7 @@ class Guide implements Runnable {
 
 		// Check namespacing
 		if(!$parser->isNamespace() && $this->url->getFile() != '') {
-			throw new StatusCodeException('Parser: Namespacing not used, but requested - ' . $this->url->getPath(), StatusCodeException::ERROR_CLIENT_NOT_FOUND);
+			throw new StatusCodeException('Guide: Namespacing requested, but not used - ' . $this->url->getPath(), StatusCodeException::ERROR_CLIENT_NOT_FOUND);
 		}
 
 		// Content echo
