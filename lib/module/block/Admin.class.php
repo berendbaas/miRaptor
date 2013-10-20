@@ -1,5 +1,5 @@
 <?php
-namespace lib\module\site;
+namespace lib\module\block;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -7,9 +7,9 @@ namespace lib\module\site;
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class Uninstall extends \lib\core\AbstractUninstall {
+class Admin extends \lib\core\AbstractAdmin {
 	public function run() {
-		$this->result = 'TODO site uninstall';
+		$this->result = 'TODO block admin';
 	}
 }
 

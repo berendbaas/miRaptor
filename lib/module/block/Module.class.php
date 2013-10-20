@@ -1,5 +1,5 @@
 <?php
-namespace lib\module\site;
+namespace lib\module\block;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -9,7 +9,7 @@ namespace lib\module\site;
  */
 class Module extends \lib\core\AbstractModule {
 	public function run() {
-		$this->result = $this->parseSite($this->parseGet());
+		$this->result = $this->parseBlock($this->parseGet());
 	}
 
 	/**
@@ -26,7 +26,7 @@ class Module extends \lib\core\AbstractModule {
 	/**
 	 *
 	 */
-	private function parseSite($get) {
+	private function parseBlock($get) {
 		$this->pdbc->query('SELECT `content`
 		                    FROM `module_block`
 		                    WHERE `name` = "' . $this->pdbc->quote($get) . '"');
