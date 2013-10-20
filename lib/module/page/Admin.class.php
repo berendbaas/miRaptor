@@ -9,17 +9,8 @@ namespace lib\module\page;
  */
 class Admin extends \lib\core\AbstractAdmin {
 	public function run() {
-		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-			$request = 'POST';
-		} else {
-			$request = 'GET';
-		}
-
-		if (!isset($_GET['action'])) {
-			$action = 'Overview';
-		} else {
-			$action = $_GET['action'];
-		}
+		$request = ($_SERVER['REQUEST_METHOD'] == 'POST')? 'POST' : 'GET';
+		$action = !isset($_GET['action']) ? 'Overview' : $_GET['action'];
 
 		$function = $request . $action;
 		if (method_exists($this, $function)) {
