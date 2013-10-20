@@ -7,7 +7,7 @@ namespace lib\module\admin;
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class Module implements \lib\core\ModuleInterface {
+class Module extends \lib\core\AbstractModule {
 	const PAGE_LOGIN = '';
 	const PAGE_LOGOUT = 'logout';
 	const PAGE_OVERVIEW = 'overview';
@@ -17,12 +17,15 @@ class Module implements \lib\core\ModuleInterface {
 	private $userPdbc;
         private $user;
 
-	public function __construct(\lib\core\PDBC $pdbc, \lib\core\URL $url, $pageID, array $arguments) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $pageID, array $arguments) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
 		$this->pageID = $pageID;
 		$this->arguments = $arguments;
 		$this->result = '';
+
+		$this->static = FALSE;
+		$this->namespace = TRUE;
 
 		include('config.php');
 		$this->userPdbc = clone $pdbc;
@@ -46,7 +49,7 @@ class Module implements \lib\core\ModuleInterface {
 
 		switch($this->url->getFile()) {
 			case self::PAGE_LOGIN:
-				throw new \Exception($this->url->getURLBase() . self::PAGE_OVERVIEW, 301);
+				throw new \Exception($this->url->getURLDirectory() . self::PAGE_OVERVIEW, 301);
 			break;
 
 			case self::PAGE_LOGOUT:
@@ -78,7 +81,7 @@ class Module implements \lib\core\ModuleInterface {
 	 */
 	private function handleLogin() {
 		if($this->url->getFile() != Module::PAGE_LOGIN) {
-			throw new \Exception($this->url->getURLBase() . Module::PAGE_LOGIN, 301);
+			throw new \Exception($this->url->getURLDirectory() . Module::PAGE_LOGIN, 301);
 		}
 
 		$result = new ModuleHandleLogin($this->userPdbc, $this->url, $this->arguments, $this->user);

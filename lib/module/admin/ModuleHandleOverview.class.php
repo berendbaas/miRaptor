@@ -62,7 +62,7 @@ class ModuleHandleOverview extends ModuleHandleAbstract {
 		                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
 
 		if($this->pdbc->rowCount() > 0) {
-			throw new \Exception($this->url->getURLBase() . Module::PAGE_OVERVIEW, 301);
+			throw new \Exception($this->url->getURLPath(), 301);
 		}
 
 		return <<<HTML
@@ -99,7 +99,7 @@ HTML;
 			                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
 
 			if($this->pdbc->rowCount() > 0) {
-				throw new \Exception($this->url->getURLBase() . Module::PAGE_OVERVIEW, 301);
+				throw new \Exception($this->url->getURLPath(), 301);
 			} else {
 				$message = <<<HTML
 <p class="error">Can't modify domain.</p>
@@ -130,7 +130,7 @@ HTML;
 
 		
 		*/
-		throw new \Exception($this->url->getURLBase() . Module::PAGE_OVERVIEW, 301);
+		throw new \Exception($this->url->getURLPath(), 301);
 	}
 
 	/**

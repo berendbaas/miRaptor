@@ -13,7 +13,7 @@ class ModuleHandleLogout extends ModuleHandleAbstract {
 	 */
 	public function content() {
 		$this->user->logout();
-		throw new \Exception($this->url->getURLBase() . Module::PAGE_LOGIN, 301);
+		throw new \Exception($this->url->getURLDirectory() . Module::PAGE_LOGIN, 301);
 	}
 
 	/**

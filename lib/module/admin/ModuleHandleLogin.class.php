@@ -16,7 +16,7 @@ class ModuleHandleLogin extends ModuleHandleAbstract {
 
 		if(isset($_POST['username']) && isset($_POST['password'])) {
 			if($this->user->login($this->pdbc, $_POST['username'], $_POST['password'])) {
-				throw new \Exception($this->url->getURLBase() . Module::PAGE_OVERVIEW, 301);
+				throw new \Exception($this->url->getURLDirectory() . Module::PAGE_OVERVIEW, 301);
 			}
 
 			$message = <<<HTML
