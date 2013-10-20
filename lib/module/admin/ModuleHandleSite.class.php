@@ -63,7 +63,7 @@ class ModuleHandleSite extends ModuleHandleAbstract {
 		}
 
 		$this->pdbc->query('SELECT `id`
-		                    FROM `modules`
+		                    FROM `access`
 		                    WHERE `name` = "' . $_GET['module'] . '"');
 
 		$id = $this->pdbc->fetch();
@@ -90,7 +90,7 @@ HTML;
 	 *
 	 */
 	public function menu() {
-		$this->pdbc->query('SELECT `name` FROM `modules`');
+		$this->pdbc->query('SELECT `name` FROM `access`');
 
 		$modules = $this->pdbc->fetchAll();
 		$result = '';

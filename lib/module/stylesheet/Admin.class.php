@@ -141,7 +141,7 @@ HTML;
 		$this->redirectOverview();
 	}
 
-	private function redirecOverview()
+	private function redirectOverview()
 	{
 		$base = $this->url->getURLDirectory();
 		$id = $_GET['id'];
