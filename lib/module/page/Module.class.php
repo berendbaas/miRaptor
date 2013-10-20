@@ -16,9 +16,6 @@ class Module extends \lib\core\AbstractModule {
 			case "description":
 				$this->result = $this->parseDescription();
 			break;
-			case "media":
-				$this->result = $this->parseMedia();
-			break;
 			case "title":
 				$this->result = $this->parseTitle();
 			break;
@@ -43,30 +40,9 @@ class Module extends \lib\core\AbstractModule {
 	 *
 	 */
 	private function parseContent() {
-		return isset($this->arguments['name']) ? $this->parseContentName($this->arguments['name'])  : $this->parseContentDefault() ;
-	}
-
-	private function parseContentName($name) {
 		$this->pdbc->query('SELECT `content`
-		                    FROM `module_page_content`
-		                    WHERE `pid` = ' . $this->pdbc->quote($this->pageID) . '
-		                    AND `nid`= (SELECT `id`
-		                                FROM `module_page_content_name`
-		                                WHERE `name` = "' . $this->pdbc->quote($name) . '")');
-
-		$content = $this->pdbc->fetch();
-
-		if(!$content) {
-			throw new \Exception('Content does not exists.');
-		}
-
-		return end($content);
-	}
-
-	private function parseContentDefault() {
-		$this->pdbc->query('SELECT `content`
-		                    FROM `pages`
-		                    WHERE `id` = ' .  $this->pdbc->quote($this->pageID));
+		                    FROM `module_page`
+		                    WHERE `rid` = ' .  $this->pdbc->quote($this->routerID));
 
 		$content = $this->pdbc->fetch();
 
@@ -82,8 +58,8 @@ class Module extends \lib\core\AbstractModule {
 	 */
 	private function parseDescription() {
 		$this->pdbc->query('SELECT `description`
-		                    FROM `pages`
-		                    WHERE `id`=' .  $this->pdbc->quote($this->pageID));
+		                    FROM `module_page`
+		                    WHERE `id`=' .  $this->pdbc->quote($this->routerID));
 
 		$description = $this->pdbc->fetch();
 
@@ -97,36 +73,10 @@ class Module extends \lib\core\AbstractModule {
 	/**
 	 *
 	 */
-	private function parseMedia() {
-		if(!isset($this->arguments['name'])) {
-			throw new Exception('name="" required.');
-		}
-
-		$this->pdbc->query('SELECT `url`
-		          FROM `module_page_media`
-		          WHERE `pid` = ' . $this->pdbc->quote($this->pageID) . '
-		          AND `nid`= (SELECT `id`
-		                      FROM `module_page_media_name`
-		                      WHERE `name` = "' . $this->pdbc->quote($this->arguments['name']) . '")');
-
-		$media = $this->pdbc->fetch();
-
-		if(!$media) {
-			throw new \Exception('Media does not exists.');
-		}
-
-		return <<<HTML
-<img src="{end($url)}" alt="{$this->arguments['name']}" />
-HTML;
-	}
-
-	/**
-	 *
-	 */
 	private function parseTitle() {
 		$this->pdbc->query('SELECT `name`
-		                    FROM `pages`
-		                    WHERE `id`=' . $this->pdbc->quote($this->pageID));
+		                    FROM `router`
+		                    WHERE `id`=' . $this->pdbc->quote($this->routerID));
 
 		$title = $this->pdbc->fetch();
 

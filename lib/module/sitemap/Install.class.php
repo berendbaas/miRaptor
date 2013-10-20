@@ -1,5 +1,5 @@
 <?php
-namespace lib\module\site;
+namespace lib\module\sitemap;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -9,7 +9,7 @@ namespace lib\module\site;
  */
 class Install extends \lib\core\AbstractInstall {
 	public function run() {
-		$this->result = 'TODO site install';
+		$this->result = 'TODO sitemap install';
 	}
 }
 

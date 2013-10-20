@@ -85,10 +85,10 @@ class Error {
 		<title>miRaptor - {$error['title']}</title>
 
 		<style>
-			body{ margin: 25px; padding: 0; }
-			h1, p{ font-family: 'Droid Sans', Heveltica, Arial, Tahoma, sans-serif; }
-			p{ font-size: 0.9em; line-height: 1.5em; margin-left: 10px; }
-			h1{ font-size: 1.4em; margin: 0; padding: 0; font-weight: normal; }
+			body { margin: 25px; padding: 0; }
+			h1, p { font-family: 'Droid Sans', Heveltica, Arial, Tahoma, sans-serif; }
+			p { font-size: 0.9em; line-height: 1.5em; margin-left: 10px; }
+			h1 { font-size: 1.4em; margin: 0; padding: 0; font-weight: normal; }
 		</style>
 
 	</head>

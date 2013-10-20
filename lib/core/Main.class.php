@@ -88,7 +88,7 @@ class Main implements Runnable {
 		$runtime = (microtime(TRUE) - $time) * 1000;
 		
 		// Request
-		$request = $this->pdbc->quote($_SERVER['REQUEST_URI']);
+		$request = $this->pdbc->quote($this->url->getURL());
 		$referal = empty($_SERVER['HTTP_REFERER']) ? 'NULL' : '"' . $this->pdbc->quote($_SERVER['HTTP_REFERER']) . '"';
 		$ip = $this->pdbc->quote($_SERVER['REMOTE_ADDR']);
 

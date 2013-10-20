@@ -10,10 +10,10 @@ namespace lib\module\template;
 class Module extends \lib\core\AbstractModule {
 	public function run() {
 		$this->pdbc->query('SELECT `content`
-		                    FROM `module_template`
+		                    FROM `template`
 		                    WHERE `id` = (SELECT `tid`
-		                                  FROM `pages`
-	                                          WHERE `id` = "' . $this->pdbc->quote($this->pageID) . '")');
+		                                  FROM `router`
+	                                          WHERE `id` = "' . $this->pdbc->quote($this->routerID) . '")');
 
 		$template = $this->pdbc->fetch();
 
