@@ -9,17 +9,8 @@ namespace lib\module\page;
  */
 class Admin extends \lib\core\AbstractAdmin {
 	public function run() {
-		if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-			$request = 'POST';
-		} else {
-			$request = 'GET';
-		}
-
-		if (!isset($_GET['action'])) {
-			$action = 'Overview';
-		} else {
-			$action = $_GET['action'];
-		}
+		$request = ($_SERVER['REQUEST_METHOD'] == 'POST') ? 'POST' : 'GET';
+		$action = !isset($_GET['action']) ? 'Overview' : $_GET['action'];
 
 		$function = $request . $action;
 		if (method_exists($this, $function)) {
@@ -253,7 +244,7 @@ HTML;
 							WHERE module_page.id = '. $this->pdbc->quote($_GET['pid']));
 		$page = $this->pdbc->fetch();
 		$this->result .= <<<HTML
-<h1> Removal notice </h1>
+<h1>Removal notice</h1>
 <p>You are about to remove the page "{$page['name']}"</p>
 <p>Are you sure you want to remove this page? </p>
 <form action="" method="POST">
