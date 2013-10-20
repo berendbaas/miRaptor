@@ -62,6 +62,8 @@ class Mysql implements PDBC {
 		if(!$this->resource) {
 			throw new PDBCException('Mysql: Can\'t execute query - ' . $query);
 		}
+
+		return $this;
 	}
 
 	public function fetch() {

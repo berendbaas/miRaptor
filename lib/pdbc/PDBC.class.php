@@ -42,10 +42,10 @@ interface PDBC {
 	public function quote($string);
 
 	/**
-	 * Try to execute the given query.
+	 * Returns this object and executes the given query.
 	 *
 	 * @param  String $query
-	 * @return void
+	 * @return PDBC this object and executes the given query.
 	 * @throws Exception on failure.
 	 */
 	public function query($query);
