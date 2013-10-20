@@ -19,14 +19,14 @@ HTML;
 	 *
 	 */
 	private function parseBreadcrumb($id) {
-		$this->pdbc->query('SELECT `pid`,`name`,`namespace`
+		$this->pdbc->query('SELECT `pid`,`name`,`uri`
 		                    FROM `router`
 		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"');
 
 		$breadcrumb = $this->pdbc->fetch();
 
 		return !$breadcrumb ? '' : $this->parseBreadcrumb($breadcrumb['pid']) . PHP_EOL . <<<HTML
-<li><a href="{$breadcrumb['namespace']}">{$breadcrumb['name']}</a></li>
+<li><a href="{$breadcrumb['uri']}">{$breadcrumb['name']}</a></li>
 HTML;
 	}
 }

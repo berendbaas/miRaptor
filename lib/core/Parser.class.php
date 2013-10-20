@@ -44,7 +44,7 @@ class Parser implements Runnable {
 	private function getRouterID() {
 		$this->pdbc->query('SELECT `id`
 		                    FROM `router`
-		                    WHERE `namespace` = "' . $this->pdbc->quote($this->url->getDirectory()) . '"');
+		                    WHERE `uri` = "' . $this->pdbc->quote($this->url->getDirectory()) . '"');
 
 		$routerID = $this->pdbc->fetch();
 

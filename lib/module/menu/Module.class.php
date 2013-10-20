@@ -69,7 +69,7 @@ class Module extends \lib\core\AbstractModule {
 		}
 
 		// Get pages
-		$this->pdbc->query('SELECT `id`,`name`,`namespace`
+		$this->pdbc->query('SELECT `id`,`name`,`uri`
 		                    FROM `router`
 		                    WHERE `pid` = ' . $pid . '
 		                    ORDER BY `index` ASC');
@@ -87,7 +87,7 @@ class Module extends \lib\core\AbstractModule {
 			$current = ($this->pageID == $page['id'] ? ' class="current"' : '');
 
 			$result .= PHP_EOL . <<<HTML
-<li {$current}><a href="{$page['namespace']}">{$page['name']}</a>{$this->parseMenuDefault($page['id'], ($level - 1))}</li>
+<li {$current}><a href="{$page['uri']}">{$page['name']}</a>{$this->parseMenuDefault($page['id'], ($level - 1))}</li>
 HTML;
 		}
 
@@ -107,7 +107,7 @@ HTML;
 		}
 
 		// Get pages
-		$this->pdbc->query('SELECT `id`,`name`,`namespace`
+		$this->pdbc->query('SELECT `id`,`name`,`uri`
 		                    FROM `router`
 		                    WHERE `pid` = ' . $pid . '
 		                    ORDER BY `index` ASC');
@@ -125,7 +125,7 @@ HTML;
 			$current = ($this->pageID == $page['id'] ? ' class="current"' : '');
 
 			$result .= PHP_EOL . <<<HTML
-<li {$current}><a href="{$page['namespace']}">{$page['name']}<span></span></a>{$this->parseMenuDefault($page['id'], ($level - 1))}</li>
+<li {$current}><a href="{$page['uri']}">{$page['name']}<span></span></a>{$this->parseMenuDefault($page['id'], ($level - 1))}</li>
 HTML;
 		}
 
