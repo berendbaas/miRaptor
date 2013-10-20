@@ -18,6 +18,13 @@ class StatusCodeException extends \Exception {
 	const ERROR_SERVER_INTERNAL_SERVER_ERROR = 500;
 	const ERROR_SERVER_NOT_IMPLEMENTED = 501;
 
+	/**
+	 * Construct a status code exception with the given message, code & previous exception if any.
+	 *
+	 * @param String     $message = ''
+	 * @param int        $code = self::ERROR_SERVER_INTERNAL_SERVER_ERROR
+	 * @param \Exception $previous = NULL
+	 */
 	public function __construct($message = '', $code = self::ERROR_SERVER_INTERNAL_SERVER_ERROR, \Exception $previous = NULL) {
 		parent::__construct($message, $code, $previous);
 	}
