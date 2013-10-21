@@ -31,7 +31,6 @@ class Admin extends \lib\core\AbstractAdmin {
 	<th>Name</th>
 	<th>Edit</th>
 	<th>Remove</th>
-	<th>Rename</th>
 </tr>
 HTML;
 
@@ -44,7 +43,6 @@ HTML;
 	<td>{$template['name']}</td>
 	<td><a href="{$base}site?id={$id}&amp;module=template&amp;action=edit&amp;tid={$template['id']}" class="edit">Edit</a></td>
 	<td><a href="{$base}site?id={$id}&amp;module=template&amp;action=remove&amp;tid={$template['id']}" class="edit">Remove</a></td>
-	<td><a href="{$base}site?id={$id}&amp;module=template&amp;action=rename&amp;tid={$template['id']}" class="edit">Rename</a></td>
 </tr>
 HTML;
 		}
@@ -82,8 +80,8 @@ HTML;
 		$this->pdbc->query('UPDATE `template`
 							SET `name` = "'. $this->pdbc->quote($_POST['name']) .'",
 							`content` = "'. $this->pdbc->quote($_POST['content']) .'"
-							WHERE `id` = "'. $this->pdbc->quote($_GET['tid'] .'"');
-		if ($this->pdbc->rowCount == 0) {
+							WHERE `id` = "'. $this->pdbc->quote($_GET['tid']) .'"');
+		if ($this->pdbc->rowCount() == 0) {
 			$this->getEdit(array(
 					'name' => $_GET['name'],
 					'content' => $_GET['content']
@@ -97,9 +95,9 @@ HTML;
 		$this->result .= <<<HTML
 <h1>New Template</h1>
 <form action="" method="POST">
-	<label for="name">Name</label>
+	<label for="name">Nam	e</label>
 	<input type="text" name="name">
-	<label for="content"></label>
+	<label for="content">Code</label>
 	<textarea name="content"></textarea>
 
 	<input type="submit">

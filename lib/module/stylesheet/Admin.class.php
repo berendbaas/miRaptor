@@ -41,9 +41,8 @@ HTML;
 <tr>
 	<td>{$sheet['id']}</td>
 	<td>{$sheet['name']}</td>
-	<td><a href="{$base}site?id={$id}&amp;module=stylesheet&amp;action=edit&amp;tid={$sheet['id']}" class="edititem" alt="edit item">Edit</a></td>
-	<td><a href="{$base}site?id={$id}&amp;module=stylesheet&amp;action=remove&amp;tid={$sheet['id']}" class="removeitem" alt="Remove item">Remove</a></td>
-	<td><a href="{$base}site?id={$id}&amp;module=stylesheet&amp;action=remove&amp;tid={$sheet['id']}" class="renameitem" alt="Rename item"></a></td>
+	<td><a href="{$base}site?id={$id}&amp;module=stylesheet&amp;action=edit&amp;sid={$sheet['id']}" class="edititem" alt="edit item">Edit</a></td>
+	<td><a href="{$base}site?id={$id}&amp;module=stylesheet&amp;action=remove&amp;sid={$sheet['id']}" class="removeitem" alt="Remove item">Remove</a></td>
 </tr>
 HTML;
 		}
@@ -58,7 +57,7 @@ HTML;
 	private function getRemove() {
 		$id = $_GET['id'];
 		$base = $this->url->getURLDirectory();
-		$sheet = $this->pdbc->query('SELECT name from module_stylesheet WHERE id =' . $this->pdbc->quote($_GET['tid']))->fetch();
+		$sheet = $this->pdbc->query('SELECT name from module_stylesheet WHERE id =' . $this->pdbc->quote($_GET['sid']))->fetch();
 		$this->result .= <<<HTML
 <p>You are about to remove the stylesheet {$sheet['name']}</p>
 <p>Are you sure you want to remove this stylesheet? This can not be undone!<p>
@@ -70,7 +69,7 @@ HTML;
 	}
 
 	private function postRemove() {
-		$this->pdbc->query('DELETE FROM module_stylesheet WHERE id ="'. $this->pdbc->quote($_GET['tid']) .'"');
+		$this->pdbc->query('DELETE FROM module_stylesheet WHERE id ="'. $this->pdbc->quote($_GET['sid']) .'"');
 
 		$this->redirectOverview();
 	}
@@ -81,7 +80,7 @@ HTML;
 
 		$this->pdbc->query('SELECT * 
 							FROM module_stylesheet
-							WHERE id = "' . $this->pdbc->quote($_GET['tid']) . '"');
+							WHERE id = "' . $this->pdbc->quote($_GET['sid']) . '"');
 		$item = $this->pdbc->fetch();
 
 		$name = isset($fields['name']) ? $fields['name'] : $item['name'];
@@ -105,9 +104,9 @@ HTML;
 		$this->pdbc->query('UPDATE `module_stylesheet`
 							SET `name` = "' . $this->pdbc->quote($_POST['name']) .  '",
 							`content` = "' . $this->pdbc->quote($_POST['content']) . '"
-							WHERE `id` = ' . $this->pdbc->quote($_GET['id']) . '
+							WHERE `id` = ' . $this->pdbc->quote($_GET['sid']) . '
 							');
-		if ($this->pdbc->rowCount == 0) {
+		if ($this->pdbc->rowCount() == 0) {
 			$this->getEdit(array(
 					'name' => $_POST['name'],
 					'content' => $_POST['content']
