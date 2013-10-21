@@ -22,7 +22,6 @@ abstract class AbstractAdmin implements Runnable {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
 		$this->result = '';
-		$this->parsable = false;
 	}
 
 	/**
