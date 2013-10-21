@@ -9,25 +9,18 @@ namespace lib\module\template;
  */
 class Admin extends \lib\core\AbstractAdmin {
 	public function run() {
-		if ($_SERVER['REQUEST_METHOD'] == 'GET') {
-			$request = 'GET';
-		} else {
-			$request = 'POST';
-		}
-
-		if (!isset($_GET['action'])) {
-			$action = 'Overview';
-		} else {
-			$action = $_GET['action'];
-		}
+		$request = ($_SERVER['REQUEST_METHOD'] == 'GET') ? 'GET' : 'POST';
+		$action = !isset($_GET['action']) ? 'Overview' : $_GET['action'];
 
 		$function = $request . $action;
-		$this->$function();
+		if (method_exists($this, $function)) {
+			$this->$function();	
+		} else {
+			throw new \Exception('Action is not implemented', 501);
+		}
 	}
 
-
-	private function getOverview()
-	{
+	private function getOverview() {
 		$base = $this->url->getURLDirectory();
 		$id = $_GET['id'];
 		$this->result .= <<<HTML
@@ -62,21 +55,21 @@ HTML;
 	}
 
 
-	private function getEdit()
-	{
+	private function getEdit(array $fields = array()) {
 		$base = $this->url->getURLDirectory();
-		$tid = $this->pdbc->quote($_GET['tid']);
-		$id = $_GET['tid'];
+		$id = $_GET['id'];
 		$this->pdbc->query('SELECT *
 							FROM template
-							WHERE id = "'. $tid .'"');
+							WHERE id = "'. $this->pdbc->quote($_GET['tid']) .'"');
 		$item = $this->pdbc->fetch();
-		$content = $item['content'];
+		$name = isset($fields['name']) ? $fields['name'] : $item['name'];
+		$content = isset($fields['content']) ? $fields['content'] : $item['content'];
+
 		$this->result .= <<<HTML
 <h1>Edit Template</h1>
 <form action="" method="POST">
 	<label for="name">Name</label>
-	<input type="text" name="name" value="{$item['name']}">
+	<input type="text" name="name" value="{$name}">
 	<label for="content">Template</label>
 	<textarea name="content">{$content}</textarea>
 	<a href="{$base}site?id={$id}&amp;module=template">Back</a>
@@ -85,23 +78,22 @@ HTML;
 HTML;
 	}
 
-	private function postEdit()
-	{
-		$id = $this->pdbc->quote($_GET['tid']);
-
-		$name = $this->pdbc->quote($_POST['name']);
-		$content = $this->pdbc->quote($_POST['content']);
-
+	private function postEdit() {
 		$this->pdbc->query('UPDATE `template`
-							SET `name` = "'. $name .'",
-							`content` = "'. $content .'"
-							WHERE `id` = "'. $id .'"');
-
+							SET `name` = "'. $this->pdbc->quote($_POST['name']) .'",
+							`content` = "'. $this->pdbc->quote($_POST['content']) .'"
+							WHERE `id` = "'. $this->pdbc->quote($_GET['tid'] .'"');
+		if ($this->pdbc->rowCount == 0) {
+			$this->getEdit(array(
+					'name' => $_GET['name'],
+					'content' => $_GET['content']
+				));
+			return;
+		}
 		$this->getEdit();
 	}
 
-	private function getNew()
-	{
+	private function getNew() {
 		$this->result .= <<<HTML
 <h1>New Template</h1>
 <form action="" method="POST">
@@ -115,17 +107,15 @@ HTML;
 HTML;
 	}
 
-	private function postNew()
-	{
-		$name = $this->pdbc->quote($_POST['name']);
-		$content = $this->pdbc->quote($_POST['content']);
-		$this->pdbc->query('INSERT INTO `template` (`name`, `content`) values ("'. $name .'", "'. $content .'")');
+	private function postNew() {
+		$this->pdbc->query('INSERT INTO `template` (`name`, `content`) 
+							VALUES ("'. $this->pdbc->quote($_POST['name']) .
+								'", "'. $this->pdbc->quote($_POST['content']) .'")');
 
 		$this->redirectOverview();
 	}
 
-	private function getRemove()
-	{
+	private function getRemove() {
 		$id = $_GET['id'];
 		$base = $this->url->getURLDirectory();
 		$this->result .= <<<HTML
@@ -137,17 +127,14 @@ HTML;
 HTML;
 	}
 
-	private function postRemove()
-	{
-		$tid = $this->pdbc->quote($_GET['tid']);
-		$this->pdbc->query('DELETE FROM template WHERE `id` = "' . $tid .'"');
+	private function postRemove() {
+		$this->pdbc->query('DELETE FROM template WHERE `id` = "' . $this->pdbc->quote($_GET['tid']) .'"');
 
 		$this->getRemove();
 	}
 
 
-	private function redirectOverview()
-	{
+	private function redirectOverview() {
 		$base = $this->url->getURLDirectory();
 		$id = $_GET['id'];
 		throw new \Exception($base . "site?id={$id}&module=template", 301);

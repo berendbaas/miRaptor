@@ -9,7 +9,7 @@ namespace lib\module\stylesheet;
  */
 class Admin extends \lib\core\AbstractAdmin {
 	public function run() {
-		$request = ($_SERVER['REQUEST_METHOD'] == 'POST') ? 'POST' : 'GET';
+		$request = ($_SERVER['REQUEST_METHOD'] == 'GET') ? 'GET' : 'POST';
 		$action = !isset($_GET['action']) ? 'Overview' : $_GET['action'];
 
 		$function = $request . $action;
@@ -57,9 +57,10 @@ HTML;
 
 	private function getRemove() {
 		$id = $_GET['id'];
-		$tid = $this->pdbc->quote($_GET['tid']);
 		$base = $this->url->getURLDirectory();
+		$sheet = $this->pdbc->query('SELECT name from module_stylesheet WHERE id =' . $this->pdbc->quote($_GET['tid']))->fetch();
 		$this->result .= <<<HTML
+<p>You are about to remove the stylesheet {$sheet['name']}</p>
 <p>Are you sure you want to remove this stylesheet? This can not be undone!<p>
 <form action="" method="POST">
 	<a href="{$base}site?id={$id}&amp;module=stylesheet">Back</a>
@@ -69,21 +70,18 @@ HTML;
 	}
 
 	private function postRemove() {
-		$tid = $this->pdbc->quote($_GET['tid']);
-		$base = $this->url->getURLDirectory();
-		$this->pdbc->query('DELETE FROM module_stylesheet WHERE id ="'. $tid .'"');
+		$this->pdbc->query('DELETE FROM module_stylesheet WHERE id ="'. $this->pdbc->quote($_GET['tid']) .'"');
 
-		$id = $_GET['id'];
 		$this->redirectOverview();
 	}
 
 	private function getEdit(array $fields = array()) {
 		$base = $this->url->getURLDirectory();
-		$tid = $this->pdbc->quote($_GET['tid']);
 		$id = $_GET['id'];
+
 		$this->pdbc->query('SELECT * 
 							FROM module_stylesheet
-							WHERE id = "' . $tid . '"');
+							WHERE id = "' . $this->pdbc->quote($_GET['tid']) . '"');
 		$item = $this->pdbc->fetch();
 
 		$name = isset($fields['name']) ? $fields['name'] : $item['name'];
@@ -133,13 +131,11 @@ HTML;
 	}
 
 	private function postNew() {
-		$name = $this->pdbc->quote($_POST['name']);
-		$content = $this->pdbc->quote($_POST['content']);
-		$this->pdbc->query('INSERT INTO module_stylesheet (name, content) values ("'. $name .'", "'. $content .'")');
-	
+		$this->pdbc->query('INSERT 
+								INTO module_stylesheet (name, content) 
+								VALUES ("'. $this->pdbc->quote($_POST['name']) .
+									'", "'. $this->pdbc->quote($_POST['content']) .'")');
 
-		$base = $this->url->getURLDirectory();
-		$id = $_GET['id'];
 		$this->redirectOverview();
 	}
 

@@ -68,6 +68,7 @@ HTML;
 	<input type="text" name="name" />
 	<label for="content">Code</label>
 	<textarea name="content"></textarea>
+	<a href="{$base}?id={$id}&amp;module=block&amp;action=new">Add Block</a>
 	<input type="submit" />
 </form>
 HTML;
