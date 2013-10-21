@@ -1,5 +1,5 @@
 <?php
-namespace lib\module\admin;
+namespace lib\module\javascript;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -7,10 +7,11 @@ namespace lib\module\admin;
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class Install extends \lib\core\AbstractInstall {
+class Install extens \lib\core\AbstractInstall  {
 	public function run() {
-		$this->result = 'TODO admin install';
+		$this->result = 'TODO javascript install';
 	}
+
 }
 
 ?>

@@ -26,7 +26,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		$id = $_GET['id'];
 	
 		$this->result .= <<<HTML
-<h1>Pages</h1>
+<h1>Page</h1>
 <table>
 <tr>
 	<th>ID</th>
@@ -68,7 +68,6 @@ HTML;
 	{
 		$base = $this->url->getURLDirectory();
 		$id = $_GET['id'];
-		$pid = $this->pdbc->quote($_GET['pid']);
 		$this->pdbc->query('SELECT p.id as id, 
 								p.description as description, 
 								r.name as name, 
@@ -81,7 +80,7 @@ HTML;
 									ON r.id = p.rid 
 								INNER JOIN template AS t
 									ON t.id = r.tid
-							WHERE p.id = "'. $pid .'"');
+							WHERE p.id = "'. $this->pdbc->quote($_GET['pid']) .'"');
 		$item = $this->pdbc->fetch();
 
 		$name = isset($fields['name']) ? $fields['name'] : $item['name'];
@@ -121,11 +120,6 @@ HTML;
 
 	private function postEdit()
 	{
-
-		$pid = $this->pdbc->quote($_GET['pid']);
-		$content = $this->pdbc->quote($_POST['content']);
-		$name = $this->pdbc->quote($_POST['name']);
-
 		if(!$this->templateIDExists($_POST['template']))
 		{
 			$this->result .= <<<HTML
@@ -143,10 +137,10 @@ HTML;
 									ON r.id = p.rid
 								JOIN template AS t
 									ON t.id = r.tid
-								SET p.content = "'. $content .'",
-									r.name = "'. $name .'",
+								SET p.content = "'. $this->pdbc->quote($_POST['content']) .'",
+									r.name = "'. $this->pdbc->quote($_POST['name']) .'",
 									r.tid = '. $this->pdbc->quote($_POST['template']) .'
-								WHERE p.id = '. $pid);
+								WHERE p.id = '. $this->pdbc->quote($_GET['pid']));
 		if ($this->pdbc->rowCount() == 0) {
 			$this->result .= <<<HTML
 <p class="error">Failed to update page.</p>
@@ -163,6 +157,8 @@ HTML;
 	private function getNew(array $fields = array())
 	{
 		$base = $this->url->getURLDirectory();
+		$id = $_GET['id'];
+
 		$name = isset($fields['name']) ? $fields['name'] : "";
 		$template = isset($fields['template']) ? $fields['template'] : "";
 		$uri = isset($fields['uri']) ? $fields['uri'] : "";
@@ -189,24 +185,20 @@ HTML;
 	<textarea name="content">{$content}</textarea>
 
 	<input type="submit" />
-	<a href="">Back</a>
+	<a href="{$base}site?id={$id}&amp;module=page">Back</a>
 </form>
 HTML;
 	}
 
 	private function postNew()
 	{
-		$name = $this->pdbc->quote($_POST['name']);
-		$content = $this->pdbc->quote($_POST['content']);
-		$template = $this->pdbc->quote($_POST['template']);
-
 		if ($this->templateIDExists($_POST['template'])) {
 			$this->pdbc->query('INSERT INTO router (pid, name, uri, tid) 
 								VALUES (
 									0,
 									"'. $this->pdbc->quote($_POST['name']) .'",
 									"/'. $this->pdbc->quote(strtolower($_POST['name'])) .'/",
-									'. $template .'
+									'. $this->pdbc->quote($_POST['template']) .'
 									 )');
 
 			$this->pdbc->query('SELECT LAST_INSERT_ID() as id FROM router');
@@ -216,7 +208,7 @@ HTML;
 								VALUES (
 									'. $rid .',
 									"Description",
-									"'. $content .'"
+									"'. $this->pdbc->quote($_POST['content']) .'"
 									)');
 		}
 		else {
@@ -224,11 +216,12 @@ HTML;
 <p class="error">There was an error adding your page</p>
 HTML;
 			$this->getNew(array(
-				'name' => $name,
-				'content' => $content,
-				'template' => $template
+				'name' => $_POST['name'],
+				'content' => $_POST['content'],
+				'template' => $_POST['template']
 				));
 		}
+		
 		$id = $_GET['id'];
 		$base = $this->url->getURLDirectory();
 		throw new \Exception($base . "site?id={$id}&module=page", 301);
