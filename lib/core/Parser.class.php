@@ -108,8 +108,8 @@ class Parser implements Runnable {
 	}
 
 	public function run() {
-		while($token = $this->tokenizer->token()) {
-			$this->tokenizer->replace($this->module($token), $this->isParsable);
+		while(($token = $this->tokenizer->getToken()) != NULL) {
+			$this->tokenizer->replaceToken($this->module($token), $this->isParsable);
 		}
 	}
 

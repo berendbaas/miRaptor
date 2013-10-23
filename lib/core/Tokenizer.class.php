@@ -28,6 +28,8 @@ class Tokenizer {
 		$this->token = NULL;
 		$this->tokenStart = $tokenStart;
 		$this->tokenEnd = $tokenEnd;
+
+		$this->nextToken();
 	}
 
 	/**
@@ -40,51 +42,50 @@ class Tokenizer {
 	}
 
 	/**
+	 * Returns the first parsable token or NULL if none are found.
+	 *
+	 * @returns Token the first parsable token or NULL if none are found.
+	 */
+	public function getToken() {
+		return $this->token;
+	}
+
+	/**
 	 * Replace the first parsable token with the given content.
 	 *
 	 * @param  string  $replace = ''
 	 * @param  boolean $parsable = TRUE
 	 * @return void
 	 */
-	public function replace($replace = '', $parsable = TRUE) {
-		if($this->token == NULL) {
-			return;
-		}
+	public function replaceToken($replace = '', $parsable = TRUE) {
+		if($this->token != NULL) {
+			if($parsable) {
+				$this->input = $replace . $this->input;
+			} else {
+				$this->result .= $replace;
+			}
 
-		if($parsable) {
-			$this->input = $replace . $this->input;
-		} else {
-			$this->result .= $replace;
+			$this->nextToken();
 		}
-
-		$this->token = NULL;
 	}
 
 	/**
-	 * Returns the first parsable token or NULL if none are found.
+	 * Iterate to the next token in the input.
 	 *
-	 * @returns Token the first parsable token or NULL if none are found.
+	 * @return void
 	 */
-	public function token() {
-		if($this->input == '') {
-			return NULL;
+	private function nextToken() {
+		$buffer = preg_split('/(' . $this->tokenStart . '[\w\s="]+' . $this->tokenEnd . ')/i', $this->input, 2, PREG_SPLIT_DELIM_CAPTURE);
+
+		if(isset($buffer[2])) {
+			$this->input = $buffer[2];
+			$this->token = new Token($buffer[1], $this->tokenStart, $this->tokenEnd);
+		} else {
+			$this->input = '';
+			$this->token = NULL;
 		}
 
-		if($this->token == NULL) {
-			$tokens = array();
-
-			if(preg_match('/' . $this->tokenStart . '[\w\s="]+' . $this->tokenEnd .  '/i', $this->input, $tokens)) {
-				$this->token = new Token($tokens[0]);
-			} else {
-				$this->token = NULL;
-			}
-		}
-
-		$buffer = preg_split('/' . $this->tokenStart . '[\w\s="]+' . $this->tokenEnd . '/i', $this->input, 2);
-		$this->input = (isset($buffer[1]) ? $buffer[1] : '');
 		$this->result .= $buffer[0];
-
-		return $this->token;
 	}
 }
 
