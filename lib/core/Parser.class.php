@@ -20,9 +20,9 @@ class Parser implements Runnable {
 	private $routerID;
 	private $tokenizer;
 
-	private $isNamespace;
-	private $isParsable;
-	private $isStatic;
+	private $namespace;
+	private $parsable;
+	private $static;
 
 	/**
 	 * Construct a Parser object with the given PDBC & URL.
@@ -38,9 +38,9 @@ class Parser implements Runnable {
 		$this->routerID = $this->getRouterID();
 		$this->tokenizer = $this->getTokenizer();
 
-		$this->isNamespace = self::DEFAULT_NAMESPACE;
-		$this->isParsable = self::DEFAULT_PARSABLE;
-		$this->isStatic = self::DEFAULT_STATIC;
+		$this->namespace = self::DEFAULT_NAMESPACE;
+		$this->parsable = self::DEFAULT_PARSABLE;
+		$this->static = self::DEFAULT_STATIC;
 	}
 
 	/**
@@ -95,7 +95,7 @@ class Parser implements Runnable {
 	 * @return boolean true if the parsed data is namespaced.
 	 */
 	public function isNamespace() {
-		return $this->isNamespace;
+		return $this->namespace;
 	}
 
 	/**
@@ -104,12 +104,12 @@ class Parser implements Runnable {
 	 * @return boolean true if the parsed data is static.
 	 */
 	public function isStatic() {
-		return $this->isStatic;
+		return $this->static;
 	}
 
 	public function run() {
 		while(($token = $this->tokenizer->getToken()) != NULL) {
-			$this->tokenizer->replaceToken($this->module($token), $this->isParsable);
+			$this->tokenizer->replaceToken($this->module($token), $this->parsable);
 		}
 	}
 
@@ -122,15 +122,17 @@ class Parser implements Runnable {
 	 * @throws PDBCException       on PDBC failure.
 	 */
 	private function module(Token $token) {
+		// Run
 		$module = self::MODULE_NAMESPACE . $token->getName() . self::MODULE_CLASS;
-
 		$result = new $module($this->pdbc, $this->url, $this->routerID, $token->getArgs());
 		$result->run();
 
-		$this->isNamespace = $result->isNamespace() != self::DEFAULT_NAMESPACE ? $result->isNamespace() : $this->isNamespace;
-		$this->isParsable = $result->isParsable();
-		$this->isStatic = $result->isStatic() != self::DEFAULT_NAMESPACE ? $result->isStatic() : $this->isStatic;
+		// Vars
+		$this->namespace = $result->isNamespace() != self::DEFAULT_NAMESPACE ? $result->isNamespace() : $this->namespace;
+		$this->parsable = $result->isParsable();
+		$this->static = $result->isStatic() != self::DEFAULT_NAMESPACE ? $result->isStatic() : $this->static;
 
+		// Return
 		return $result->__toString();
 	}
 }
