@@ -69,12 +69,12 @@ class User {
 	}
 
 	/**
-	 * Returns the user ID if the user is logged in or 0 if the user is not logged in.
+	 * Returns the user ID if the user is logged in or -1 if the user is not logged in.
 	 *
-	 * @return boolean the user ID if the user is logged in or 0 if the user is not logged in.
+	 * @return int the user ID if the user is logged in or -1 if the user is not logged in.
 	 */
 	public function getID() {
-		return $this->isLoggedIn() ? $_SESSION['userId'] : 0;
+		return $this->isLoggedIn() ? $_SESSION['userId'] : -1;
 	}
 }
 
