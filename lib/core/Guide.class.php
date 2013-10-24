@@ -9,6 +9,7 @@ namespace lib\core;
  */
 class Guide implements Runnable {
 	const DEFAULT_FILE = 'index.html';
+	
 	const METHOD_GET = 'GET';
 	const METHOD_POST = 'POST';
 
