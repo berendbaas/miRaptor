@@ -1,5 +1,5 @@
 <?php
-namespace lib\core;
+namespace lib\html;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -7,8 +7,8 @@ namespace lib\core;
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class HTML {
-
+class HTMLTable {
+	// TODO
 }
 
 ?>
