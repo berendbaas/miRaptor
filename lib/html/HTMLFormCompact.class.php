@@ -8,13 +8,20 @@ namespace lib\html;
  * @version 1.0
  */
 class HTMLFormCompact extends HTMLForm {
-	public function button() {
+	public function addInput($title, $content = '', $attributes = array()) {
+		$this->result .= 'TODO';
 	}
 
-	public function input() {
+	public function addTextarea($title, $content = '', $attributes = array()) {
+		$this->result .= 'TODO';
 	}
 
-	public function textarea() {
+	public function addSelect($title, $list = array(), $attributes = array()) {
+		$this->result .= 'TODO';
+	}
+
+	public function addButton($title, $attributes = array()) {
+		$this->result .= 'TODO';
 	}
 }
 

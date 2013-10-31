@@ -8,10 +8,10 @@ namespace lib\html;
  * @version 1.0
  */
 abstract class HTMLForm {
-	private $method;
-	private $action;
-	private $fieldset;
-	private $result;
+	protected $method;
+	protected $action;
+	protected $fieldset;
+	protected $result;
 
 	/**
 	 * Construct an HTML form object with the given method & action.
@@ -23,7 +23,7 @@ abstract class HTMLForm {
 		$this->method = $method;
 		$this->action = $action;
 		$this->fieldset = FALSE;
-		$this->result = '';
+		$this->result = PHP_EOL;
 	}
 
 	/**
@@ -32,7 +32,7 @@ abstract class HTMLForm {
 	 * @return string the string representation of the HTML form object.
 	 */
 	public function __toString() {
-		return HTML::element('form', array('action' => $this->action, 'method' => $this->method), $this->result);
+		return HTML::element('form', array('action' => $this->action, 'method' => $this->method), $this->result) . PHP_EOL;
 	}
 
 	/**
@@ -45,7 +45,7 @@ abstract class HTMLForm {
 	}
 
 	/**
-	 * Open a fieldset if none are open.
+	 * Open a fieldset with the given legend, if none are open.
 	 *
 	 * @param  string $legend = '';
 	 * @return void
@@ -74,28 +74,43 @@ abstract class HTMLForm {
 	}
 
 	/**
-	 * Add a button to the current form.
-	 *
-	 * @param
-	 * @return void
-	 */
-	public abstract function button($content, $attributes = array(), $type = 'button');
-
-	/**
 	 * Add an input field to the current form.
 	 *
-	 * @param
+	 * @param  string $title
+	 * @param  string $content = ''
+	 * @param  array  $attributes = array()
 	 * @return void
 	 */
-	public abstract function input($content, $attributes = array());
+	public abstract function addInput($title, $content = '', $attributes = array());
 
 	/**
 	 * Add a textarea to the current form.
 	 *
-	 * @param
+	 * @param  string $title
+	 * @param  string $content = ''
+	 * @param  array  $attributes = array()
 	 * @return void
 	 */
-	public abstract function textarea($content, $attributes = array());
+	public abstract function addTextarea($title, $content = '', $attributes = array());
+
+	/**
+	 * Add a select box to the current form.
+	 *
+	 * @param  string $title
+	 * @param  array  $content = array()
+	 * @param  array  $attributes = array()
+	 * @return void
+	 */
+	public abstract function addSelect($title, $list = array(), $attributes = array());
+
+	/**
+	 * Add a button to the current form.
+	 *
+	 * @param  string $title
+	 * @param  array  $attributes = array()
+	 * @return void
+	 */
+	public abstract function addButton($title, $attributes = array());
 }
 
 ?>
