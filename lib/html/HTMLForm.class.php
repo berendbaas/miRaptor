@@ -30,7 +30,7 @@ abstract class HTMLForm {
 	}
 
 	/**
-	 * Open a fieldset with the given legend, if none are open.
+	 * Open a fieldset with the given legend.
 	 *
 	 * @param  string $legend = '';
 	 * @return void
@@ -44,7 +44,7 @@ abstract class HTMLForm {
 	}
 
 	/**
-	 * Close the fieldset if one is open.
+	 * Close a fieldset.
 	 *
 	 * @return void
 	 */
