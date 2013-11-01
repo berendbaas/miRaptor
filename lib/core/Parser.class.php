@@ -17,6 +17,7 @@ class Parser implements Runnable {
 
 	private $pdbc;
 	private $url;
+	private $access;
 	private $routerID;
 	private $tokenizer;
 
@@ -35,12 +36,26 @@ class Parser implements Runnable {
 	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
+		$this->access = $this->getAccess();
 		$this->routerID = $this->getRouterID();
 		$this->tokenizer = $this->getTokenizer();
 
 		$this->namespace = self::DEFAULT_NAMESPACE;
 		$this->parsable = self::DEFAULT_PARSABLE;
 		$this->static = self::DEFAULT_STATIC;
+	}
+
+	/**
+	 * Returns an array with modules you may use.
+	 *
+	 * @return array         an array with modules you may use.
+	 * @throws PDBCException on PDBC failure.
+	 */
+	private function getAccess() {
+		$this->pdbc->query('SELECT `name`
+		                    FROM `access`');
+
+		return $this->pdbc->fetchAll();
 	}
 
 	/**
@@ -122,6 +137,12 @@ class Parser implements Runnable {
 	 * @throws PDBCException       on PDBC failure.
 	 */
 	private function module(Token $token) {
+		// Access
+		if(!$this->hasAccess($token->getName())) {
+			$this->parsable = FALSE;
+			return $token->__toString();
+		}
+
 		// Run
 		$module = self::MODULE_NAMESPACE . $token->getName() . self::MODULE_CLASS;
 		$result = new $module($this->pdbc, $this->url, $this->routerID, $token->getArgs());
@@ -134,6 +155,22 @@ class Parser implements Runnable {
 
 		// Return
 		return $result->__toString();
+	}
+
+	/**
+	 * Returns true if you have access to use the given module.
+	 *
+	 * @param  string
+	 * @return boolean true if you have access to use the given module.
+	 */
+	private function hasAccess($name) {
+		foreach($this->access as $module) {
+			if($module['name'] == $name) {
+				return TRUE;
+			}
+		}
+
+		return FALSE;
 	}
 }
 
