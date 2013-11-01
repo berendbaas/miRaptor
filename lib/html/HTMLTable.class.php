@@ -27,35 +27,47 @@ class HTMLTable {
 	}
 
 	/**
-	 * Add the given header row to the table object.
+	 * Open a row.
 	 *
-	 * @param  array $columns
 	 * @return void
 	 */
-	public function addHeader(array $columns) {
+	public function openRow() {
 		$this->result .= '<tr>';
+	}
 
-		foreach($columns as $column) {
-			$this->result .= '<th>' . $column . '</th>';
-		}
-
+	/**
+	 * Close a row.
+	 *
+	 * @return void
+	 */
+	public function closeRow() {
 		$this->result .= '</tr>' . PHP_EOL;
 	}
 
 	/**
-	 * Add the given row to the table object.
+	 * Add the given header row to the table object.
 	 *
-	 * @param  array $columns
+	 * @param  array $row
 	 * @return void
 	 */
-	public function addRow(array $columns) {
-		$this->result .= '<tr>';
+	public function addHeaderRow(array $row) {
+		$this->openRow();
 
-		foreach($row as $columns) {
-			$this->result .= '<td>' . $column . '</td>';
+		foreach($row as $column) {
+			$this->addHeaderCollumn($column);
 		}
 
-		$this->result .= '</tr>' . PHP_EOL;
+		$this->closeRow();
+	}
+
+	/**
+	 * Add the given header collumn to the table object.
+	 *
+	 * @param  string $column
+	 * @return void
+	 */
+	public function addHeaderCollumn($column) {
+		$this->result .= '<th>' . $column . '</th>';
 	}
 
 	/**
@@ -70,4 +82,29 @@ class HTMLTable {
 		}
 	}
 
+	/**
+	 * Add the given row to the table object.
+	 *
+	 * @param  array $row
+	 * @return void
+	 */
+	public function addRow(array $row) {
+		$this->openRow();
+
+		foreach($row as $column) {
+			$this->addColumn($column);
+		}
+
+		$this->closeRow();
+	}
+
+	/**
+	 * Add the given column to the table object.
+	 *
+	 * @param  string 
+	 * @return void
+	 */
+	public function addColumn($column) {
+		$this->result .= '<td>' . $column . '</td>';
+	}
 }
