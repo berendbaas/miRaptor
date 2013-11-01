@@ -11,7 +11,6 @@ abstract class HTMLForm {
 	protected $method;
 	protected $action;
 	protected $fieldset;
-	protected $result;
 
 	/**
 	 * Construct an HTML form object with the given method & action.
@@ -36,29 +35,16 @@ abstract class HTMLForm {
 	}
 
 	/**
-	 * Returns true if the button, input, textarea and so on will be added in a fieldset.
-	 *
-	 * @return boolean true if the button, input, textarea and so on will be added in a fieldset.
-	 */
-	public function isFieldset() {
-		return $this->fieldset;
-	}
-
-	/**
 	 * Open a fieldset with the given legend, if none are open.
 	 *
 	 * @param  string $legend = '';
 	 * @return void
 	 */
-	public function fieldsetOpen($legend = '') {
-		if(!$this->fieldset) {
-			$this->result .= HTML::tagOpen('fieldset') . PHP_EOL;
+	public function openFieldset($legend = '') {
+		$this->result .= HTML::tagOpen('fieldset') . PHP_EOL;
 
-			if($legend != '') {
-				$this->result .= HTML::element('legend', array(), $legend) . PHP_EOL;
-			}
-
-			$this->fieldset = TRUE;
+		if($legend != '') {
+			$this->result .= HTML::element('legend', array(), $legend) . PHP_EOL;
 		}
 	}
 
@@ -67,21 +53,27 @@ abstract class HTMLForm {
 	 *
 	 * @return void
 	 */
-	public function fieldsetClose() {
-		if($this->fieldset) {
-			$this->result .= HTML::tagClose('fieldset') . PHP_EOL;
-		}
+	public function closeFieldset() {
+		$this->result .= HTML::tagClose('fieldset') . PHP_EOL;
+	}
+
+	/**
+	 * Add the given content to the current form.
+	 *
+	 * @param string $content
+	 */
+	public function addContent($content) {
+		$this->result .= $content;
 	}
 
 	/**
 	 * Add an input field to the current form.
 	 *
 	 * @param  string $title
-	 * @param  string $content = ''
 	 * @param  array  $attributes = array()
 	 * @return void
 	 */
-	public abstract function addInput($title, $content = '', $attributes = array());
+	public abstract function addInput($title, array $attributes = array());
 
 	/**
 	 * Add a textarea to the current form.
@@ -91,26 +83,26 @@ abstract class HTMLForm {
 	 * @param  array  $attributes = array()
 	 * @return void
 	 */
-	public abstract function addTextarea($title, $content = '', $attributes = array());
+	public abstract function addTextarea($title, $content = '', array $attributes = array());
+
+	/**
+	 * Add a button to the current form.
+	 *
+	 * @param  string $content = ''
+	 * @param  array  $attributes = array()
+	 * @return void
+	 */
+	public abstract function addButton($content = '', array $attributes = array());
 
 	/**
 	 * Add a select box to the current form.
 	 *
 	 * @param  string $title
-	 * @param  array  $content = array()
+	 * @param  array  $options = array()
 	 * @param  array  $attributes = array()
 	 * @return void
 	 */
-	public abstract function addSelect($title, $list = array(), $attributes = array());
-
-	/**
-	 * Add a button to the current form.
-	 *
-	 * @param  string $title
-	 * @param  array  $attributes = array()
-	 * @return void
-	 */
-	public abstract function addButton($title, $attributes = array());
+	public abstract function addSelect($title, array $options = array(), array $attributes = array());
 }
 
 ?>

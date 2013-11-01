@@ -35,7 +35,7 @@ class HTML {
 			$result .= ' ' . $key . '="' . $value . '"';
 		}
 
-		return $result . ($closing ? '/>' : '>');
+		return $result . ($closing ? ' />' : '>');
 	}
 
 	/**

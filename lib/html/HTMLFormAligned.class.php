@@ -8,20 +8,53 @@ namespace lib\html;
  * @version 1.0
  */
 class HTMLFormAligned extends HTMLForm {
-	public function addInput($title, $content = '', $attributes = array()) {
-		$this->result .= 'TODO';
+	/**
+	 * Returns the attributes of the label tag.
+	 *
+	 * @param array $attributes
+	 * @return array the attributes of the label tag.
+	 */
+	private function labelAttributes($attributes) {
+		$result = array();
+
+		if(isset($attributes['id'])) {
+			$result['for'] = $attributes['id'];
+		}
+
+		return $result;
 	}
 
-	public function addTextarea($title, $content = '', $attributes = array()) {
-		$this->result .= 'TODO';
+	private function addRow($row) {
+		$this->result .= HTML::element('div', array(), PHP_EOL . $row) . PHP_EOL;
 	}
 
-	public function addSelect($title, $list = array(), $attributes = array()) {
-		$this->result .= 'TODO';
+	public function addInput($title, array $attributes = array()) {
+		$this->addRow(HTML::element('label', $this->labelAttributes($attributes), $title) . PHP_EOL .
+		              HTML::tagOpen('input', $attributes, TRUE) . PHP_EOL);
 	}
 
-	public function addButton($title, $attributes = array()) {
-		$this->result .= 'TODO';
+	public function addTextarea($title, $content = '', array $attributes = array()) {
+		$this->addRow(HTML::element('label', $this->labelAttributes($attributes), $title) . PHP_EOL .
+		              HTML::element('textarea', $attributes, $content) . PHP_EOL);
+	}
+
+	public function addButton($content = '', array $attributes = array()) {
+		$this->addRow(HTML::element('button', $attributes, $content) . PHP_EOL);
+	}
+
+	public function addSelect($title, array $options = array(), array $attributes = array()) {
+		$content = PHP_EOL;
+
+		foreach($options as $optionKey => $optionValue) {
+			if(is_int($optionKey)) {
+				$content .= HTML::element('option', array(), $optionValue) . PHP_EOL;
+			} else {
+				$content .= HTML::element('option', $optionValue, $optionKey) . PHP_EOL;
+			}
+		}
+
+		$this->addRow(HTML::element('label', $this->labelAttributes($attributes), $title) . PHP_EOL .
+		              HTML::element('select', $attributes, $content) . PHP_EOL);
 	}
 }
 
