@@ -42,7 +42,7 @@ class Module extends \lib\core\AbstractModule {
 	private function parseContent() {
 		$this->pdbc->query('SELECT `content`
 		                    FROM `module_page`
-		                    WHERE `rid` = ' .  $this->pdbc->quote($this->routerID));
+		                    WHERE `id_router` = ' .  $this->pdbc->quote($this->routerID));
 
 		$content = $this->pdbc->fetch();
 
@@ -59,7 +59,7 @@ class Module extends \lib\core\AbstractModule {
 	private function parseDescription() {
 		$this->pdbc->query('SELECT `description`
 		                    FROM `module_page`
-		                    WHERE `id`=' .  $this->pdbc->quote($this->routerID));
+		                    WHERE `id_router`=' .  $this->pdbc->quote($this->routerID));
 
 		$description = $this->pdbc->fetch();
 

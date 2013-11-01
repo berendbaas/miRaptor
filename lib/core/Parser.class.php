@@ -73,7 +73,7 @@ class Parser implements Runnable {
 	private function getTokenizer() {
 		$this->pdbc->query('SELECT `content`
 		                    FROM `template`
-		                    WHERE `id` = (SELECT `tid`
+		                    WHERE `id` = (SELECT `id_template`
 		                                  FROM `router`
 	                                          WHERE `id` = "' . $this->pdbc->quote($this->routerID) . '")');
 
