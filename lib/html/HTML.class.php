@@ -17,7 +17,7 @@ class HTML {
 	 * @return string an HTML element with the given tag, attributes & content.
 	 */
 	public static function element($tag, array $attributes = array(), $content = '') {
-		return self::tagOpen($tag, $attributes) . $content . self::tagClose($tag);
+		return self::openTag($tag, $attributes) . $content . self::closeTag($tag);
 	}
 
 	/**
@@ -28,7 +28,7 @@ class HTML {
 	 * @param  boolean $closing
 	 * @return string  an HTML start tag with the given tag, attributes. You can also make the HTML tag self closing.
 	 */
-	public static function tagOpen($tag, array $attributes = array(), $closing = FALSE) {
+	public static function openTag($tag, array $attributes = array(), $closing = FALSE) {
 		$result = '<' . $tag;
 
 		foreach($attributes as $key => $value) {
@@ -44,7 +44,7 @@ class HTML {
 	 * @param  string $tag
 	 * @return string an HTML end tag with the given $tag.
 	 */
-	public static function tagClose($tag) {
+	public static function closeTag($tag) {
 		return '</' . $tag . '>';
 	}
 }
