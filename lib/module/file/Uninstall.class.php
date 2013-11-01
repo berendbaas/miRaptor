@@ -1,5 +1,5 @@
 <?php
-namespace lib\module\media;
+namespace lib\module\file;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -9,7 +9,7 @@ namespace lib\module\media;
  */
 class Uninstall extends \lib\core\AbstractUninstall {
 	public function run() {
-		$this->result = 'TODO media uninstall';
+		$this->result = 'TODO file uninstall';
 	}
 }
 

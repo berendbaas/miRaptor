@@ -1,5 +1,5 @@
 <?php
-namespace lib\module\media;
+namespace lib\module\file;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -7,9 +7,9 @@ namespace lib\module\media;
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-class Admin extends \lib\core\AbstractAdmin {
+class Install extends \lib\core\AbstractInstall {
 	public function run() {
-		$this->result = 'TODO media admin';
+		$this->result = 'TODO file install';
 	}
 }
 
