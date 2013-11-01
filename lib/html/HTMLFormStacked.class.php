@@ -25,12 +25,12 @@ class HTMLFormStacked extends HTMLForm {
 	}
 
 	public function addInput($title, array $attributes = array()) {
-		$this->result .= HTML::element('label', $this->labelAttributes($attributes), $title) . PHP_EOL .
-		                 HTML::tagOpen('input', $attributes, TRUE) . PHP_EOL;
+		$this->result .= $this->addLabel($title, $this->labelAttributes($attributes)) .
+		                 HTML::openTag('input', $attributes, TRUE) . PHP_EOL;
 	}
 
 	public function addTextarea($title, $content = '', array $attributes = array()) {
-		$this->result .= HTML::element('label', $this->labelAttributes($attributes), $title) . PHP_EOL .
+		$this->result .= $this->addLabel($title, $this->labelAttributes($attributes)) .
 		                 HTML::element('textarea', $attributes, $content) . PHP_EOL;
 	}
 
@@ -49,7 +49,7 @@ class HTMLFormStacked extends HTMLForm {
 			}
 		}
 
-		$this->result .= HTML::element('label', $this->labelAttributes($attributes), $title) . PHP_EOL .
+		$this->result .= $this->addLabel($title, $this->labelAttributes($attributes)) .
 		                 HTML::element('select', $attributes, $content) . PHP_EOL;
 	}
 }

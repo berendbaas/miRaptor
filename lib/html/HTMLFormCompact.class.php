@@ -9,7 +9,7 @@ namespace lib\html;
  */
 class HTMLFormCompact extends HTMLForm {
 	public function addInput($title, array $attributes = array()) {
-		$this->result .= HTML::tagOpen('input', $attributes, TRUE) . PHP_EOL;
+		$this->result .= HTML::openTag('input', $attributes, TRUE) . PHP_EOL;
 	}
 
 	public function addTextarea($title, $content = '', array $attributes = array()) {

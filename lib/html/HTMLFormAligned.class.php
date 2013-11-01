@@ -31,16 +31,16 @@ class HTMLFormAligned extends HTMLForm {
 	 * @return void
 	 */
 	private function addRow($row) {
-		$this->result .= HTML::element('div', array(), PHP_EOL . $row) . PHP_EOL;
+		$this->result .= '<div>' . $row . '</div>' . PHP_EOL;
 	}
 
 	public function addInput($title, array $attributes = array()) {
-		$this->addRow(HTML::element('label', $this->labelAttributes($attributes), $title) . PHP_EOL .
-		              HTML::tagOpen('input', $attributes, TRUE) . PHP_EOL);
+		$this->addRow($this->addLabel($title, $this->labelAttributes($attributes)) .
+		              HTML::openTag('input', $attributes, TRUE) . PHP_EOL);
 	}
 
 	public function addTextarea($title, $content = '', array $attributes = array()) {
-		$this->addRow(HTML::element('label', $this->labelAttributes($attributes), $title) . PHP_EOL .
+		$this->addRow($this->addLabel($title, $this->labelAttributes($attributes)) .
 		              HTML::element('textarea', $attributes, $content) . PHP_EOL);
 	}
 
@@ -59,7 +59,7 @@ class HTMLFormAligned extends HTMLForm {
 			}
 		}
 
-		$this->addRow(HTML::element('label', $this->labelAttributes($attributes), $title) . PHP_EOL .
+		$this->addRow($this->addLabel($title, $this->labelAttributes($attributes)) .
 		              HTML::element('select', $attributes, $content) . PHP_EOL);
 	}
 }

@@ -8,9 +8,7 @@ namespace lib\html;
  * @version 1.0
  */
 abstract class HTMLForm {
-	protected $method;
-	protected $action;
-	protected $fieldset;
+	protected $result;
 
 	/**
 	 * Construct an HTML form object with the given method & action.
@@ -19,10 +17,7 @@ abstract class HTMLForm {
 	 * @param string $action = ''
 	 */
 	public function __construct($method = 'post', $action = '') {
-		$this->method = $method;
-		$this->action = $action;
-		$this->fieldset = FALSE;
-		$this->result = PHP_EOL;
+		$this->result = '<form method="' . $method . '" action"' . $action . '">' . PHP_EOL;
 	}
 
 	/**
@@ -31,7 +26,7 @@ abstract class HTMLForm {
 	 * @return string the string representation of the HTML form object.
 	 */
 	public function __toString() {
-		return HTML::element('form', array('action' => $this->action, 'method' => $this->method), $this->result) . PHP_EOL;
+		return $this->result . '</form>' . PHP_EOL;
 	}
 
 	/**
@@ -41,10 +36,10 @@ abstract class HTMLForm {
 	 * @return void
 	 */
 	public function openFieldset($legend = '') {
-		$this->result .= HTML::tagOpen('fieldset') . PHP_EOL;
+		$this->result .= '<fieldset>' . PHP_EOL;
 
 		if($legend != '') {
-			$this->result .= HTML::element('legend', array(), $legend) . PHP_EOL;
+			$this->result .= '<legend>' . $legend . '</legend>' . PHP_EOL;
 		}
 	}
 
@@ -54,7 +49,7 @@ abstract class HTMLForm {
 	 * @return void
 	 */
 	public function closeFieldset() {
-		$this->result .= HTML::tagClose('fieldset') . PHP_EOL;
+		$this->result .= '</fieldset>' . PHP_EOL;
 	}
 
 	/**
@@ -63,7 +58,18 @@ abstract class HTMLForm {
 	 * @param string $content
 	 */
 	public function addContent($content) {
-		$this->result .= $content;
+		$this->result .= $content . PHP_EOL;
+	}
+
+	/**
+	 * Add a label to the current form.
+	 *
+	 * @param  string $content
+	 * @param  string for
+	 * @return void
+	 */
+	public function addLabel($content, array $attributes = array()) {
+		$this->result .= HTML::element('label', $attributes, $content) . PHP_EOL;
 	}
 
 	/**
