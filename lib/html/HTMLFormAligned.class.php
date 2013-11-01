@@ -24,6 +24,12 @@ class HTMLFormAligned extends HTMLForm {
 		return $result;
 	}
 
+	/**
+	 * Add the given row to the form and wrap it in a HTML div element.
+	 *
+	 * @param string $row
+	 * @return void
+	 */
 	private function addRow($row) {
 		$this->result .= HTML::element('div', array(), PHP_EOL . $row) . PHP_EOL;
 	}
