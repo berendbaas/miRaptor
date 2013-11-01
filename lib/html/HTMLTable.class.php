@@ -10,57 +10,63 @@ namespace lib\html;
 class HTMLTable {
 	private $result;
 
-
 	/**
-	 * Construct a new HTML table
+	 * Construct a new HTML table object.
 	 */
 	public function __construct() {
-		$this->result .= '<table>';
+		$this->result .= '<table>' . PHP_EOL;
 	}
 
 	/**
-	 * returns the string representation of the HTML table object.
+	 * Returns the string representation of the HTML table object.
+	 *
 	 * @return string The string representation of the HTML table object.
 	 */
 	public function __toString() {
-		$this->result .= '</table>';
-		return $this->result;
+		return $this->result . '</table>' . PHP_EOL;
 	}
 
 	/**
-	 * Adds an row of header columns to the table
-	 * @param array $columns [description]
-	 * @return void 
+	 * Add the given header row to the table object.
+	 *
+	 * @param  array $columns
+	 * @return void
 	 */
 	public function addHeader(array $columns) {
 		$this->result .= '<tr>';
-		foreach ($columns as $column) {
-			$this->result .= "<th>" . $column . "</th>";
+
+		foreach($columns as $column) {
+			$this->result .= '<th>' . $column . '</th>';
 		}
-		$this->result .= '</tr>';
+
+		$this->result .= '</tr>' . PHP_EOL;
 	}
 
 	/**
-	 * Add a row to the table
-	 * @param array $row row of columns
+	 * Add the given row to the table object.
+	 *
+	 * @param  array $columns
 	 * @return void
 	 */
-	public function addRow(array $row) {
+	public function addRow(array $columns) {
 		$this->result .= '<tr>';
-		foreach ($row as $columns) {
+
+		foreach($row as $columns) {
 			$this->result .= '<td>' . $column . '</td>';
 		}
-		$this->result .= '</tr>';
+
+		$this->result .= '</tr>' . PHP_EOL;
 	}
 
 	/**
-	 * Add rows to the current table
-	 * @param array $rows array of arrays containing the fields
+	 * Add the given rows to the table object.
+	 *
+	 * @param  array $rows
 	 * @return void 
 	 */
 	public function addRows(array $rows) {
-		foreach ($rows as $row) {
-			$this->addRow($row);
+		foreach($rows as $columns) {
+			$this->addRow($columns);
 		}
 	}
 
