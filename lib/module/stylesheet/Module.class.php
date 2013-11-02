@@ -32,7 +32,7 @@ HTML;
 			return $id;
 		}
 
-		throw new \Exception('get="" required');
+		throw new \Exception('id="" required');
 	}
 }
 
