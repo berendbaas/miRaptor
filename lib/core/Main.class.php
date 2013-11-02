@@ -16,8 +16,8 @@ class Main implements Runnable {
 	/**
 	 * Construct a Main object with the given config.
 	 *
-	 * @param array $config
-	 * @throws PDBCException on failure.
+	 * @param  array                   $config
+	 * @throws \lib\pdbc\PDBCException if you can't connected to the database with the given credentials.
 	 */
 	public function __construct(array $config) {
 		$this->pdbc = $this->initPDBC($config['pdbc']);
@@ -29,9 +29,9 @@ class Main implements Runnable {
 	/**
 	 * Returns a PDBC object.
 	 *
-	 * @param  array          $config
-	 * @return \lib\pdbc\PDBC a PDBC object.
-	 * @throws PDBCException  on failure.
+	 * @param  array                   $config
+	 * @return \lib\pdbc\PDBC          a PDBC object.
+	 * @throws \lib\pdbc\PDBCException if you can't connected to the database with the given credentials.
 	 */
 	public function initPDBC(Array $config) {
 		$pdbc = new \lib\pdbc\Mysql($config['hostname'], $config['username'], $config['password']);
@@ -88,7 +88,7 @@ class Main implements Runnable {
 	 * Log time & request related data.
 	 *
 	 * @return void
-	 * @throws PDBCException on failure.
+	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
 	private function log() {
 		// Time

@@ -14,10 +14,10 @@ class Gatekeeper {
 	/**
 	 * Construct a Gatekeeper object with the given PDBC & URL.
 	 *
-	 * @param  \lib\pdbc\PDBC      $pdbc
-	 * @param  URL                 $url
-	 * @throws StatusCodeException on failure.
-	 * @throws PDBCException       on PDBC failure.
+	 * @param  \lib\pdbc\PDBC          $pdbc
+	 * @param  URL                     $url
+	 * @throws StatusCodeException     if the file isn't found at the current location or if the user doesn't exists.
+	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
 	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url) {
 		// Get website location & database
@@ -32,11 +32,11 @@ class Gatekeeper {
 	/**
 	 * Returns an array with the user ID, location & database of the host.
 	 *
-	 * @param  \lib\pdbc\PDBC      $pdbc
-	 * @param  URL                 $url
-	 * @return array               an array with the user ID, location & database of the host.
-	 * @throws StatusCodeException on failure.
-	 * @throws PDBCException       on PDBC failure.
+	 * @param  \lib\pdbc\PDBC          $pdbc
+	 * @param  URL                     $url
+	 * @return array                   an array with the user ID, location & database of the host.
+	 * @throws StatusCodeException     if the file isn't found at the current location.
+	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
 	private function getHost(\lib\pdbc\PDBC $pdbc, URL $url) {
 		$pdbc->query('SELECT `uid`,`location`,`db`
@@ -56,11 +56,11 @@ class Gatekeeper {
 	/**
 	 * This function helps getHost() determines whether he has to throw a 301 or 404 exception.
 	 *
-	 * @param  \lib\pdbc\PDBC      $pdbc
-	 * @param  URL                 $url
+	 * @param  \lib\pdbc\PDBC          $pdbc
+	 * @param  URL                     $url
 	 * @return void
-	 * @throws StatusCodeException on failure.
-	 * @throws PDBCException       on PDBC failure.
+	 * @throws StatusCodeException     if the file isn't found at the current location.
+	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
 	private function getHostException(\lib\pdbc\PDBC $pdbc, URL $url) {
 		$pdbc->query('SELECT `website`.`domain`, `redirect`.`path`
@@ -82,12 +82,12 @@ class Gatekeeper {
 	/**
 	 * Returns the user location.
 	 *
-	 * @param  \lib\pdbc\PDBC      $pdbc
-	 * @param  URL                 $url
-	 * @param  int                 $id
-	 * @return string              the user location.
-	 * @throws StatusCodeException on failure.
-	 * @throws PDBCException       on PDBC failure.
+	 * @param  \lib\pdbc\PDBC          $pdbc
+	 * @param  URL                     $url
+	 * @param  int                     $id
+	 * @return string                  the user location.
+	 * @throws StatusCodeException     if the user doesn't exists.
+	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
 	private function getUser(\lib\pdbc\PDBC $pdbc, URL $url, $id) {
 		$pdbc->query('SELECT `location`

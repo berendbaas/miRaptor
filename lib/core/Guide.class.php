@@ -52,8 +52,7 @@ class Guide implements Runnable {
 	 * Echos the static page.
 	 *
 	 * @return void
-	 * @throws StatusCodeException on failure.
-	 * @throws PDBCException   on PDBC failure.
+	 * @throws StatusCodeException if the requested file isn't modified.
 	 */
 	private function getPage() {
 		// Header parse
@@ -75,6 +74,7 @@ class Guide implements Runnable {
 	/**
 	 * Returns true if the file is modified.
 	 *
+	 * @param  int     $lastModified
 	 * @return boolean true if the file is modified.
 	 */
 	private function isModified($lastModified) {
@@ -88,10 +88,10 @@ class Guide implements Runnable {
 	/**
 	 * Echos the dynamic page.
 	 *
-	 * @global boolean             MIRAPTOR_CACHE
+	 * @global boolean                 MIRAPTOR_CACHE
 	 * @return void
-	 * @throws StatusCodeException on failure.
-	 * @throws PDBCException   on PDBC failure.
+	 * @throws StatusCodeException     if the requested file can't be parsed.
+	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
 	private function parsePage() {
 		// Header

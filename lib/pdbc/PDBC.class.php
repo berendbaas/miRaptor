@@ -11,10 +11,10 @@ interface PDBC {
 	/**
 	 * Construct a PDBC object. A database connection is made with the given hostname, username & password.
 	 * 
-	 * @param  String $hostname
-	 * @param  String $username
-	 * @param  String $password
-	 * @throws Exception on failure.
+	 * @param  String        $hostname
+	 * @param  String        $username
+	 * @param  String        $password
+	 * @throws PDBCException if you can't connected to the database with the given credentials.
 	 */
 	public function __construct($hostname, $username, $password);
 
@@ -26,43 +26,41 @@ interface PDBC {
 	/**
 	 * Try to select the given database.
 	 *
-	 * @param  String $database
+	 * @param  String        $database
 	 * @return void
-	 * @throws Exception on failure.
+	 * @throws PDBCException if the given database can't select the database.
 	 */
 	public function selectDatabase($database);
 
 	/**
 	 * Returns a quoted string that is safe to pass into an SQL statement.
 	 *
-	 * @param  String $string
-	 * @return String a quoted string that is safe to pass into an SQL statement.
-	 * @throws Exception on failure.
+	 * @param  String        $string
+	 * @return String        a quoted string that is safe to pass into an SQL statement.
+	 * @throws PDBCException if the given string can't be quoted.
 	 */
 	public function quote($string);
 
 	/**
 	 * Returns this object and executes the given query.
 	 *
-	 * @param  String $query
-	 * @return PDBC this object and executes the given query.
-	 * @throws Exception on failure.
+	 * @param  String        $query
+	 * @return PDBC          this object and executes the given query.
+	 * @throws PDBCException if the given query can't be executed.
 	 */
 	public function query($query);
 
 	/**
-	 * Returns an array indexed by column name as returned in your result set.
+	 * Returns an array indexed by column name or an empty array there is nothing to fetch.
 	 *
-	 * @return Array an array indexed by column name as returned in your result set.
-	 * @throws Exception on failure.
+	 * @return Array an array indexed by column name or an empty array there is nothing to fetch.
 	 */
 	public function fetch();
 
 	/**
-	 * Returns an array containing all remaining rows indexed by column name as returned in your result set.
+	 * Returns an array containing all remaining rows indexed by column name or an empty array there is nothing to fetch.
 	 *
-	 * @return Array an array containing all remaining rows indexed by column name as returned in your result set.
-	 * @throws Exception on failure.
+	 * @return Array an array containing all remaining rows indexed by column name or an empty array there is nothing to fetch.
 	 */
 	public function fetchAll();
 

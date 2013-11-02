@@ -12,7 +12,7 @@ interface Runnable {
 	 * Run a separate part of the program. We use this abstraction to make a clear distinction between tasks.
 	 *
 	 * @return void
-	 * @throws \Exception implementations may throw exceptions and are ought to be documented properly.
+	 * @throws \Exception implementations of the Runnable interface may throw exceptions or implementations of the Exception class and are ought to be documented properly.
 	 */
 	public function run();
 }

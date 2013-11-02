@@ -29,10 +29,11 @@ class User {
 	/**
 	 * Returns true if the user can successfully login with the given credentials.
 	 *
-	 * @param  \lib\pdbc\PDBC $pdbc
-	 * @param  string         $username
-	 * @param  string         $password
-	 * @return boolean        true if the user can successfully login with the given credentials.
+	 * @param  \lib\pdbc\PDBC          $pdbc
+	 * @param  string                  $username
+	 * @param  string                  $password
+	 * @return boolean                 true if the user can successfully login with the given credentials.
+	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
 	public function login(\lib\pdbc\PDBC $pdbc, $username, $password) {
 		$pdbc->query('SELECT `id`
