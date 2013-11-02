@@ -50,7 +50,7 @@ class Module extends \lib\core\AbstractModule {
 		// Get router
 		$this->pdbc->query('SELECT `id`,`name`,`uri`
 		                    FROM `router`
-		                    WHERE `pid` = ' . $pid . '
+		                    WHERE `pid` ' . ($pid == 0 ? 'IS NULL' : '= ' . $pid) . '
 		                    ORDER BY `index` ASC');
 
 		$router = $this->pdbc->fetchAll();
@@ -67,7 +67,7 @@ class Module extends \lib\core\AbstractModule {
 			$current = ($this->routerID == $route['id'] ? ' class="current"' : '');
 
 			$result .= PHP_EOL . <<<HTML
-<li {$current}><a href="{$route['uri']}">{$route['name']}</a>{$this->parseMenu($route['id'], ($depth - 1))}</li>
+<li{$current}><a href="{$route['uri']}">{$route['name']}</a>{$this->parseMenu($route['id'], ($depth - 1))}</li>
 HTML;
 		}
 
