@@ -54,6 +54,10 @@ abstract class ModuleHandleAbstract {
 		throw new \Exception('Get="" must be given.');
 	}
 
+	protected function hasAccess() {
+
+	}
+
 	/**
 	 *
 	 */

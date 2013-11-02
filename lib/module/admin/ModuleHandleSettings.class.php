@@ -12,9 +12,6 @@ class ModuleHandleSettings extends ModuleHandleAbstract {
 	const EDIT_PASSWORD = 'password';
 	const EDIT_MAIL = 'mail';
 
-	/**
-	 *
-	 */
 	public function content() {
 		if (isset($_GET[self::EDIT])) {
 			switch ($_GET[self::EDIT]) {
@@ -117,9 +114,6 @@ HTML;
 		return $result;
 	}
 
-	/**
-	 *
-	 */
 	public function logBox() {
 		$logout = $this->url->getDirectory() . Module::PAGE_LOGOUT;
 
@@ -130,9 +124,6 @@ HTML;
 HTML;
 	}
 
-	/**
-	 *
-	 */
 	public function menu() {
 		$overview = $this->url->getDirectory() . Module::PAGE_OVERVIEW;
 		$settings = $this->url->getDirectory() . Module::PAGE_SETTINGS;

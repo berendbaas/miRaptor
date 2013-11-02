@@ -38,9 +38,6 @@ class ModuleHandleSite extends ModuleHandleAbstract {
 		$this->pdbc->selectDatabase(end($db));
 	}
 
-	/**
-	 *
-	 */
 	public function content() {
 		if($this->hasAccessModule()) {
 			$module = self::ADMIN_NAMESPACE . $_GET['module'] . self::ADMIN_CLASS;
@@ -71,9 +68,6 @@ class ModuleHandleSite extends ModuleHandleAbstract {
 		return !empty($id);
 	}
 
-	/**
-	 *
-	 */
 	public function logBox() {
 		$overview = $this->url->getDirectory() . Module::PAGE_OVERVIEW;
 		$logout = $this->url->getDirectory() . Module::PAGE_LOGOUT;
@@ -86,9 +80,6 @@ class ModuleHandleSite extends ModuleHandleAbstract {
 HTML;
 	}
 
-	/**
-	 *
-	 */
 	public function menu() {
 		$this->pdbc->query('SELECT `name` FROM `access`');
 

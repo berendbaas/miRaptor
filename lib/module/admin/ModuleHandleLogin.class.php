@@ -8,9 +8,6 @@ namespace lib\module\admin;
  * @version 1.0
  */
 class ModuleHandleLogin extends ModuleHandleAbstract {
-	/**
-	 *
-	 */
 	public function content() {
 		$message = '';
 
@@ -35,17 +32,11 @@ HTML;
 HTML;
 	}
 
-	/**
-	 *
-	 */
 	public function logBox() {
 		return <<<HTML
 HTML;
 	}
 
-	/**
-	 *
-	 */
 	public function menu() {
 		return <<<HTML
 HTML;

@@ -8,24 +8,15 @@ namespace lib\module\admin;
  * @version 1.0
  */
 class ModuleHandleLogout extends ModuleHandleAbstract {
-	/**
-	 *
-	 */
 	public function content() {
 		$this->user->logout();
 		throw new \Exception($this->url->getURLDirectory() . Module::PAGE_LOGIN, 301);
 	}
 
-	/**
-	 *
-	 */
 	public function logBox() {
 		$this->content();
 	}
-
-	/**
-	 *
-	 */
+	
 	public function menu() {
 		$this->content();
 	}

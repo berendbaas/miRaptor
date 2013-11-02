@@ -12,9 +12,6 @@ class ModuleHandleOverview extends ModuleHandleAbstract {
 	const ACTION_DOMAIN = 'domain';
 	const ACTION_ACTIVE = 'active';
 
-	/**
-	 *
-	 */
 	public function content() {
 		if(isset($_GET['action']) && isset($_GET['id'])) {
 			$id = intval($_GET['id']);
@@ -181,9 +178,6 @@ HTML;
 HTML;
 	}
 
-	/**
-	 *
-	 */
 	public function logBox() {
 		$logout = $this->url->getDirectory() . Module::PAGE_LOGOUT;
 
@@ -194,9 +188,6 @@ HTML;
 HTML;
 	}
 
-	/**
-	 *
-	 */
 	public function menu() {
 		$overview = $this->url->getDirectory() . Module::PAGE_OVERVIEW;
 		$settings = $this->url->getDirectory() . Module::PAGE_SETTINGS;
