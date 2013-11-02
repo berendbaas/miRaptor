@@ -25,7 +25,7 @@ When contributing to the codebase, please keep the following style guidelines fo
 - Function and variables are camelCased.
 - Opening brackets come behind function declaration and statements.
 - Constants are capitalized.
-- Default indentation is a tab.
+- Default indentation is a tab, but non-leading tabs are evil.
 - strings are single-quoted.
 - HTML arguments are double-quoted.
 - HTML is heredocs (<<<HTML)
