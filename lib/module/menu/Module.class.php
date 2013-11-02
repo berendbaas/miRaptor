@@ -8,18 +8,34 @@ namespace lib\module\menu;
  * @version 1.0
  */
 class Module extends \lib\core\AbstractModule {
+	const DEFAULT_DEPTH = -1;
+	const DEFAULT_URI = '/';
+
 	public function run() {
-		$this->result = $this->parseMenu($this->parseId(), $this->parseDepth());
+		// $this->result = $this->getMenu($this->parseId($this->parseURI()), $this->parseDepth());
 	}
 
 	/**
 	 *
 	 */
-	private function parseId() {
-		if(isset($this->arguments['id'])) {
-			$id = intval($this->arguments['id']);
+	private function parseURI() {
+		if(isset($this->arguments['uri'])) {
+			return $this->arguments['uri'];
+		}
 
-			return ($id < 0) ? $this->routerID : $id;
+		return self::DEFAULT_URI;
+	}
+
+	/**
+	 *
+	 */
+	private function parseID($uri) {
+		$this->pdbc->query('');
+
+		$id = $this->fetch();
+
+		if(!$id) {
+			throw new \Exception();
 		}
 
 		return 0;
@@ -32,16 +48,16 @@ class Module extends \lib\core\AbstractModule {
 		if(isset($this->arguments['depth'])) {
 			$depth = intval($this->arguments['depth']);
 
-			return ($depth < 1) ? -1 : $depth;
+			return ($depth < 1) ? self::DEFAULT_DEPTH : $depth;
 		}
 
-		return -1;
+		return self::DEFAULT_DEPTH;
 	}
 
 	/**
 	 *
 	 */
-	private function parseMenu($pid, $depth) {
+	private function getMenu($pid, $depth) {
 		// Check depth
 		if($depth == 0) {
 			return '';
@@ -67,7 +83,7 @@ class Module extends \lib\core\AbstractModule {
 			$current = ($this->routerID == $route['id'] ? ' class="current"' : '');
 
 			$result .= PHP_EOL . <<<HTML
-<li{$current}><a href="{$route['uri']}">{$route['name']}</a>{$this->parseMenu($route['id'], ($depth - 1))}</li>
+<li><a{$current} href="{$route['uri']}">{$route['name']}</a>{$this->parseMenu($route['id'], ($depth - 1))}</li>
 HTML;
 		}
 

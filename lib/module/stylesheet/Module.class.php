@@ -8,31 +8,69 @@ namespace lib\module\stylesheet;
  * @version 1.0
  */
 class Module extends \lib\core\AbstractModule {
+	const DEFAULT_GROUP = '';
+
 	public function run() {
+		$this->result = $this->getStylesheet($this->parseName(), $this->parseGroup());
+	}
+
+	/**
+	 * Returns the name argument, if one is given.
+	 *
+	 * @return string                    the name argument, if one is given.
+	 * @throws \lib\core\ModuleException if the name argument isn't given.
+	 */
+	private function parseName() {
+		if(isset($this->arguments['name'])) {
+			return $this->arguments['name'];
+		}
+
+		throw new \ModuleException('name="" required.');
+	}
+
+	/**
+	 * Returns the group argument or the default argument, if none is given.
+	 *
+	 * @return string the group argument or the default argument, if none is given.
+	 */
+	private function parseGroup() {
+		if(isset($this->arguments['group'])) {
+			return $this->arguments['group'];
+		}
+
+		return self::DEFAULT_GROUP;
+	}
+
+	/**
+	 * Returns the stylesheet with the given name and group.
+	 *
+	 * @param  string                    $name
+	 * @param  string                    $group = ''
+	 * @return string                    the stylesheet with the given name and group.
+	 * @throws \lib\core\ModuleException if there is no stylesheet for the given name & group.
+	 * @throws \lib\pdbc\PDBCException   if the given query can't be executed.
+	 */
+	private function getStylesheet($name, $group = self::DEFAULT_GROUP) {
 		$this->pdbc->query('SELECT `name`, `content`
 		                    FROM `module_stylesheet`
-		                    WHERE `id` = ' . $this->parseID());
+		                    WHERE `name` = "' . $this->pdbc->quote($name) . '"
+		                    AND `id_group` ' . ($group == self::DEFAULT_GROUP ? 'is NULL' : '= (SELECT `id`
+		                                                                                        FROM `group`
+		                                                                                        WHERE `name` = "' . $this->pdbc->quote($group) . '")'));
 
 		$stylesheet = $this->pdbc->fetch();
 
-		$this->result = <<<HTML
+		if(!$stylesheet) {
+			throw new \lib\core\ModuleException('name="' . $name . '" does not exists.');
+		}
+
+		return <<<HTML
 <style>
 /* {$stylesheet['name']} start */
 {$stylesheet['content']}
 /* {$stylesheet['name']} end */
 </style>
 HTML;
-	}
-
-	/**
-	 *
-	 */
-	private function parseID() {
-		if(isset($this->arguments['id']) && ($id = intval($this->arguments['id'])) != 0) {
-			return $id;
-		}
-
-		throw new \Exception('id="" required');
 	}
 }
 
