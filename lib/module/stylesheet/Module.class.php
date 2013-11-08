@@ -10,6 +10,11 @@ namespace lib\module\stylesheet;
 class Module extends \lib\core\AbstractModule {
 	const DEFAULT_GROUP = '';
 
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $routerID, array $arguments) {
+			parent::__construct($pdbc, $url, $routerID, $arguments);
+			$this->isStatic = TRUE;
+	}
+
 	public function run() {
 		$this->result = $this->getStylesheet($this->parseName(), $this->parseGroup());
 	}
@@ -25,7 +30,7 @@ class Module extends \lib\core\AbstractModule {
 			return $this->arguments['name'];
 		}
 
-		throw new \ModuleException('name="" required.');
+		throw new \lib\core\ModuleException('name="" required.');
 	}
 
 	/**
@@ -51,7 +56,7 @@ class Module extends \lib\core\AbstractModule {
 	 * @throws \lib\pdbc\PDBCException   if the given query can't be executed.
 	 */
 	private function getStylesheet($name, $group = self::DEFAULT_GROUP) {
-		$this->pdbc->query('SELECT `name`, `content`
+		$this->pdbc->query('SELECT `content`
 		                    FROM `module_stylesheet`
 		                    WHERE `name` = "' . $this->pdbc->quote($name) . '"
 		                    AND `id_group` ' . ($group == self::DEFAULT_GROUP ? 'is NULL' : '= (SELECT `id`
@@ -66,9 +71,9 @@ class Module extends \lib\core\AbstractModule {
 
 		return <<<HTML
 <style>
-/* {$stylesheet['name']} start */
+/* {$name} start */
 {$stylesheet['content']}
-/* {$stylesheet['name']} end */
+/* {$name} end */
 </style>
 HTML;
 	}
