@@ -20,8 +20,8 @@ class Main implements Runnable {
 	 * @throws \lib\pdbc\PDBCException if you can't connected to the database with the given credentials.
 	 */
 	public function __construct(array $config) {
-		$this->pdbc = $this->initPDBC($config['pdbc']);
-		$this->url = $this->initURL($config['main']['default_host']);
+		$this->pdbc = self::initPDBC($config['pdbc']);
+		$this->url = self::initURL($config['main']['default_host']);
 		$this->location = $config['main']['user_location'];
 		$this->statusCode = StatusCodeException::SUCCESFULL_OK;
 	}
@@ -33,7 +33,7 @@ class Main implements Runnable {
 	 * @return \lib\pdbc\PDBC          a PDBC object.
 	 * @throws \lib\pdbc\PDBCException if you can't connected to the database with the given credentials.
 	 */
-	public function initPDBC(Array $config) {
+	public static function initPDBC(Array $config) {
 		$pdbc = new \lib\pdbc\Mysql($config['hostname'], $config['username'], $config['password']);
 		$pdbc->selectDatabase($config['database']);
 
@@ -46,7 +46,7 @@ class Main implements Runnable {
 	 * @param  string $defaultHost
 	 * @return URL    a URL object.
 	 */
-	public function initURL($defaultHost) {
+	public static function initURL($defaultHost) {
 		$scheme = isset($_SERVER['HTTPS']) ? 'https' : 'http';
 		$host = empty($_SERVER['HTTP_HOST']) ? $defaultHost : $_SERVER['HTTP_HOST'];
 

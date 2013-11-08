@@ -21,8 +21,8 @@ class Gatekeeper {
 	 */
 	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url) {
 		// Get website location & database
-		$host = $this->getHost($pdbc, $url);
-		$location = $this->getUser($pdbc, $url, $host['uid']);
+		$host = self::getHost($pdbc, $url);
+		$location = self::getUser($pdbc, $url, $host['uid']);
 
 		// Set website location & database
 		$this->location = $location . $host['location'];
@@ -38,7 +38,7 @@ class Gatekeeper {
 	 * @throws StatusCodeException     if the file isn't found at the current location.
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
-	private function getHost(\lib\pdbc\PDBC $pdbc, URL $url) {
+	private static function getHost(\lib\pdbc\PDBC $pdbc, URL $url) {
 		$pdbc->query('SELECT `uid`,`location`,`db`
 		              FROM `website`
 		              WHERE `active` = 1
@@ -47,14 +47,14 @@ class Gatekeeper {
 		$host = $pdbc->fetch();
 
 		if(!$host) {
-			$this->getHostException($pdbc, $url);
+			self::getHostException($pdbc, $url);
 		}
 
 		return $host;
 	}
 
 	/**
-	 * This function helps getHost() determines whether he has to throw a 301 or 404 exception.
+	 * This function helps sefl::getHost() determine whether he has to throw a 301 or 404 exception.
 	 *
 	 * @param  \lib\pdbc\PDBC          $pdbc
 	 * @param  URL                     $url
@@ -62,7 +62,7 @@ class Gatekeeper {
 	 * @throws StatusCodeException     if the file isn't found at the current location.
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
-	private function getHostException(\lib\pdbc\PDBC $pdbc, URL $url) {
+	private static function getHostException(\lib\pdbc\PDBC $pdbc, URL $url) {
 		$pdbc->query('SELECT `website`.`domain`, `redirect`.`path`
 		              FROM `website`
 		              RIGHT JOIN (SELECT `wid`,`path`
@@ -89,7 +89,7 @@ class Gatekeeper {
 	 * @throws StatusCodeException     if the user doesn't exists.
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
-	private function getUser(\lib\pdbc\PDBC $pdbc, URL $url, $id) {
+	private static function getUser(\lib\pdbc\PDBC $pdbc, URL $url, $id) {
 		$pdbc->query('SELECT `location`
 		              FROM `user`
 		              WHERE `id` = ' . $id);
