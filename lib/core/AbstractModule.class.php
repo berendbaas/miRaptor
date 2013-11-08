@@ -9,8 +9,8 @@ namespace lib\core;
  */
 abstract class AbstractModule implements Runnable {
 	const DEFAULT_NAMESPACE = FALSE;
-	const DEFAULT_PARSABLE = TRUE;
-	const DEFAULT_STATIC = TRUE;
+	const DEFAULT_PARSABLE = FALSE;
+	const DEFAULT_STATIC = FALSE;
 
 	protected $pdbc;
 	protected $url;
@@ -18,28 +18,28 @@ abstract class AbstractModule implements Runnable {
 	protected $arguments;
 	protected $result;
 
-	protected $namespace;
-	protected $parsable;
-	protected $static;
+	protected $isNamespace;
+	protected $isParsable;
+	protected $isStatic;
 
 	/**
-	 * Construct an Module object with the given PDBC, URL, pageID & arguments.
+	 * Construct a Module object with the given PDBC, URL, pageID & arguments.
 	 *
 	 * @param \lib\pdbc\PDBC  $pdbc
 	 * @param URL             $url
 	 * @param int             $pageID
 	 * @param array           $arguments
 	 */
-	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $routerID, Array $arguments) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $routerID, array $arguments) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
 		$this->routerID = $routerID;
 		$this->arguments = $arguments;
 		$this->result = '';
 
-		$this->namespace = self::DEFAULT_NAMESPACE;
-		$this->parsable = self::DEFAULT_PARSABLE;
-		$this->static = self::DEFAULT_STATIC;
+		$this->isNamespace = self::DEFAULT_NAMESPACE;
+		$this->isParsable = self::DEFAULT_PARSABLE;
+		$this->isStatic = self::DEFAULT_STATIC;
 	}
 
 	/**
@@ -57,7 +57,7 @@ abstract class AbstractModule implements Runnable {
 	 * @return boolean true if the module uses namespace.
 	 */
 	public function isNamespace() {
-		return $this->namespace;
+		return $this->isNamespace;
 	}
 
 	/**
@@ -66,7 +66,7 @@ abstract class AbstractModule implements Runnable {
 	 * @return boolean true if the module can be parsed.
 	 */
 	public function isParsable() {
-		return $this->parsable;
+		return $this->isParsable;
 	}
 
 	/**
@@ -75,7 +75,7 @@ abstract class AbstractModule implements Runnable {
 	 * @return boolean true if the module is static.
 	 */
 	public function isStatic() {
-		return $this->static;
+		return $this->isStatic;
 	}
 
 	public abstract function run();
