@@ -8,19 +8,22 @@ namespace lib\module\page;
  * @version 1.0
  */
 class Module extends \lib\core\AbstractModule {
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $routerID, array $arguments) {
+			parent::__construct($pdbc, $url, $routerID, $arguments);
+			$this->isParsable = TRUE;
+			$this->isStatic = TRUE;
+	}
+
 	public function run() {
 		switch($this->parseGet()) {
 			case "title":
 				$this->result = $this->getTitle();
 			break;
-			case "description":
-				$this->result = $this->getDescription();
-			break;
 			case "content":
 				$this->result = $this->getContent();
 			break;
 			default:
-				throw new \ModuleException('get="' . $this->arguments['get']. '" is not supported.');
+				throw new \lib\core\ModuleException('get="' . $this->arguments['get']. '" is not supported.');
 			break;
 		}
 	}
@@ -36,7 +39,7 @@ class Module extends \lib\core\AbstractModule {
 			return $this->arguments['get'];
 		}
 
-		throw new \ModuleException('get="" required.');
+		throw new \lib\core\ModuleException('get="" required.');
 	}
 
 	/**
@@ -54,31 +57,10 @@ class Module extends \lib\core\AbstractModule {
 		$title = $this->pdbc->fetch();
 
 		if(!$title) {
-			throw new \ModuleException('Title does not exists.');
+			throw new \lib\core\ModuleException('Title does not exists.');
 		}
 
 		return end($title);
-	}
-
-	/**
-	 * Returns the description of the current page.
-	 *
-	 * @return string                    the description of the current page.
-	 * @throws \lib\core\ModuleException if the description doesn't exists.
-	 * @throws \lib\pdbc\PDBCException   if the given query can't be executed.
-	 */
-	private function getDescription() {
-		$this->pdbc->query('SELECT `description`
-		                    FROM `module_page`
-		                    WHERE `id_router`=' .  $this->pdbc->quote($this->routerID));
-
-		$description = $this->pdbc->fetch();
-
-		if(!$description) {
-			throw new \ModuleException('Description does not exists.');
-		}
-
-		return end($description);
 	}
 
 	/**
@@ -96,7 +78,7 @@ class Module extends \lib\core\AbstractModule {
 		$content = $this->pdbc->fetch();
 
 		if(!$content) {
-			throw new \ModuleException('Content does not exists.');
+			throw new \lib\core\ModuleException('Content does not exists.');
 		}
 
 		return end($content);
