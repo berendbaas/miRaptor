@@ -11,6 +11,11 @@ class Module extends \lib\core\AbstractModule {
 	const DEFAULT_ID = 0;
 	const DEFAULT_DEPTH = -1;
 
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $routerID, array $arguments) {
+			parent::__construct($pdbc, $url, $routerID, $arguments);
+			$this->isStatic = TRUE;
+	}
+
 	public function run() {
 		$this->result = $this->getMenu($this->parseID(), $this->parseDepth());
 	}
@@ -42,7 +47,7 @@ class Module extends \lib\core\AbstractModule {
 		$id = $this->pdbc->fetch();
 
 		if(!$id) {
-			throw new \ModuleException('uri="' . $uri . '" doesnt exists.');
+			throw new \lib\core\ModuleException('uri="' . $uri . '" doesnt exists.');
 		}
 
 		return $id['id'];
