@@ -24,28 +24,20 @@ class HTMLFormAligned extends HTMLForm {
 		return $result;
 	}
 
-	/**
-	 * Add the given row to the form and wrap it in a HTML div element.
-	 *
-	 * @param string $row
-	 * @return void
-	 */
-	private function addRow($row) {
-		$this->result .= '<div>' . $row . '</div>' . PHP_EOL;
-	}
-
 	public function addInput($title, array $attributes = array()) {
-		$this->addRow($this->addLabel($title, $this->labelAttributes($attributes)) .
-		              HTML::openTag('input', $attributes, TRUE) . PHP_EOL);
+		$this->result .= '<div>';
+		$this->addLabel($title, $this->labelAttributes($attributes));
+		$this->result .= HTML::openTag('input', $attributes, TRUE) . '</div>' . PHP_EOL;
 	}
 
 	public function addTextarea($title, $content = '', array $attributes = array()) {
-		$this->addRow($this->addLabel($title, $this->labelAttributes($attributes)) .
-		              HTML::element('textarea', $attributes, $content) . PHP_EOL);
+		$this->result .= '<div>';
+		$this->addLabel($title, $this->labelAttributes($attributes));
+		$this->result .= HTML::element('textarea', $attributes, $content) . '</div>' . PHP_EOL;
 	}
 
 	public function addButton($content = '', array $attributes = array()) {
-		$this->addRow(HTML::element('button', $attributes, $content) . PHP_EOL);
+		$this->result .= '<div>' . HTML::element('button', $attributes, $content) . '</div>' . PHP_EOL;
 	}
 
 	public function addSelect($title, array $options = array(), array $attributes = array()) {
@@ -59,8 +51,9 @@ class HTMLFormAligned extends HTMLForm {
 			}
 		}
 
-		$this->addRow($this->addLabel($title, $this->labelAttributes($attributes)) .
-		              HTML::element('select', $attributes, $content) . PHP_EOL);
+		$this->result .= '<div>';
+		$this->addLabel($title, $this->labelAttributes($attributes));
+		$this->result .= HTML::element('select', $attributes, $content) . '</div>' . PHP_EOL;
 	}
 }
 
