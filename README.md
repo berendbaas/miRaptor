@@ -22,10 +22,11 @@ Steps:
 Style Guide
 ---
 When contributing to the codebase, please keep the following style guidelines for convenience in mind:
+- Default indentation is a tab, but non-leading tabs are evil.
+- Constants are capitalized.
 - Function and variables are camelCased.
 - Opening brackets come behind function declaration and statements.
-- Constants are capitalized.
-- Default indentation is a tab, but non-leading tabs are evil.
+- Guard clause is prefered over nested if else statements.
 - strings are single-quoted.
 - HTML arguments are double-quoted.
-- HTML is heredocs (<<<HTML)
+- Single line HTML code is single quoted & multi line HTML code is heredocs. (<<<HTML)
