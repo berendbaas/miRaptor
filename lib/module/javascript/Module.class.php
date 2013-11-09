@@ -8,7 +8,7 @@ namespace lib\module\javascript;
  * @version 1.0
  */
 class Module extends \lib\core\AbstractModule {
-	const DEFAULT_GROUP = '';
+	const DEFAULT_THEME = '';
 
 	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $routerID, array $arguments) {
 			parent::__construct($pdbc, $url, $routerID, $arguments);
@@ -16,7 +16,7 @@ class Module extends \lib\core\AbstractModule {
 	}
 
 	public function run() {
-		$this->result = $this->getJavascript($this->parseName(), $this->parseGroup());
+		$this->result = $this->getJavascript($this->parseName(), $this->parseTheme());
 	}
 
 	/**
@@ -34,34 +34,34 @@ class Module extends \lib\core\AbstractModule {
 	}
 
 	/**
-	 * Returns the group argument or the default argument, if none is given.
+	 * Returns the theme argument or the default argument, if none is given.
 	 *
-	 * @return string the group argument or the default argument, if none is given.
+	 * @return string the theme argument or the default argument, if none is given.
 	 */
-	private function parseGroup() {
-		if(isset($this->arguments['group'])) {
-			return $this->arguments['group'];
+	private function parseTheme() {
+		if(isset($this->arguments['theme'])) {
+			return $this->arguments['theme'];
 		}
 
-		return self::DEFAULT_GROUP;
+		return self::DEFAULT_THEME;
 	}
 
 	/**
-	 * Returns the javascript with the given name and group.
+	 * Returns the javascript with the given name and theme.
 	 *
 	 * @param  string                    $name
 	 * @param  string                    $group = self::DEFAULT_GROUP
-	 * @return string                    the javascript with the given name and group.
-	 * @throws \lib\core\ModuleException if there is no javascript for the given name & group.
+	 * @return string                    the javascript with the given name and theme.
+	 * @throws \lib\core\ModuleException if there is no javascript for the given name and theme.
 	 * @throws \lib\pdbc\PDBCException   if the given query can't be executed.
 	 */
-	private function getJavascript($name, $group = self::DEFAULT_GROUP) {
+	private function getJavascript($name, $theme = self::DEFAULT_THEME) {
 		$this->pdbc->query('SELECT `content`
 		                    FROM `module_javascript`
 		                    WHERE `name` = "' . $this->pdbc->quote($name) . '"
-		                    AND `id_group` ' . ($group == self::DEFAULT_GROUP ? 'is NULL' : '= (SELECT `id`
-		                                                                                        FROM `group`
-		                                                                                        WHERE `name` = "' . $this->pdbc->quote($group) . '")'));
+		                    AND `id_theme` ' . ($theme == self::DEFAULT_THEME ? 'IS NULL' : '= (SELECT `id`
+		                                                                                        FROM `theme`
+		                                                                                        WHERE `name` = "' . $this->pdbc->quote($theme) . '")'));
 
 		$javascript = $this->pdbc->fetch();
 
