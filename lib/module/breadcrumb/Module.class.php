@@ -30,7 +30,7 @@ class Module extends \lib\core\AbstractModule {
 
 		while($breadcrumb = $this->fetchBreadcrumb($id)) {
 			$list->addItem('<a href="' . $breadcrumb['uri'] . '">' . $breadcrumb['name'] .'</a>');
-			$id = $breadcrumb['id'];
+			$id = $breadcrumb['pid'];
 		}
 
 		return $list->__toString();
