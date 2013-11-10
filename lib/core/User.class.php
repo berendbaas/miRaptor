@@ -37,9 +37,9 @@ class User {
 	 */
 	public function login(\lib\pdbc\PDBC $pdbc, $username, $password) {
 		$pdbc->query('SELECT `id`
-		                    FROM user
-		                    WHERE `username` = "' . $pdbc->quote($username) . '"
-		                    AND `password` = "' . $pdbc->quote($password) . '"');
+		              FROM user
+		              WHERE `username` = "' . $pdbc->quote($username) . '"
+		              AND `password` = "' . $pdbc->quote($password) . '"');
 
 		$user = $pdbc->fetch();
 
