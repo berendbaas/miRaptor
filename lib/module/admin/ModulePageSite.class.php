@@ -97,7 +97,7 @@ class ModulePageSite extends ModulePageAbstract {
 		$list = new \lib\html\HTMLList();
 
 		foreach($modules as $module) {
-			$list->addItem('<a class="icon icon-module-' . $module['name'] . '" href="' . $this->url->getURLPath() . '?id=' . $_GET['id'] . '&amp;module=' . $module['name'] . '">' . ucfirst($module['name']) . '</a>');
+			$list->addItem('<a href="' . $this->url->getURLPath() . '?id=' . $_GET['id'] . '&amp;module=' . $module['name'] . '">' . ucfirst($module['name']) . '</a>');
 		}
 
 		return $list->__toString();
