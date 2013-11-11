@@ -8,37 +8,29 @@ namespace lib\module\admin;
  * @version 1.0
  */
 class Module extends \lib\core\AbstractModule {
-	const PAGE_LOGIN = '';
-	const PAGE_LOGOUT = 'logout';
-	const PAGE_OVERVIEW = 'overview';
-	const PAGE_SETTINGS = 'settings';
+	const PAGE_SIGN_IN = '';
+	const PAGE_SIGN_OUT = 'signout';
+	const PAGE_DASHBOARD = 'dashboard';
+	const PAGE_ACCOUNT = 'account';
 	const PAGE_SITE = 'site';
 
-	private $userPdbc;
-        private $user;
+	private static $userPdbc;
+	private static $user;
 
-	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $pageID, array $arguments) {
-		$this->pdbc = $pdbc;
-		$this->url = $url;
-		$this->pageID = $pageID;
-		$this->arguments = $arguments;
-		$this->result = '';
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $routerID, array $arguments) {
+		parent::__construct($pdbc, $url, $routerID, $arguments);
+		$this->isNamespace = TRUE;
 
-		$this->static = FALSE;
-		$this->namespace = TRUE;
-
-		include('config.php');
-		$this->userPdbc = clone $pdbc;
-		$this->userPdbc->selectDatabase($config['pdbc']['database']);
-		$this->user = new \lib\core\User($this->userPdbc);
+		if(!isset($this->userPdbc)) {
+			include('config.php');
+			$this->userPdbc = clone $pdbc;
+			$this->userPdbc->selectDatabase($config['pdbc']['database']);
+			$this->user = new \lib\core\User();
+		}
 	}
 
 	public function run() {
-		if($this->user->isLoggedIn()) {
-			$this->result = $this->handleAdmin();
-		} else {
-			$this->result = $this->handleLogin();
-		}
+		$this->result = $this->user->isLoggedIn() ? $this->handleAdmin() : $this->handleLogin();
 	}
 
 	/**
@@ -48,28 +40,24 @@ class Module extends \lib\core\AbstractModule {
 		$result;
 
 		switch($this->url->getFile()) {
-			case self::PAGE_LOGIN:
-				throw new \Exception($this->url->getURLDirectory() . self::PAGE_OVERVIEW, 301);
+			case self::PAGE_SIGN_OUT:
+				$result = new ModulePageSignOut($this->userPdbc, $this->url, $this->arguments, $this->user);
 			break;
 
-			case self::PAGE_LOGOUT:
-				$result = new ModuleHandleLogout($this->userPdbc, $this->url, $this->arguments, $this->user);
+			case self::PAGE_DASHBOARD:
+				$result = new ModulePageDashboard($this->userPdbc, $this->url, $this->arguments, $this->user);
 			break;
 
-			case self::PAGE_OVERVIEW:
-				$result = new ModuleHandleOverview($this->userPdbc, $this->url, $this->arguments, $this->user);
-			break;
-
-			case self::PAGE_SETTINGS:
-				$result = new ModuleHandleSettings($this->userPdbc, $this->url, $this->arguments, $this->user);
+			case self::PAGE_ACCOUNT:
+				$result = new ModulePageAccount($this->userPdbc, $this->url, $this->arguments, $this->user);
 			break;
 
 			case self::PAGE_SITE:
-				$result = new ModuleHandleSite($this->userPdbc, $this->url, $this->arguments, $this->user);
+				$result = new ModulePageSite($this->userPdbc, $this->url, $this->arguments, $this->user);
 			break;
 
 			default:
-				throw new \Exception('Page not found', 404);
+				throw new \lib\core\StatusCodeException($this->url->getURLDirectory() . self::PAGE_DASHBOARD, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 			break;
 		}
 
@@ -80,11 +68,12 @@ class Module extends \lib\core\AbstractModule {
 	 *
 	 */
 	private function handleLogin() {
-		if($this->url->getFile() != Module::PAGE_LOGIN) {
-			throw new \Exception($this->url->getURLDirectory() . Module::PAGE_LOGIN, 301);
+		if($this->url->getFile() != self::PAGE_SIGN_IN) {
+			throw new \lib\core\StatusCodeException($this->url->getURLDirectory() . self::PAGE_SIGN_IN, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
-		$result = new ModuleHandleLogin($this->userPdbc, $this->url, $this->arguments, $this->user);
+		$result = new ModulePageSignIn($this->userPdbc, $this->url, $this->arguments, $this->user);
+
 		return $result->get();
 	}
 }
