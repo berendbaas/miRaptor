@@ -1,5 +1,5 @@
 <?php
-namespace lib\module\form;
+namespace lib\module\mail;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -9,7 +9,7 @@ namespace lib\module\form;
  */
 class Uninstall extends \lib\core\AbstractUninstall {
 	public function run() {
-		$this->result = 'TODO form uninstall';
+		$this->result = 'TODO mail uninstall';
 	}
 }
 

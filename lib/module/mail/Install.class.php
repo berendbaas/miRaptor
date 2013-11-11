@@ -1,5 +1,5 @@
 <?php
-namespace lib\module\form;
+namespace lib\module\mail;
 
 /**
  * @author miWebb <info@miwebb.com>
@@ -9,7 +9,7 @@ namespace lib\module\form;
  */
 class Install extends \lib\core\AbstractInstall {
 	public function run() {
-		$this->result = 'TODO form install';
+		$this->result = 'TODO mail install';
 	}
 }
 
