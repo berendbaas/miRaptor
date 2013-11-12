@@ -36,7 +36,7 @@ class ModulePageSite extends ModulePageAbstract {
 			return 'TODO Website dashboard';
 		}
 
-		if(!$this->moduleID($_GET['module'])) {
+		if(!$this->moduleExists($_GET['module'])) {
 			throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?id=' . $_GET['id'], \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
@@ -50,12 +50,12 @@ class ModulePageSite extends ModulePageAbstract {
 	/**
 	 *
 	 */
-	private function moduleID($name) {
+	private function moduleExists($name) {
 		$this->sitePdbc->query('SELECT `id`
-		                        FROM `access`
+		                        FROM `module`
 		                        WHERE `name` = "' . $this->pdbc->quote($name) . '"');
 
-		return $this->sitePdbc->fetch();
+		return $this->sitePdbc->fetch() ? TRUE : FALSE;
 	}
 
 	public function logBox() {
@@ -84,14 +84,14 @@ class ModulePageSite extends ModulePageAbstract {
 	 *
 	 */
 	private function subMenu($groupID) {
-		$this->sitePdbc->query('SELECT `access`.`name`
-		                        FROM `access`
-		                        RIGHT JOIN (SELECT `id_access`
+		$this->sitePdbc->query('SELECT `module`.`name`
+		                        FROM `module`
+		                        RIGHT JOIN (SELECT `id_module`
 		                                    FROM `module_admin`
 		                                    WHERE `active` = "1"
 		                                    AND `id_group` = "' . $this->pdbc->quote($groupID) . '") AS `admin`
-		                        ON `access`.`id` = `admin`.`id_access`
-		                        ORDER BY `access`.`name` ASC');
+		                        ON `module`.`id` = `admin`.`id_module`
+		                        ORDER BY `module`.`name` ASC');
 
 		$modules = $this->sitePdbc->fetchAll();
 		$list = new \lib\html\HTMLList();

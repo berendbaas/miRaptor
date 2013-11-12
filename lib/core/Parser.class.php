@@ -18,7 +18,7 @@ class Parser implements Runnable {
 	private $pdbc;
 	private $url;
 
-	private $access;
+	private $modules;
 	private $routerID;
 	private $tokenizer;
 
@@ -38,7 +38,7 @@ class Parser implements Runnable {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
 		
-		$this->access = $this->getAccess();
+		$this->modules = $this->getModules();
 		$this->routerID = $this->getRouterID();
 		$this->tokenizer = $this->getTokenizer();
 
@@ -53,9 +53,10 @@ class Parser implements Runnable {
 	 * @return array                   an array with modules you may use.
 	 * @throws \lib\pdbc\PDBCException if the query can't be executed.
 	 */
-	private function getAccess() {
+	private function getModules() {
 		$this->pdbc->query('SELECT `name`
-		                    FROM `access`');
+		                    FROM `module`
+		                    WHERE `active` = 1');
 
 		return $this->pdbc->fetchAll();
 	}
@@ -171,7 +172,7 @@ class Parser implements Runnable {
 	 * @return boolean true if you have access to use the given module.
 	 */
 	private function hasAccess($name) {
-		foreach($this->access as $module) {
+		foreach($this->modules as $module) {
 			if($module['name'] == $name) {
 				return TRUE;
 			}
