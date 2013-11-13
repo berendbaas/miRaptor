@@ -17,6 +17,8 @@ class ModulePageAccount extends ModulePageAbstract {
 		                    SET ' . ($password != '' ? '`password` = "' . $this->pdbc->quote($password) . '",' : '') . '
 		                        `email` = "' . $this->pdbc->quote($email) . '"
 		                    WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
+
+		return !$this->pdbc->rowCount() ? '' : '<p class="msg-succes">Your account has been saved successfully</p>';
 	}
 
 	private function contentView($message = '') {
