@@ -23,7 +23,7 @@ class ModulePageSignOut extends ModulePageAbstract {
 	/**
 	 *
 	 */
-	public function model() {
+	private function model() {
 		$this->user->logout();
 		throw new \lib\core\StatusCodeException($this->url->getURLDirectory() . Module::PAGE_SIGN_IN, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
