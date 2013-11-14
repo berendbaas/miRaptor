@@ -9,16 +9,20 @@ namespace lib\module\admin;
  */
 class ModulePageAccount extends ModulePageAbstract {
 	public function content() {
-		return $this->contentView(isset($_POST['password'], $_POST['email']) ? $this->contentModel($_POST['password'], $_POST['email']) : '');
+		return $this->contentView($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->contentModel() : '');
 	}
 
-	private function contentModel($password, $email) {
+	private function contentModel() {
+		if(!isset($_POST['password'], $_POST['email'])) {
+			return '<p class="msg-warning">Require password and email.</p>';
+		}
+
 		$this->pdbc->query('UPDATE `user`
-		                    SET ' . ($password != '' ? '`password` = "' . $this->pdbc->quote($password) . '",' : '') . '
-		                        `email` = "' . $this->pdbc->quote($email) . '"
+		                    SET ' . ($password != '' ? '`password` = "' . $this->pdbc->quote($_POST['password']) . '",' : '') . '
+		                        `email` = "' . $this->pdbc->quote($_POST['email']) . '"
 		                    WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
 
-		return !$this->pdbc->rowCount() ? '' : '<p class="msg-succes">Your account has been saved successfully</p>';
+		return !$this->pdbc->rowCount() ? '' : '<p class="msg-succes">Your changes have been saved successfully</p>';
 	}
 
 	private function contentView($message = '') {

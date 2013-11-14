@@ -9,24 +9,28 @@ namespace lib\module\admin;
  */
 class ModulePageSignIn extends ModulePageAbstract {
 	public function content() {
-		return $this->contentView(isset($_POST['username'], $_POST['password']) ? $this->contentModel($_POST['username'], $_POST['password']) : '');
+		return $this->contentView($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->contentModel($_POST['username'], $_POST['password']) : '');
 	}
 
 	/**
 	 *
 	 */
-	public function contentModel($username, $password) {
+	private function contentModel($username, $password) {
+		if(!isset($_POST['username'], $_POST['password'])) {
+			return '<p class="msg-warning">Require username and password.</p>';
+		}
+
 		if($this->user->login($this->pdbc, $username, $password)) {
 			throw new \lib\core\StatusCodeException($this->url->getURLDirectory() . Module::PAGE_DASHBOARD, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
-		return '<p class="error">Invalid username or password. Please try again.</p>';
+		return '<p class="msg-error">Invalid username or password. Please try again.</p>';
 	}
 
 	/**
 	 *
 	 */
-	public function contentView($message = '') {
+	private function contentView($message = '') {
 		$form = new \lib\html\HTMLFormStacked();
 
 		$form->addInput('Username', array(

@@ -12,7 +12,7 @@ class ModulePageDashboard extends ModulePageAbstract {
 	const ACTION_SETTINGS = 'settings';
 
 	public function content() {
-		if(isset($_GET['action']) && isset($_GET['id'])) {
+		if(isset($_GET['action'], $_GET['id'])) {
 			return $this->actionController($_GET['action'], intval($_GET['id']));
 		}
 
@@ -23,27 +23,23 @@ class ModulePageDashboard extends ModulePageAbstract {
 	 *
 	 */
 	private function actionController($action, $id) {
-		if($this->hasAccess($id)) {
-			switch($action) {
-				case self::ACTION_ACTIVE:
-					if($_SERVER['REQUEST_METHOD'] == 'POST') {
-						$this->actionActiveModel($id);
-					}
-
-					return $this->actionActiveView($id);
-				break;
-
-				case self::ACTION_SETTINGS:
-					if(isset($_POST['name'], $_POST['domain'])) {
-						$this->actionSettingsModel($id, $_POST['name'], $_POST['domain']);
-					}
-
-					return $this->actionSettingsView($id);
-				break;
-			}
+		if(!$this->hasAccess($id)) {
+			throw new \lib\core\StatusCodeException($this->url->getURLPath(), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
-		throw new \lib\core\StatusCodeException($this->url->getURLPath(), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		switch($action) {
+			case self::ACTION_ACTIVE:
+				return $this->actionActiveView($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->actionActiveModel($id) : ''));
+			break;
+
+			case self::ACTION_SETTINGS:
+				return $this->actionSettingsView($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->actionSettingsModel($id) : ''));
+			break;
+
+			default:
+				throw new \lib\core\StatusCodeException($this->url->getURLPath(), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+			break;
+		}
 	}
 
 	/**
@@ -55,13 +51,13 @@ class ModulePageDashboard extends ModulePageAbstract {
 		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"
 		                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
 
-		throw new \lib\core\StatusCodeException($this->url->getURLPath(), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		return !$this->pdbc->rowCount() ? '' : '<p class="msg-succes">Your changes have been saved successfully</p>';
 	}
 
 	/**
 	 *
 	 */
-	private function actionActiveView($id) {
+	private function actionActiveView($id, $message = '') {
 		$this->pdbc->query('SELECT `active`
 		                    FROM `website`
 		                    WHERE `id` = ' . $this->pdbc->quote($id) . '
@@ -90,20 +86,24 @@ class ModulePageDashboard extends ModulePageAbstract {
 	/**
 	 *
 	 */
-	private function actionSettingsModel($id, $name, $domain) {
+	private function actionSettingsModel($id) {
+		if(!isset($_POST['name'], $_POST['domain'])) {
+			return '<p class="msg-warning">Require name and domain.</p>';
+		}
+
 		$this->pdbc->query('UPDATE `website`
-		                    SET `name` =  "' . $this->pdbc->quote($name) . '",
-		                        `domain` =  "' . $this->pdbc->quote($domain) . '"
+		                    SET `name` =  "' . $this->pdbc->quote($_POST['name']) . '",
+		                        `domain` =  "' . $this->pdbc->quote($_POST['domain']) . '"
 		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"
 		                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
 
-		throw new \lib\core\StatusCodeException($this->url->getURLPath(), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		return !$this->pdbc->rowCount() ? '' : '<p class="msg-succes">Your changes have been saved successfully</p>';
 	}
 
 	/**
 	 *
 	 */
-	private function actionSettingsView($id) {
+	private function actionSettingsView($id, $message = '') {
 		$this->pdbc->query('SELECT `name`, `domain`
 		                    FROM `website`
 		                    WHERE `id` = ' . $this->pdbc->quote($id) . '
@@ -133,7 +133,7 @@ class ModulePageDashboard extends ModulePageAbstract {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-settings">Website settings</h2>' . $form->__toString();
+		return '<h2 class="icon icon-settings">Website settings</h2>' . $message . $form->__toString();
 	}
 
 	/**
@@ -145,10 +145,6 @@ class ModulePageDashboard extends ModulePageAbstract {
 		                    WHERE `uid` = ' . $this->pdbc->quote($this->user->getID()));
 
 		$websites = $this->pdbc->fetchAll();
-
-		if(!$websites) {
-			return '<p>You have no websites. Contact your system administrator.</p>';
-		}
 
 		$table = new \lib\html\HTMLTable();
 		$table->addHeaderRow(array('#','Website','Settings','Active'));
