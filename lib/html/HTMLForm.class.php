@@ -35,8 +35,8 @@ abstract class HTMLForm {
 	 * @param  string $legend = '';
 	 * @return void
 	 */
-	public function openFieldset($legend = '') {
-		$this->result .= '<fieldset>' . PHP_EOL;
+	public function openFieldset($legend = '', array $attributes = array()) {
+		$this->result .= HTML::openTag('fieldset', $attributes) . PHP_EOL;
 
 		if($legend != '') {
 			$this->result .= '<legend>' . $legend . '</legend>' . PHP_EOL;
