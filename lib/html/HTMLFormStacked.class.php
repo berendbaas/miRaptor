@@ -43,7 +43,7 @@ class HTMLFormStacked extends HTMLForm {
 
 		foreach($options as $optionKey => $optionValue) {
 			if(is_int($optionKey)) {
-				$content .= HTML::element('option', array(), $optionValue) . PHP_EOL;
+				$content .= HTML::element('option', array('value' => $optionValue), $optionValue) . PHP_EOL;
 			} else {
 				$content .= HTML::element('option', $optionValue, $optionKey) . PHP_EOL;
 			}
