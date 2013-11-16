@@ -9,10 +9,13 @@ namespace lib\module\admin;
  */
 class ModulePageAccount extends ModulePageAbstract {
 	public function content() {
-		return $this->contentView($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->contentModel() : '');
+		return $this->getAccount($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postAccount() : '');
 	}
 
-	private function contentModel() {
+	/**
+	 *
+	 */
+	private function postAccount() {
 		if(!isset($_POST['password'], $_POST['email'])) {
 			return '<p class="msg-warning">Require password and email.</p>';
 		}
@@ -25,7 +28,10 @@ class ModulePageAccount extends ModulePageAbstract {
 		return !$this->pdbc->rowCount() ? '' : '<p class="msg-succes">Your changes have been saved successfully</p>';
 	}
 
-	private function contentView($message = '') {
+	/**
+	 *
+	 */
+	private function getAccount($message = '') {
 		$this->pdbc->query('SELECT `username`, `email`
 		                    FROM `user`
 		                    WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
@@ -66,7 +72,7 @@ class ModulePageAccount extends ModulePageAbstract {
 	public function logBox() {
 		$list = new \lib\html\HTMLList();
 
-		$list->addItem('<a class="icon sign-out" href="' . $this->url->getDirectory() . Module::PAGE_SIGN_OUT . '">Sign Out</a>');
+		$list->addItem('<a class="icon icon-sign-out" href="' . $this->url->getDirectory() . Module::PAGE_SIGN_OUT . '">Sign Out</a>');
 
 		return $list->__toString();
 	}

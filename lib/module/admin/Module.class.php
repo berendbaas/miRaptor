@@ -8,7 +8,7 @@ namespace lib\module\admin;
  * @version 1.0
  */
 class Module extends \lib\core\AbstractModule {
-	const PAGE_SIGN_IN = '';
+	const PAGE_SIGN_IN = 'signin';
 	const PAGE_SIGN_OUT = 'signout';
 	const PAGE_DASHBOARD = 'dashboard';
 	const PAGE_ACCOUNT = 'account';

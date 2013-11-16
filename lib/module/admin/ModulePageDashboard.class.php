@@ -8,35 +8,37 @@ namespace lib\module\admin;
  * @version 1.0
  */
 class ModulePageDashboard extends ModulePageAbstract {
-	const ACTION_ACTIVE = 'active';
 	const ACTION_SETTINGS = 'settings';
+	const ACTION_STATUS = 'active';
 
 	public function content() {
 		if(isset($_GET['action'], $_GET['id'])) {
-			return $this->actionController($_GET['action'], intval($_GET['id']));
+			return $this->handleAction($_GET['action'], intval($_GET['id']));
 		}
 
-		return $this->dashboardView();
+		return $this->getDashboard();
 	}
 
 	/**
 	 *
 	 */
-	private function actionController($action, $id) {
+	private function handleAction($action, $id) {
 		if(!$this->hasAccess($id)) {
+			// You do not own this website.
 			throw new \lib\core\StatusCodeException($this->url->getURLPath(), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
 		switch($action) {
-			case self::ACTION_ACTIVE:
-				return $this->actionActiveView($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->actionActiveModel($id) : ''));
+			case self::ACTION_SETTINGS:
+				return $this->getSettings($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postSettings($id) : ''));
 			break;
 
-			case self::ACTION_SETTINGS:
-				return $this->actionSettingsView($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->actionSettingsModel($id) : ''));
+			case self::ACTION_STATUS:
+				return $this->getStatus($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postStatus($id) : ''));
 			break;
 
 			default:
+				// Action not supported.
 				throw new \lib\core\StatusCodeException($this->url->getURLPath(), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 			break;
 		}
@@ -45,48 +47,7 @@ class ModulePageDashboard extends ModulePageAbstract {
 	/**
 	 *
 	 */
-	private function actionActiveModel($id) {
-		$this->pdbc->query('UPDATE `website`
-		                    SET `active` =  "' . (isset($_POST['active']) ? 1 : 0) . '"
-		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"
-		                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
-
-		return !$this->pdbc->rowCount() ? '' : '<p class="msg-succes">Your changes have been saved successfully</p>';
-	}
-
-	/**
-	 *
-	 */
-	private function actionActiveView($id, $message = '') {
-		$this->pdbc->query('SELECT `active`
-		                    FROM `website`
-		                    WHERE `id` = ' . $this->pdbc->quote($id) . '
-		                    AND`uid` = ' . $this->pdbc->quote($this->user->getID()));
-
-		$website = $this->pdbc->fetch();
-
-		$form = new \lib\html\HTMLFormStacked();
-
-		$form->addInput('Active', array(
-			'type' => 'checkbox',
-			'id' => 'form-active-on',
-			'name' => 'active',
-			'value' => '1'
-		) + ($website['active'] ? array('checked' => 'checked') : array()));
-
-		$form->addContent('<a href="' . $this->url->getPath() . '"><button type="button">Back</button></a>');
-
-		$form->addButton('Submit', array(
-			'type' => 'submit'
-		));
-
-		return '<h2 class="icon icon-settings">Website active</h2>' . $form->__toString();
-	}
-
-	/**
-	 *
-	 */
-	private function actionSettingsModel($id) {
+	private function postSettings($id) {
 		if(!isset($_POST['name'], $_POST['domain'])) {
 			return '<p class="msg-warning">Require name and domain.</p>';
 		}
@@ -103,7 +64,7 @@ class ModulePageDashboard extends ModulePageAbstract {
 	/**
 	 *
 	 */
-	private function actionSettingsView($id, $message = '') {
+	private function getSettings($id, $message = '') {
 		$this->pdbc->query('SELECT `name`, `domain`
 		                    FROM `website`
 		                    WHERE `id` = ' . $this->pdbc->quote($id) . '
@@ -139,7 +100,48 @@ class ModulePageDashboard extends ModulePageAbstract {
 	/**
 	 *
 	 */
-	private function dashboardView() {
+	private function postStatus($id) {
+		$this->pdbc->query('UPDATE `website`
+		                    SET `active` =  "' . (isset($_POST['status']) ? 1 : 0) . '"
+		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"
+		                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
+
+		return !$this->pdbc->rowCount() ? '' : '<p class="msg-succes">Your changes have been saved successfully</p>';
+	}
+
+	/**
+	 *
+	 */
+	private function getStatus($id, $message = '') {
+		$this->pdbc->query('SELECT `active`
+		                    FROM `website`
+		                    WHERE `id` = ' . $this->pdbc->quote($id) . '
+		                    AND`uid` = ' . $this->pdbc->quote($this->user->getID()));
+
+		$website = $this->pdbc->fetch();
+
+		$form = new \lib\html\HTMLFormStacked();
+
+		$form->addInput('Active', array(
+			'type' => 'checkbox',
+			'id' => 'form-active-on',
+			'name' => 'active',
+			'value' => '1'
+		) + ($website['active'] ? array('checked' => 'checked') : array()));
+
+		$form->addContent('<a href="' . $this->url->getPath() . '"><button type="button">Back</button></a>');
+
+		$form->addButton('Submit', array(
+			'type' => 'submit'
+		));
+
+		return '<h2 class="icon icon-settings">Website status</h2>' . $form->__toString();
+	}
+
+	/**
+	 *
+	 */
+	private function getDashboard() {
 		$this->pdbc->query('SELECT `id`,`name`,`active`
 		                    FROM `website`
 		                    WHERE `uid` = ' . $this->pdbc->quote($this->user->getID()));
@@ -147,14 +149,14 @@ class ModulePageDashboard extends ModulePageAbstract {
 		$websites = $this->pdbc->fetchAll();
 
 		$table = new \lib\html\HTMLTable();
-		$table->addHeaderRow(array('#','Website','Settings','Active'));
+		$table->addHeaderRow(array('#','Website','Settings','Status'));
 
 		foreach($websites as $website) {
 			$table->openRow();
 			$table->addColumn($website['id']);
 			$table->addColumn('<a href="' . $this->url->getDirectory() . Module::PAGE_SITE . '?id=' . $website['id'] . '">' . $website['name'] . '</a>');
 			$table->addColumn('<a class="icon icon-settings" href="' . $this->url->getPath() . '?action=' . self::ACTION_SETTINGS . '&amp;id=' . $website['id'] . '"></a>');
-			$table->addColumn('<a class="icon icon-active-' . $website['active'] . '" href="' . $this->url->getPath() . '?action=' . self::ACTION_ACTIVE . '&amp;id=' . $website['id'] . '"></a>');
+			$table->addColumn('<a class="icon icon-active-' . $website['active'] . '" href="' . $this->url->getPath() . '?action=' . self::ACTION_STATUS . '&amp;id=' . $website['id'] . '"></a>');
 			$table->closeRow();
 		}
 

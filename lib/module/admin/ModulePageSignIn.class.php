@@ -9,13 +9,13 @@ namespace lib\module\admin;
  */
 class ModulePageSignIn extends ModulePageAbstract {
 	public function content() {
-		return $this->contentView($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->contentModel($_POST['username'], $_POST['password']) : '');
+		return $this->getSignIn($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postSignIn($_POST['username'], $_POST['password']) : '');
 	}
 
 	/**
 	 *
 	 */
-	private function contentModel($username, $password) {
+	private function postSignIn($username, $password) {
 		if(!isset($_POST['username'], $_POST['password'])) {
 			return '<p class="msg-warning">Require username and password.</p>';
 		}
@@ -30,7 +30,7 @@ class ModulePageSignIn extends ModulePageAbstract {
 	/**
 	 *
 	 */
-	private function contentView($message = '') {
+	private function getSignIn($message = '') {
 		$form = new \lib\html\HTMLFormStacked();
 
 		$form->addInput('Username', array(
