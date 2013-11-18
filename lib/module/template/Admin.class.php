@@ -8,136 +8,212 @@ namespace lib\module\template;
  * @version 1.0
  */
 class Admin extends \lib\core\AbstractAdmin {
+	const ACTION_NEW = 'new';
+	const ACTION_EDIT = 'edit';
+	const ACTION_REMOVE = 'remove';
+
 	public function run() {
-		$request = ($_SERVER['REQUEST_METHOD'] == 'GET') ? 'GET' : 'POST';
-		$action = !isset($_GET['action']) ? 'Overview' : $_GET['action'];
+		$this->result = isset($_GET['action'], $_GET['tid']) ? $this->handleAction($_GET['action'], $_GET['tid']) : $this->getOverview();
+	}
 
-		$function = $request . $action;
-		if (method_exists($this, $function)) {
-			$this->$function();	
-		} else {
-			throw new \Exception('Action is not implemented', 501);
+	/**
+	 *
+	 */
+	private function handleAction($action, $id) {
+		switch($action) {
+			case self::ACTION_NEW:
+				return $this->getNew($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postNew($id) : ''));
+			break;
+			case self::ACTION_EDIT:
+				return $this->getEdit($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postEdit($id) : ''));
+			break;
+			case self::ACTION_REMOVE:
+				return $this->getRemove($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postRemove($id) : ''));
+			break;
+			default:
+
+			break;
 		}
 	}
 
+	/**
+	 *
+	 */
+	private function postNew($id) {
+		$this->pdbc->query('INSERT INTO `module_template` (`id_theme`, `name`, `content`)
+		                    SELECT `id`, "' . $this->pdbc->quote($_POST['name']) . '", "' . $this->pdbc->quote($_POST['template']) . '"
+		                    FROM `module_theme`
+		                    WHERE `name` = "' . $this->pdbc->quote($_POST['theme']) . '"');
+
+		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?id=' . $_GET['id'] .  '&module=template', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+	}
+
+	/**
+	 *
+	 */
+	private function getNew($id, $message = '') {
+		$this->pdbc->query('SELECT `name` FROM `module_theme`');
+
+		$themes = array();
+
+		while($theme = $this->pdbc->fetch()) {
+			$themes[] = $theme['name'];
+		}
+
+		$form = new \lib\html\HTMLFormStacked();
+
+		$form->addSelect('Theme', $themes, array(
+			'id' => 'form-theme',
+			'name' => 'theme'
+		));
+
+		$form->addInput('Name', array(
+			'type' => 'text',
+			'id' => 'form-name',
+			'name' => 'name',
+			'placeholder' => 'Name'
+		));
+
+		$form->addTextarea('Template', '', array(
+			'type' => 'text',
+			'id' => 'form-template',
+			'name' => 'template',
+			'placeholder' => 'Template'
+		));
+
+		$form->addContent('<a href="' . $this->url->getPath() . '?id=' . $_GET['id'] .  '&amp;module=template' . '"><button type="button">Back</button></a>');
+
+		$form->addButton('Submit', array(
+			'type' => 'submit'
+		));
+
+		return '<h2 class="icon icon-module-template">New template</h2>' . $message . $form->__toString();
+
+	}
+
+	/**
+	 *
+	 */
+	private function postEdit($id) {
+		$this->pdbc->query('UPDATE `module_template`
+		                    SET `id_theme` = (SELECT `id`
+		                                      FROM `module_theme`
+		                                      WHERE `name` = "' . $this->pdbc->quote($_POST['theme']) . '"),
+		                        `name` = "'. $this->pdbc->quote($_POST['name']) .'",
+		                        `content` = "'. $this->pdbc->quote($_POST['template']) .'"
+		                    WHERE `id` = "'. $this->pdbc->quote($id) .'"');
+
+		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?id=' . $_GET['id'] .  '&module=template', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+	}
+
+	/**
+	 *
+	 */
+	private function getEdit($id, $message = '') {
+		$this->pdbc->query('SELECT `theme`.`name` as `theme`, `module_template`.`name`, `module_template`.`content`
+		                    FROM `module_template`
+		                    LEFT JOIN (SELECT `id`, `name`
+		                               FROM `module_theme`) AS `theme`
+		                    ON `module_template`.`id_theme` = `theme`.`id`
+		                    WHERE `module_template`.`id` = "' . $this->pdbc->quote($id) . '"');
+
+		$template = $this->pdbc->fetch();
+
+		$this->pdbc->query('SELECT `name` FROM `module_theme`');
+
+		$themes = array();
+
+		while($theme = $this->pdbc->fetch()) {
+			$themes[$theme['name']] = array(
+				'value' => $theme['name']
+			) + ($theme['name'] == $template['theme'] ? array('selected' => 'selected') : array());
+		}
+
+		$form = new \lib\html\HTMLFormStacked();
+
+		$form->addSelect('Theme', $themes, array(
+			'id' => 'form-theme',
+			'name' => 'theme'
+		));
+
+		$form->addInput('Name', array(
+			'type' => 'text',
+			'id' => 'form-name',
+			'name' => 'name',
+			'placeholder' => 'Name',
+			'value' => $template['name']
+		));
+
+		$form->addTextarea('Template', $template['content'], array(
+			'type' => 'text',
+			'id' => 'form-template',
+			'name' => 'template',
+			'placeholder' => 'Template'
+		));
+
+		$form->addContent('<a href="' . $this->url->getPath() . '?id=' . $_GET['id'] .  '&amp;module=template' . '"><button type="button">Back</button></a>');
+
+		$form->addButton('Submit', array(
+			'type' => 'submit'
+		));
+
+		return '<h2 class="icon icon-module-template">Edit template</h2>' . $message . $form->__toString();
+	}
+
+	/**
+	 *
+	 */
+	private function postRemove($id) {
+		$this->pdbc->query('DELETE FROM `module_template` WHERE `id` = "' . $this->pdbc->quote($id) .'"');
+
+		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?id=' . $_GET['id'] .  '&module=template', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+	}
+
+	/**
+	 *
+	 */
+	private function getRemove($id, $message = '') {
+		$form = new \lib\html\HTMLFormStacked();
+
+		$form->addContent('<label>Are you sure you want to remove this template? This action can\'t be undone!</label>');
+
+		$form->addContent('<a href="' . $this->url->getPath() . '?id=' . $_GET['id'] .  '&amp;module=template' . '"><button type="button">No</button></a>');
+
+		$form->addButton('Yes', array(
+			'type' => 'submit'
+		));
+
+		return '<h2 class="icon icon-module-template">Remove template</h2>' . $message . $form->__toString();
+	}
+
+	/**
+	 *
+	 */
 	private function getOverview() {
-		$base = $this->url->getURLDirectory();
-		$id = $_GET['id'];
-		$this->result .= <<<HTML
-<h1>Template</h1>
-<table>
-<tr>
-	<th>ID</td>
-	<th>Name</th>
-	<th>Edit</th>
-	<th>Remove</th>
-</tr>
-HTML;
+		$this->pdbc->query('SELECT `module_template`.`id`, `module_template`.`name`, `theme`.`name` AS `theme`
+		                    FROM `module_template`
+		                    LEFT JOIN (SELECT `id`, `name`
+		                               FROM `module_theme`) AS `theme`
+		                    ON `module_template`.`id_theme` = `theme`.`id`
+		                    WHERE 1');
 
-		$this->pdbc->query('SELECT * FROM template');
 		$templates = $this->pdbc->fetchAll();
-		foreach ($templates as $key => $template) {
-			$this->result .= <<<HTML
-<tr>
-	<td>{$template['id']}</td>
-	<td>{$template['name']}</td>
-	<td><a href="{$base}site?id={$id}&amp;module=template&amp;action=edit&amp;tid={$template['id']}" class="edit">Edit</a></td>
-	<td><a href="{$base}site?id={$id}&amp;module=template&amp;action=remove&amp;tid={$template['id']}" class="edit">Remove</a></td>
-</tr>
-HTML;
+
+		$table = new \lib\html\HTMLTable();
+		$table->addHeaderRow(array('#','Name','Theme','Edit','Remove'));
+
+		foreach($templates as $test => $template) {
+			$table->openRow();
+			$table->addColumn($template['id']);
+			$table->addColumn($template['name']);
+			$table->addColumn($template['theme']);
+			$table->addColumn('<a class="icon icon-edit" href="' . $this->url->getPath() . '?id=' . $_GET['id'] . '&amp;module=template&amp;action=' . self::ACTION_EDIT . '&amp;tid=' . $template['id'] . '"></a>');
+			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->getPath() . '?id=' . $_GET['id'] . '&amp;module=template&amp;action=' . self::ACTION_REMOVE . '&amp;tid=' . $template['id'] . '"></a>');
+			$table->closeRow();
 		}
-		$this->result .= <<<HTML
-</table>
-<a href="{$base}site?id={$id}&amp;module=template&amp;action=new" class="addnew">Add new template</a>
-HTML;
+
+		return '<h2 class="icon icon-module-template">Template</h2>' . $table . '<p><a class="icon icon-new" href="' . $this->url->getPath() . '?id=' . $_GET['id'] . '&amp;module=template&amp;action=' . self::ACTION_NEW . '&amp;tid=0">New template</a></p>';
 	}
-
-
-	private function getEdit(array $fields = array()) {
-		$base = $this->url->getURLDirectory();
-		$id = $_GET['id'];
-		$this->pdbc->query('SELECT *
-							FROM template
-							WHERE id = "'. $this->pdbc->quote($_GET['tid']) .'"');
-		$item = $this->pdbc->fetch();
-		$name = isset($fields['name']) ? $fields['name'] : $item['name'];
-		$content = isset($fields['content']) ? $fields['content'] : $item['content'];
-
-		$this->result .= <<<HTML
-<h1>Edit Template</h1>
-<form action="" method="POST">
-	<label for="name">Name</label>
-	<input type="text" name="name" value="{$name}">
-	<label for="content">Template</label>
-	<textarea name="content">{$content}</textarea>
-	<a href="{$base}site?id={$id}&amp;module=template">Back</a>
-	<input type="submit">
-</form>
-HTML;
-	}
-
-	private function postEdit() {
-		$this->pdbc->query('UPDATE `template`
-							SET `name` = "'. $this->pdbc->quote($_POST['name']) .'",
-							`content` = "'. $this->pdbc->quote($_POST['content']) .'"
-							WHERE `id` = "'. $this->pdbc->quote($_GET['tid']) .'"');
-		if ($this->pdbc->rowCount() == 0) {
-			$this->getEdit(array(
-					'name' => $_GET['name'],
-					'content' => $_GET['content']
-				));
-			return;
-		}
-		$this->getEdit();
-	}
-
-	private function getNew() {
-		$this->result .= <<<HTML
-<h1>New Template</h1>
-<form action="" method="POST">
-	<label for="name">Nam	e</label>
-	<input type="text" name="name">
-	<label for="content">Code</label>
-	<textarea name="content"></textarea>
-
-	<input type="submit">
-</form>
-HTML;
-	}
-
-	private function postNew() {
-		$this->pdbc->query('INSERT INTO `template` (`name`, `content`) 
-							VALUES ("'. $this->pdbc->quote($_POST['name']) .
-								'", "'. $this->pdbc->quote($_POST['content']) .'")');
-
-		$this->redirectOverview();
-	}
-
-	private function getRemove() {
-		$id = $_GET['id'];
-		$base = $this->url->getURLDirectory();
-		$this->result .= <<<HTML
-<p>Are you sure you want to remove this template? This can not be undone!</p>
-<form action="" method="POST">
-	<a href="{$base}site?id={$id}&amp;module=template">Back</a>
-	<input type="submit" value="delete">
-</form>
-HTML;
-	}
-
-	private function postRemove() {
-		$this->pdbc->query('DELETE FROM template WHERE `id` = "' . $this->pdbc->quote($_GET['tid']) .'"');
-
-		$this->getRemove();
-	}
-
-
-	private function redirectOverview() {
-		$base = $this->url->getURLDirectory();
-		$id = $_GET['id'];
-		throw new \Exception($base . "site?id={$id}&module=template", 301);
-	}
-
 }
 
 ?>
