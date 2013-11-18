@@ -8,141 +8,211 @@ namespace lib\module\stylesheet;
  * @version 1.0
  */
 class Admin extends \lib\core\AbstractAdmin {
+	const ACTION_NEW = 'new';
+	const ACTION_EDIT = 'edit';
+	const ACTION_REMOVE = 'remove';
+
 	public function run() {
-		$request = ($_SERVER['REQUEST_METHOD'] == 'GET') ? 'GET' : 'POST';
-		$action = !isset($_GET['action']) ? 'Overview' : $_GET['action'];
+		$this->result = isset($_GET['action'], $_GET['tid']) ? $this->handleAction($_GET['action'], $_GET['tid']) : $this->getOverview();
+	}
 
-		$function = $request . $action;
-		if (method_exists($this, $function)) {
-			$this->$function();
-		} else {
-			throw new \Exception('Action is not implemented', 501);
+	/**
+	 *
+	 */
+	private function handleAction($action, $id) {
+		switch($action) {
+			case self::ACTION_NEW:
+				return $this->getNew($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postNew($id) : ''));
+			break;
+			case self::ACTION_EDIT:
+				return $this->getEdit($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postEdit($id) : ''));
+			break;
+			case self::ACTION_REMOVE:
+				return $this->getRemove($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postRemove($id) : ''));
+			break;
+			default:
+
+			break;
 		}
 	}
 
-	private function getOverview() {
-		$base = $this->url->getURLDirectory();
-		$id = $_GET['id'];
-		$this->result .= <<<HTML
-<h1>Stylesheet</h1>
-<table>
-<tr>
-	<th>ID</th>
-	<th>Name</th>
-	<th>Edit</th>
-	<th>Remove</th>
-</td>
-HTML;
+	/**
+	 *
+	 */
+	private function postNew($id) {
+		$this->pdbc->query('INSERT INTO `module_stylesheet` (`id_theme`, `name`, `content`)
+		                    SELECT `id`, "' . $this->pdbc->quote($_POST['name']) . '", "' . $this->pdbc->quote($_POST['stylesheet']) . '"
+		                    FROM `module_theme`
+		                    WHERE `name` = "' . $this->pdbc->quote($_POST['theme']) . '"');
 
-		$this->pdbc->query('SELECT * FROM module_stylesheet');
-		$sheets = $this->pdbc->fetchAll();
-		foreach ($sheets as $no => $sheet) {
-			$this->result .= <<<HTML
-<tr>
-	<td>{$sheet['id']}</td>
-	<td>{$sheet['name']}</td>
-	<td><a href="{$base}site?id={$id}&amp;module=stylesheet&amp;action=edit&amp;sid={$sheet['id']}" class="edititem" alt="edit item">Edit</a></td>
-	<td><a href="{$base}site?id={$id}&amp;module=stylesheet&amp;action=remove&amp;sid={$sheet['id']}" class="removeitem" alt="Remove item">Remove</a></td>
-</tr>
-HTML;
+		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?id=' . $_GET['id'] .  '&module=stylesheet', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+	}
+
+	/**
+	 *
+	 */
+	private function getNew($id, $message = '') {
+		$this->pdbc->query('SELECT `name` FROM `module_theme`');
+
+		$themes = array();
+
+		while($theme = $this->pdbc->fetch()) {
+			$themes[] = $theme['name'];
 		}
-		$this->result .= <<<HTML
-</table>
-<a href="{$base}site?id={$id}&amp;module=stylesheet&amp;action=new" class="addnew">Add new stylesheet</a>
-HTML;
+
+		$form = new \lib\html\HTMLFormStacked();
+
+		$form->addSelect('Theme', $themes, array(
+			'id' => 'form-theme',
+			'name' => 'theme'
+		));
+
+		$form->addInput('Name', array(
+			'type' => 'text',
+			'id' => 'form-name',
+			'name' => 'name',
+			'placeholder' => 'Name'
+		));
+
+		$form->addTextarea('Stylesheet', '', array(
+			'type' => 'text',
+			'id' => 'form-stylesheet',
+			'name' => 'stylesheet',
+			'placeholder' => 'Stylesheet'
+		));
+
+		$form->addContent('<a href="' . $this->url->getPath() . '?id=' . $_GET['id'] .  '&amp;module=stylesheet' . '"><button type="button">Back</button></a>');
+
+		$form->addButton('Submit', array(
+			'type' => 'submit'
+		));
+
+		return '<h2 class="icon icon-module-stylesheet">New stylesheet</h2>' . $message . $form->__toString();
 
 	}
 
-
-	private function getRemove() {
-		$id = $_GET['id'];
-		$base = $this->url->getURLDirectory();
-		$sheet = $this->pdbc->query('SELECT name from module_stylesheet WHERE id =' . $this->pdbc->quote($_GET['sid']))->fetch();
-		$this->result .= <<<HTML
-<p>You are about to remove the stylesheet {$sheet['name']}</p>
-<p>Are you sure you want to remove this stylesheet? This can not be undone!<p>
-<form action="" method="POST">
-	<a href="{$base}site?id={$id}&amp;module=stylesheet">Back</a>
-	<input type="submit" value="Delete" />
-</form>
-HTML;
-	}
-
-	private function postRemove() {
-		$this->pdbc->query('DELETE FROM module_stylesheet WHERE id ="'. $this->pdbc->quote($_GET['sid']) .'"');
-
-		$this->redirectOverview();
-	}
-
-	private function getEdit(array $fields = array()) {
-		$base = $this->url->getURLDirectory();
-		$id = $_GET['id'];
-
-		$this->pdbc->query('SELECT * 
-							FROM module_stylesheet
-							WHERE id = "' . $this->pdbc->quote($_GET['sid']) . '"');
-		$item = $this->pdbc->fetch();
-
-		$name = isset($fields['name']) ? $fields['name'] : $item['name'];
-		$content = isset($fields['content']) ? $fields['content'] : $item['content'];
-
-		$this->result .= <<<HTML
-<h1>Edit Stylesheet</h1>
-<form action="" method="POST">
-	<label for="name">Name</label><input type="text" name="name" value="{$name}">
-	<label for="content">Style</label><textarea name="content">
-{$content}
-	</textarea>
-	<a href="{$base}site?id={$id}&amp;module=stylesheet">Back</a>
-	<input type="submit" />
-</form>
-HTML;
-	}
-
-
-	private function postEdit() {
+	/**
+	 *
+	 */
+	private function postEdit($id) {
 		$this->pdbc->query('UPDATE `module_stylesheet`
-							SET `name` = "' . $this->pdbc->quote($_POST['name']) .  '",
-							`content` = "' . $this->pdbc->quote($_POST['content']) . '"
-							WHERE `id` = ' . $this->pdbc->quote($_GET['sid']) . '
-							');
-		if ($this->pdbc->rowCount() == 0) {
-			$this->getEdit(array(
-					'name' => $_POST['name'],
-					'content' => $_POST['content']
-				));
-			return;
+		                    SET `id_theme` = (SELECT `id`
+		                                      FROM `module_theme`
+		                                      WHERE `name` = "' . $this->pdbc->quote($_POST['theme']) . '"),
+		                        `name` = "'. $this->pdbc->quote($_POST['name']) .'",
+		                        `content` = "'. $this->pdbc->quote($_POST['stylesheet']) .'"
+		                    WHERE `id` = "'. $this->pdbc->quote($id) .'"');
+
+		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?id=' . $_GET['id'] .  '&module=stylesheet', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+	}
+
+	/**
+	 *
+	 */
+	private function getEdit($id, $message = '') {
+		$this->pdbc->query('SELECT `theme`.`name` as `theme`, `module_stylesheet`.`name`, `module_stylesheet`.`content`
+		                    FROM `module_stylesheet`
+		                    LEFT JOIN (SELECT `id`, `name`
+		                               FROM `module_theme`) AS `theme`
+		                    ON `module_stylesheet`.`id_theme` = `theme`.`id`
+		                    WHERE `module_stylesheet`.`id` = "' . $this->pdbc->quote($id) . '"');
+
+		$stylesheet = $this->pdbc->fetch();
+
+		$this->pdbc->query('SELECT `name` FROM `module_theme`');
+
+		$themes = array();
+
+		while($theme = $this->pdbc->fetch()) {
+			$themes[$theme['name']] = array(
+				'value' => $theme['name']
+			) + ($theme['name'] == $stylesheet['theme'] ? array('selected' => 'selected') : array());
 		}
-		$this->getEdit();
+
+		$form = new \lib\html\HTMLFormStacked();
+
+		$form->addSelect('Theme', $themes, array(
+			'id' => 'form-theme',
+			'name' => 'theme'
+		));
+
+		$form->addInput('Name', array(
+			'type' => 'text',
+			'id' => 'form-name',
+			'name' => 'name',
+			'placeholder' => 'Name',
+			'value' => $stylesheet['name']
+		));
+
+		$form->addTextarea('Stylesheet', $stylesheet['content'], array(
+			'type' => 'text',
+			'id' => 'form-stylesheet',
+			'name' => 'stylesheet',
+			'placeholder' => 'Stylesheet'
+		));
+
+		$form->addContent('<a href="' . $this->url->getPath() . '?id=' . $_GET['id'] .  '&amp;module=stylesheet' . '"><button type="button">Back</button></a>');
+
+		$form->addButton('Submit', array(
+			'type' => 'submit'
+		));
+
+		return '<h2 class="icon icon-module-stylesheet">Edit stylesheet</h2>' . $message . $form->__toString();
 	}
 
-	private function getNew() {
-		$this->result .= <<<HTML
-<form action="" method="POST">
-	<label for="name">Name</label>
-	<input type="text" name="name" />
-	<label for="content">Content</label>
-	<textarea name="content"></textarea>
+	/**
+	 *
+	 */
+	private function postRemove($id) {
+		$this->pdbc->query('DELETE FROM `module_stylesheet` WHERE `id` = "' . $this->pdbc->quote($id) .'"');
 
-	<input type="submit" />
-</form>
-HTML;
+		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?id=' . $_GET['id'] .  '&module=stylesheet', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
 
-	private function postNew() {
-		$this->pdbc->query('INSERT 
-								INTO module_stylesheet (name, content) 
-								VALUES ("'. $this->pdbc->quote($_POST['name']) .
-									'", "'. $this->pdbc->quote($_POST['content']) .'")');
+	/**
+	 *
+	 */
+	private function getRemove($id, $message = '') {
+		$form = new \lib\html\HTMLFormStacked();
 
-		$this->redirectOverview();
+		$form->addContent('<label>Are you sure you want to remove this stylesheet? This action can\'t be undone!</label>');
+
+		$form->addContent('<a href="' . $this->url->getPath() . '?id=' . $_GET['id'] .  '&amp;module=stylesheet' . '"><button type="button">No</button></a>');
+
+		$form->addButton('Yes', array(
+			'type' => 'submit'
+		));
+
+		return '<h2 class="icon icon-module-stylesheet">Remove stylesheet</h2>' . $message . $form->__toString();
 	}
 
-	private function redirectOverview()
-	{
-		$base = $this->url->getURLDirectory();
-		$id = $_GET['id'];
-		throw new \Exception($base . "site?id={$id}&module=stylesheet", 301);
+	/**
+	 *
+	 */
+	private function getOverview() {
+		$this->pdbc->query('SELECT `module_stylesheet`.`id`, `module_stylesheet`.`name`, `theme`.`name` AS `theme`
+		                    FROM `module_stylesheet`
+		                    LEFT JOIN (SELECT `id`, `name`
+		                               FROM `module_theme`) AS `theme`
+		                    ON `module_stylesheet`.`id_theme` = `theme`.`id`
+		                    WHERE 1');
+
+		$stylesheets = $this->pdbc->fetchAll();
+
+		$table = new \lib\html\HTMLTable();
+		$table->addHeaderRow(array('#','Name','Theme','Edit','Remove'));
+
+		foreach($stylesheets as $stylesheet) {
+			$table->openRow();
+			$table->addColumn($stylesheet['id']);
+			$table->addColumn($stylesheet['name']);
+			$table->addColumn($stylesheet['theme']);
+			$table->addColumn('<a class="icon icon-edit" href="' . $this->url->getPath() . '?id=' . $_GET['id'] . '&amp;module=stylesheet&amp;action=' . self::ACTION_EDIT . '&amp;tid=' . $stylesheet['id'] . '"></a>');
+			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->getPath() . '?id=' . $_GET['id'] . '&amp;module=stylesheet&amp;action=' . self::ACTION_REMOVE . '&amp;tid=' . $stylesheet['id'] . '"></a>');
+			$table->closeRow();
+		}
+
+		return '<h2 class="icon icon-module-stylesheet">Stylesheet</h2>' . $table . '<p><a class="icon icon-new" href="' . $this->url->getPath() . '?id=' . $_GET['id'] . '&amp;module=stylesheet&amp;action=' . self::ACTION_NEW . '&amp;tid=0">New stylesheet</a></p>';
 	}
 }
 
