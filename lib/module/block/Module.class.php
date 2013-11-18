@@ -61,7 +61,7 @@ class Module extends \lib\core\AbstractModule {
 		                    FROM `module_block`
 		                    WHERE `name` = "' . $this->pdbc->quote($name) . '"
 		                    AND `id_theme` ' . ($theme == self::DEFAULT_THEME ? 'IS NULL' : '= (SELECT `id`
-		                                                                                        FROM `theme`
+		                                                                                        FROM `module_theme`
 		                                                                                        WHERE `name` = "' . $this->pdbc->quote($theme) . '")'));
 
 		$block = $this->pdbc->fetch();

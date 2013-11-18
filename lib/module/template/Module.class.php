@@ -18,8 +18,8 @@ class Module extends \lib\core\AbstractModule {
 		$this->pdbc->query('SELECT `content`
 		                    FROM `module_template`
 		                    WHERE `id` = (SELECT `id_template`
-		                                  FROM `router`
-	                                          WHERE `id` = "' . $this->pdbc->quote($this->routerID) . '")');
+		                                  FROM `module_page`
+	                                          WHERE `id_router` = "' . $this->pdbc->quote($this->routerID) . '")');
 
 		$this->result = end($this->pdbc->fetch());
 	}
