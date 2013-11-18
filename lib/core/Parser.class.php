@@ -11,6 +11,7 @@ class Parser implements Runnable {
 	const DEFAULT_NAMESPACE = AbstractModule::DEFAULT_NAMESPACE;
 	const DEFAULT_PARSABLE = AbstractModule::DEFAULT_PARSABLE;
 	const DEFAULT_STATIC = AbstractModule::DEFAULT_STATIC;
+	const DEFAULT_MODULE = 'template';
 
 	const MODULE_CLASS = '\\Module';
 	const MODULE_NAMESPACE = 'lib\\module\\';
@@ -34,13 +35,13 @@ class Parser implements Runnable {
 	 * @throws StatusCodeException     if the requested file doesn't exists.
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
-	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $module = self::DEFAULT_MODULE) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
 		
 		$this->modules = $this->getModules();
 		$this->routerID = $this->getRouterID();
-		$this->tokenizer = $this->getTokenizer();
+		$this->tokenizer = $this->getTokenizer($module);
 
 		$this->namespace = self::DEFAULT_NAMESPACE;
 		$this->parsable = self::DEFAULT_PARSABLE;
@@ -48,9 +49,9 @@ class Parser implements Runnable {
 	}
 
 	/**
-	 * Returns an array with modules you may use.
+	 * Returns an array with the modules you may use.
 	 *
-	 * @return array                   an array with modules you may use.
+	 * @return array                   an array with the modules you may use.
 	 * @throws \lib\pdbc\PDBCException if the query can't be executed.
 	 */
 	private function getModules() {
@@ -58,7 +59,13 @@ class Parser implements Runnable {
 		                    FROM `module`
 		                    WHERE `active` = 1');
 
-		return $this->pdbc->fetchAll();
+		$modules = array();
+
+		while($module = $this->pdbc->fetch()) {
+			$modules[] = $module['name'];
+		}
+
+		return $modules;
 	}
 
 	/**
@@ -83,21 +90,13 @@ class Parser implements Runnable {
 	}
 
 	/**
-	 * Returns a tokenizer object.
+	 * Returns a tokenizer object with the given module.
 	 *
-	 * Note: this function requires $this->routerID to be set.
-	 *
-	 * @return Tokenizer               returns a tokenizer object.
+	 * @return Tokenizer               returns a tokenizer object with the given module.
 	 * @throws \lib\pdbc\PDBCException if the query can't be executed.
 	 */
-	private function getTokenizer() {
-		$this->pdbc->query('SELECT `content`
-		                    FROM `template`
-		                    WHERE `id` = (SELECT `id_template`
-		                                  FROM `router`
-	                                          WHERE `id` = "' . $this->pdbc->quote($this->routerID) . '")');
-
-		return new Tokenizer(end($this->pdbc->fetch()));
+	private function getTokenizer($token) {
+		return new Tokenizer(Token::DEFAULT_START . $token . Token::DEFAULT_END);
 	}
 
 	/**
@@ -143,7 +142,7 @@ class Parser implements Runnable {
 	private function getModule(Token $token) {
 		try {
 			// Access
-			if(!$this->hasAccess($token->getName())) {
+			if(!in_array($token->getName(), $this->modules)) {
 				$this->parsable = FALSE;
 				return $token->__toString();
 			}
@@ -163,22 +162,6 @@ class Parser implements Runnable {
 		} catch(ModuleException $e) {
 			return '<!--' . $token->getName() . ': ' . $e->getMessage() . '-->';
 		}
-	}
-
-	/**
-	 * Returns true if you have access to use the given module.
-	 *
-	 * @param  string
-	 * @return boolean true if you have access to use the given module.
-	 */
-	private function hasAccess($name) {
-		foreach($this->modules as $module) {
-			if($module['name'] == $name) {
-				return TRUE;
-			}
-		}
-
-		return FALSE;
 	}
 }
 
