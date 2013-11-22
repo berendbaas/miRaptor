@@ -9,7 +9,7 @@ namespace lib\module\slider;
  */
 class Admin extends \lib\core\AbstractAdmin {
 	public function run() {
-		$this->result = 'TODO slider admin';
+		$this->result = '<h2 class="icon icon-module-slider">Slider</h2><p>Coming soon.</p>';
 	}
 }
 

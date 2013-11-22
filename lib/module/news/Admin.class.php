@@ -9,7 +9,7 @@ namespace lib\module\news;
  */
 class Admin extends \lib\core\AbstractAdmin {
 	public function run() {
-		$this->result = 'TODO news admin';
+		$this->result = '<h2 class="icon icon-module-news">News</h2><p>Coming soon.</p>';
 	}
 }
 

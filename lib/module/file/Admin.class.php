@@ -9,7 +9,7 @@ namespace lib\module\file;
  */
 class Admin extends \lib\core\AbstractAdmin {
 	public function run() {
-		$this->result = 'TODO file admin';
++		$this->result = '<h2 class="icon icon-module-file">File</h2><p>Coming soon.</p>';
 	}
 }
 

@@ -9,7 +9,7 @@ namespace lib\module\mail;
  */
 class Admin extends \lib\core\AbstractAdmin {
 	public function run() {
-		$this->result = 'TODO mail admin';
+		$this->result = '<h2 class="icon icon-module-mail">Mail</h2><p>Coming soon.</p>';
 	}
 }
 

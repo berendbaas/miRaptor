@@ -9,7 +9,7 @@ namespace lib\module\sitemap;
  */
 class Admin extends \lib\core\AbstractAdmin {
 	public function run() {
-		$this->result = 'TODO sitemap admin';
+		$this->result = '<h2 class="icon icon-module-sitemap">Sitemap</h2><p>Coming soon.</p>';
 	}
 }
 
