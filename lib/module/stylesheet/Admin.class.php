@@ -75,7 +75,6 @@ class Admin extends \lib\core\AbstractAdmin {
 		));
 
 		$form->addTextarea('Stylesheet', '', array(
-			'type' => 'text',
 			'id' => 'form-stylesheet',
 			'name' => 'stylesheet',
 			'placeholder' => 'Stylesheet'
@@ -137,7 +136,6 @@ class Admin extends \lib\core\AbstractAdmin {
 		));
 
 		$form->addInput('Name', array(
-			'type' => 'text',
 			'id' => 'form-name',
 			'name' => 'name',
 			'placeholder' => 'Name',

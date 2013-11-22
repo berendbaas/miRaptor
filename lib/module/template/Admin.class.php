@@ -75,7 +75,6 @@ class Admin extends \lib\core\AbstractAdmin {
 		));
 
 		$form->addTextarea('Template', '', array(
-			'type' => 'text',
 			'id' => 'form-template',
 			'name' => 'template',
 			'placeholder' => 'Template'
@@ -145,7 +144,6 @@ class Admin extends \lib\core\AbstractAdmin {
 		));
 
 		$form->addTextarea('Template', $template['content'], array(
-			'type' => 'text',
 			'id' => 'form-template',
 			'name' => 'template',
 			'placeholder' => 'Template'

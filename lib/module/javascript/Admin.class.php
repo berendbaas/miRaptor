@@ -75,7 +75,6 @@ class Admin extends \lib\core\AbstractAdmin {
 		));
 
 		$form->addTextarea('Javascript', '', array(
-			'type' => 'text',
 			'id' => 'form-javascript',
 			'name' => 'javascript',
 			'placeholder' => 'Javascript'
@@ -145,7 +144,6 @@ class Admin extends \lib\core\AbstractAdmin {
 		));
 
 		$form->addTextarea('Javascript', $javascript['content'], array(
-			'type' => 'text',
 			'id' => 'form-javascript',
 			'name' => 'javascript',
 			'placeholder' => 'Javascript'
