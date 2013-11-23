@@ -85,6 +85,10 @@ class Mysql implements PDBC {
 	public function rowCount() {
 		return mysql_affected_rows($this->link);
 	}
+
+	public function insertID() {
+		return mysql_insert_id($this->link);
+	}
 }
 
 ?>

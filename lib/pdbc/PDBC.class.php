@@ -70,6 +70,13 @@ interface PDBC {
 	 * @returns int the number of rows.
 	 */
 	public function rowCount();
+
+	/**
+	 * Returns the ID of the last inserted row, or 0 if the previous query didn't insert a new row.
+	 *
+	 * @returns int the ID of the last inserted row, or 0 if the previous query didn't insert a new row.
+	 */
+	public function insertID();
 }
 
 ?>
