@@ -193,7 +193,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		                    LEFT JOIN (SELECT `id`, `name`
 		                               FROM `module_theme`) AS `theme`
 		                    ON `module_javascript`.`id_theme` = `theme`.`id`
-		                    WHERE 1');
+		                    ORDER BY `id` ASC');
 
 		$javascripts = $this->pdbc->fetchAll();
 

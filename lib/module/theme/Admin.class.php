@@ -139,7 +139,9 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	private function getOverview() {
-		$this->pdbc->query('SELECT `id`,`name` FROM `module_theme`');
+		$this->pdbc->query('SELECT `id`,`name`
+		                    FROM `module_theme`
+		                    ORDER BY `id` ASC');
 
 		$themes = $this->pdbc->fetchAll();
 
