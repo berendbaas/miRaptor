@@ -16,41 +16,32 @@ class Mysql implements PDBC {
 	private $link;
 	private $resource;
 
-	public function __construct($hostname, $username, $password) {
+	public function __construct($hostname, $username, $password, $database = '') {
 		$this->hostname = $hostname;
 		$this->username = $username;
 		$this->password = $password;
+		$this->database = $database;
 
-		if(!($this->link = mysql_connect($hostname, $username, $password, TRUE))) {
-			throw new PDBCException('Mysql: Can\'t connect to database - ' . $hostname);
-		}
+		$this->mysqlConnect();
+		$this->mysqlSelectDatabase();
 	}
 
 	public function __clone() {
-		if(!($this->link = mysql_connect($this->hostname, $this->username, $this->password, TRUE))) {
-			throw new PDBCException('Mysql: Can\'t connect to database - ' . $this->hostname);
-		}
-
-		if(isset($this->database)) {
-			if(!mysql_select_db($this->database, $this->link)) {
-				throw new PDBCException('Mysql: Can\'t select database - ' . $this->database);
-			}
-		}
+		$this->mysqlConnect();
+		$this->mysqlSelectDatabase();
 	}
 
 	public function selectDatabase($database) {
 		$this->database = $database;
 
-		if(!mysql_select_db($database, $this->link)) {
-			throw new PDBCException('Mysql: Can\'t select database - ' . $database);
-		}
+		$this->mysqlSelectDatabase();
 	}
 
 	public function quote($string) {
-		$result = mysql_real_escape_string($string);
+		$result = mysql_real_escape_string($string, $this->link);
 
 		if($result === FALSE) {
-			throw new PDBCException('Mysql: Can\'t quote - ' . $string);
+			throw new PDBCException('Mysql(' . mysql_errno($this->link) . '): ' . mysql_error($this->link));
 		}
 
 		return $result;
@@ -59,8 +50,8 @@ class Mysql implements PDBC {
 	public function query($query) {
 		$this->resource = mysql_query($query, $this->link);
 
-		if(!$this->resource) {
-			throw new PDBCException('Mysql: Can\'t execute query - ' . $query);
+		if($this->resource === FALSE) {
+			throw new PDBCException('Mysql(' . mysql_errno($this->link) . '): ' . mysql_error($this->link));
 		}
 
 		return $this;
@@ -69,13 +60,13 @@ class Mysql implements PDBC {
 	public function fetch() {
 		$row = mysql_fetch_assoc($this->resource);
 
-		return !$row ? array() : $row;
+		return $row === FALSE ? NULL : $row;
 	}
 
 	public function fetchAll() {
 		$rows = array();
 
-		while($row = $this->fetch()) {
+		while(($row = $this->fetch()) !== NULL) {
 			$rows[] = $row;
 		}
 
@@ -88,6 +79,28 @@ class Mysql implements PDBC {
 
 	public function insertID() {
 		return mysql_insert_id($this->link);
+	}
+
+	/**
+	 * Connect with the Mysql database.
+	 *
+	 * @return void
+	 */
+	private function mysqlConnect() {
+		if(!($this->link = mysql_connect($this->hostname, $this->username, $this->password, TRUE))) {
+			throw new PDBCException('Mysql(' . mysql_errno($this->link) . '): ' . mysql_error($this->link));
+		}
+	}
+
+	/**
+	 * Select the current Mysql database.
+	 *
+	 * @return void
+	 */
+	private function mysqlSelectDatabase() {
+		if($this->database !== '' && !mysql_select_db($this->database, $this->link)) {
+			throw new PDBCException('Mysql(' . mysql_errno($this->link) . '): ' . mysql_error($this->link));
+		}
 	}
 }
 

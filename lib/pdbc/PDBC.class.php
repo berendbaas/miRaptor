@@ -9,14 +9,15 @@ namespace lib\pdbc;
  */
 interface PDBC {
 	/**
-	 * Construct a PDBC object. A database connection is made with the given hostname, username & password.
+	 * Construct a PDBC object. A database connection is made with the given hostname, username, password & database.
 	 * 
 	 * @param  String        $hostname
 	 * @param  String        $username
 	 * @param  String        $password
+	 * @param  String        $database
 	 * @throws PDBCException if you can't connected to the database with the given credentials.
 	 */
-	public function __construct($hostname, $username, $password);
+	public function __construct($hostname, $username, $password, $database);
 
 	/**
 	 * Clone is ought to return a deep copy of the PDBC object.
@@ -51,16 +52,16 @@ interface PDBC {
 	public function query($query);
 
 	/**
-	 * Returns an array indexed by column name or an empty array there is nothing to fetch.
+	 * Returns an array indexed by column name or null if there is nothing to fetch.
 	 *
-	 * @return Array an array indexed by column name or an empty array there is nothing to fetch.
+	 * @return Array an array indexed by column name or null if there is nothing to fetch.
 	 */
 	public function fetch();
 
 	/**
-	 * Returns an array containing all remaining rows indexed by column name or an empty array there is nothing to fetch.
+	 * Returns an array containing all remaining rows indexed by column name or null if there is nothing to fetch.
 	 *
-	 * @return Array an array containing all remaining rows indexed by column name or an empty array there is nothing to fetch.
+	 * @return Array an array containing all remaining rows indexed by column name or null if there is nothing to fetch.
 	 */
 	public function fetchAll();
 
