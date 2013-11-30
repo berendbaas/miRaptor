@@ -10,34 +10,21 @@ namespace lib\core;
 class Main implements Runnable {
 	private $pdbc;
 	private $url;
-	private $location;
+	private $userDirectory;
 	private $statusCode;
 
 	/**
-	 * Construct a Main object with the given config.
+	 * Construct a Main object with the given PDBC object, default host & user folder.
 	 *
-	 * @param  array                   $config
-	 * @throws \lib\pdbc\PDBCException if you can't connected to the database with the given credentials.
+	 * @param  PDBC   $config
+	 * @param  String $defaultHost
+	 * @param  String $userDirectory
 	 */
-	public function __construct(array $config) {
-		$this->pdbc = self::initPDBC($config['pdbc']);
-		$this->url = self::initURL($config['main']['default_host']);
-		$this->location = $config['main']['user_location'];
+	public function __construct(\lib\pdbc\PDBC $pdbc, $defaultHost, $userDirectory) {
+		$this->pdbc = $pdbc;
+		$this->url = self::initURL($defaultHost);
+		$this->userDirectory = $userDirectory;
 		$this->statusCode = StatusCodeException::SUCCESFULL_OK;
-	}
-
-	/**
-	 * Returns a PDBC object.
-	 *
-	 * @param  array                   $config
-	 * @return \lib\pdbc\PDBC          a PDBC object.
-	 * @throws \lib\pdbc\PDBCException if you can't connected to the database with the given credentials.
-	 */
-	public static function initPDBC(Array $config) {
-		$pdbc = new \lib\pdbc\Mysql($config['hostname'], $config['username'], $config['password']);
-		$pdbc->selectDatabase($config['database']);
-
-		return $pdbc;
 	}
 
 	/**
@@ -63,7 +50,7 @@ class Main implements Runnable {
 			$this->pdbc->selectDatabase($gatekeeper->getDatabase());
 
 			// Guide
-			$guide = new Guide($this->pdbc, $this->url, $this->location . $gatekeeper->getLocation());
+			$guide = new Guide($this->pdbc, $this->url, $this->userDirectory . $gatekeeper->getLocation());
 			$guide->run();
 		} catch(StatusCodeException $e) {
 			$this->statusCode = $e->getCode();

@@ -7,13 +7,10 @@
  * @version 1.0
  */
 
-// Init config
+// Config
 $config = array();
-
-// Main class
-$config['main'] = array();
-$config['main']['default_host'] = 'www.example.org';
-$config['main']['user_location'] = 'users';
+$config['default_host'] = 'www.example.org';
+$config['user_directory'] = 'users';
 
 // PDBC class
 $config['pdbc'] = array();
