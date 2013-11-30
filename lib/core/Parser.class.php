@@ -127,7 +127,7 @@ class Parser implements Runnable {
 	}
 
 	public function run() {
-		while(($token = $this->tokenizer->getToken()) != NULL) {
+		while(($token = $this->tokenizer->getToken()) !== NULL) {
 			$this->tokenizer->replaceToken($this->getModule($token), $this->isParsable);
 		}
 	}
@@ -153,9 +153,9 @@ class Parser implements Runnable {
 			$result->run();
 
 			// Vars
-			$this->isNamespace = $result->isNamespace() != self::DEFAULT_NAMESPACE ? $result->isNamespace() : $this->isNamespace;
+			$this->isNamespace = $result->isNamespace() !== self::DEFAULT_NAMESPACE ? $result->isNamespace() : $this->isNamespace;
 			$this->isParsable = $result->isParsable();
-			$this->isStatic = $result->isStatic() != self::DEFAULT_NAMESPACE ? $result->isStatic() : $this->isStatic;
+			$this->isStatic = $result->isStatic() !== self::DEFAULT_NAMESPACE ? $result->isStatic() : $this->isStatic;
 
 			// Return
 			return $result->__toString();

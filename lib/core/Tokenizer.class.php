@@ -58,7 +58,7 @@ class Tokenizer {
 	 * @return void
 	 */
 	public function replaceToken($replace = '', $parsable = TRUE) {
-		if($this->token != NULL) {
+		if($this->token !== NULL) {
 			if($parsable) {
 				$this->input = $replace . $this->input;
 			} else {

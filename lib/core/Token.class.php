@@ -37,7 +37,7 @@ class Token {
 
 		// Parse arguments
 		$this->args = array();
-		while(($input = trim(current($input))) != '') {
+		while(($input = trim(current($input))) !== '') {
 			// Set key
 			$input = explode('="',$input,2);
 			$key = array_shift($input);

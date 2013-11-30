@@ -91,7 +91,7 @@ class URL {
 	 * @return string the URL scheme, host.
 	 */
 	public function getURLHost() {
-		return ($this->scheme == '' ? '' : $this->scheme . self::DELIMITER_SCHEME) . $this->host;
+		return ($this->scheme === '' ? '' : $this->scheme . self::DELIMITER_SCHEME) . $this->host;
 	}
 
 	/**
@@ -102,7 +102,7 @@ class URL {
 	 * @return string the URI.
 	 */
 	public function getURI() {
-		return $this->getPath() . ($this->query == '' ? '' : self::DELIMITER_QUERY . $this->query);
+		return $this->getPath() . ($this->query === '' ? '' : self::DELIMITER_QUERY . $this->query);
 	}
 
 	/**

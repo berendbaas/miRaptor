@@ -27,7 +27,7 @@ class Guide implements Runnable {
 	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $location) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
-		$this->filename = $location . $url->getDirectory() . ($url->getFile() == '' ? self::DEFAULT_FILE : $url->getFile());
+		$this->filename = $location . $url->getDirectory() . ($url->getFile() === '' ? self::DEFAULT_FILE : $url->getFile());
 	}
 
 	public function run() {
@@ -78,7 +78,7 @@ class Guide implements Runnable {
 	 * @return boolean true if the file is modified.
 	 */
 	private function isModified($lastModified) {
-		if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) == $lastModified) {
+		if(isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) && strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) === $lastModified) {
 			return false;
 		}
 
@@ -102,7 +102,7 @@ class Guide implements Runnable {
 		$parser->run();
 
 		// Check namespacing
-		if(!$parser->isNamespace() && $this->url->getFile() != '') {
+		if(!$parser->isNamespace() && $this->url->getFile() !== '') {
 			throw new StatusCodeException('Guide: Namespacing requested, but not used - ' . $this->url->getPath(), StatusCodeException::ERROR_CLIENT_NOT_FOUND);
 		}
 
