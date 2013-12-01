@@ -75,7 +75,7 @@ class Tokenizer {
 	 * @return void
 	 */
 	private function nextToken() {
-		$buffer = preg_split('/(' . $this->tokenStart . '[\w\s="]+' . $this->tokenEnd . ')/i', $this->input, 2, PREG_SPLIT_DELIM_CAPTURE);
+		$buffer = preg_split('/(' . $this->tokenStart . '[\w\s="\/]+' . $this->tokenEnd . ')/i', $this->input, 2, PREG_SPLIT_DELIM_CAPTURE);
 
 		if(isset($buffer[2])) {
 			$this->input = $buffer[2];
