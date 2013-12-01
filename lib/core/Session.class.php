@@ -8,8 +8,6 @@ namespace lib\core;
  * @version 1.0
  */
 class Session {
-	const SIGN_IN = 'signin';
-
 	/**
 	 * Construct a Session object.
 	 *
@@ -29,36 +27,47 @@ class Session {
 	}
 
 	/**
-	 * Sign In.
+	 * Returns true if this session map contains a mapping for the specified key.
 	 *
+	 * @param  String  $key
+	 * @return boolean true if this session map contains a mapping for the specified key.
+	 */
+	public function containsKey($key) {
+		return isset($_SESSION[$key]);
+	}
+
+	/**
+	 * Returns true if this session map maps one or more keys to the specified value.
+	 *
+	 * @param  String  $key
+	 * @return boolean true if this session map maps one or more keys to the specified value.
+	 */
+	public function containsValue($value) {
+		return in_array($value, $_SESSION);
+	}
+
+	/**
+	 * Returns the value to which the specified key is mapped, or null if this session map contains no mapping for the key.
+	 *
+	 * @param  String $key
+	 * @return String the value to which the specified key is mapped, or null if this session map contains no mapping for the key.
+	 */
+	public function get($key) {
+		return isset($_SESSION[$key]) ? $_SESSION[$key] : NULL;
+	}
+
+	/**
+	 * Removes the mapping for the specified key from this session map if present.
+	 *
+	 * @param  String $key
 	 * @return void
 	 */
-	public function signIn() {
-		$_SESSION[self::SIGN_IN] = TRUE;
+	public function remove($key) {
+		unset($_SESSION[$key]);
 	}
 
 	/**
-	 * Sign Out.
-	 *
-	 * @return void
-	 */
-	public function signOut() {
-		unset($_SESSION[self::SIGN_IN]);
-	}
-
-	/**
-	 * Returns true if the user is singed in.
-	 *
-	 * @return boolean true if the user is signed in.
-	 */
-	public function isSignedIn() {
-		return isset($_SESSION[self::SIGN_IN]);
-	}
-
-	/**
-	 * Set the given key with the given value in the session data.
-	 *
-	 * ATTENTION: using Session::SIGN_IN as $key might result in unexpected behavior.
+	 * Associates the specified value with the specified key in this session map.
 	 *
 	 * @param  String $key
 	 * @param  String $value
@@ -66,16 +75,6 @@ class Session {
 	 */
 	public function set($key, $value) {
 		$_SESSION[$key] = $value;
-	}
-
-	/**
-	 * Return the session value with the given key.
-	 *
-	 * @param  String $key
-	 * @return String the session value with the given key.
-	 */
-	public function get($key) {
-		return isset($_SESSION[$key]) ? $_SESSION[$key] : NULL;
 	}
 }
 
