@@ -8,24 +8,13 @@ namespace lib\module\admin;
  * @version 1.0
  */
 class ModulePageSignOut extends ModulePageAbstract {
-	public function content() {
-		$this->model();
-	}
+	public function run() {
+		// Check session
+		if($this->session->isSignedIn()) {
+			$this->session->signout();
+		}
 
-	public function logBox() {
-		$this->model();
-	}
-	
-	public function menu() {
-		$this->model();
-	}
-
-	/**
-	 *
-	 */
-	private function model() {
-		$this->user->logout();
-		throw new \lib\core\StatusCodeException($this->url->getURLDirectory() . Module::PAGE_SIGN_IN, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		throw new \lib\core\StatusCodeException($this->redirect, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
 }
 

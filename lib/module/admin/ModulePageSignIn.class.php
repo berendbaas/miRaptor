@@ -8,36 +8,61 @@ namespace lib\module\admin;
  * @version 1.0
  */
 class ModulePageSignIn extends ModulePageAbstract {
-	public function content() {
-		return $this->getSignIn($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postSignIn($_POST['username'], $_POST['password']) : '');
+	public function run() {
+		// Check session
+		if($this->session->isSignedIn()) {
+			throw new \lib\core\StatusCodeException($this->redirect, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		}
+
+		$this->result = $this->signInPage($_SERVER['REQUEST_METHOD'] === 'POST' ? $this->signInPost() : $this->signInGet());
 	}
 
 	/**
 	 *
 	 */
-	private function postSignIn($username, $password) {
+	private function signInGet() {
+		return array(
+			'username' => '',
+			'password' => '',
+			'message' => ''
+		);
+	}
+
+	/**
+	 *
+	 */
+	private function signInPost() {
+		$fields = $this->signInGet();
+
+		// Check fields
 		if(!isset($_POST['username'], $_POST['password'])) {
-			return '<p class="msg-warning">Require username and password.</p>';
+			$fields['message'] = '<p class="msg-warning">Require username and password.</p>';
+			return $fields;
 		}
 
-		if($this->user->login($this->pdbc, $username, $password)) {
-			throw new \lib\core\StatusCodeException($this->url->getURLDirectory() . Module::PAGE_DASHBOARD, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		$fields['username'] = $_POST['username'];
+
+		// Check credentials
+		if(!($this->session->signIn($fields['username'], $_POST['password']))) {
+			$fields['message'] = '<p class="msg-error">Invalid username or password. Please try again.</p>';
+			return $fields;
 		}
 
-		return '<p class="msg-error">Invalid username or password. Please try again.</p>';
+		throw new \lib\core\StatusCodeException($this->redirect, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
 
 	/**
 	 *
 	 */
-	private function getSignIn($message = '') {
+	private function signInPage($fields) {
 		$form = new \lib\html\HTMLFormStacked();
 
 		$form->addInput('Username', array(
 			'type' => 'text',
 			'id' => 'form-username',
 			'name' => 'username',
-			'placeholder' => 'Username'
+			'placeholder' => 'Username',
+			'value' => $fields['username']
 		));
 
 		$form->addInput('Password', array(
@@ -51,15 +76,7 @@ class ModulePageSignIn extends ModulePageAbstract {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-sign-in">Sign In</h2>' . $message . $form->__toString();
-	}
-
-	public function logBox() {
-		return '';
-	}
-
-	public function menu() {
-		return '';
+		return '<h2 class="icon icon-sign-in">Sign In</h2>' . $fields['message'] . $form->__toString();
 	}
 }
 

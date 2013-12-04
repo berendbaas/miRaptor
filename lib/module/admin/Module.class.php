@@ -8,73 +8,95 @@ namespace lib\module\admin;
  * @version 1.0
  */
 class Module extends \lib\core\AbstractModule {
+	const DEFAULT_NAMESPACE = ModulePageAbstract::DEFAULT_NAMESPACE;
+
 	const PAGE_SIGN_IN = 'signin';
 	const PAGE_SIGN_OUT = 'signout';
-	const PAGE_DASHBOARD = 'dashboard';
 	const PAGE_ACCOUNT = 'account';
-	const PAGE_SITE = 'site';
-
-	private static $userPdbc;
-	private static $user;
+	const PAGE_DASHBOARD = 'dashboard';
+	const PAGE_WEBSITE = 'website';
 
 	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $routerID, array $arguments) {
 		parent::__construct($pdbc, $url, $routerID, $arguments);
-		$this->isNamespace = TRUE;
 
-		if(!isset($this->userPdbc)) {
-			include('config.php');
-			$this->userPdbc = clone $pdbc;
-			$this->userPdbc->selectDatabase($config['pdbc']['database']);
-			$this->user = new \lib\core\User();
-		}
+		$this->pdbc = clone $pdbc;
+		$this->pdbc->selectDatabase(MIRAPTOR_DB);
 	}
 
 	public function run() {
-		$this->result = $this->user->isLoggedIn() ? $this->handleAdmin() : $this->handleLogin();
-	}
+		$page;
 
-	/**
-	 *
-	 */
-	private function handleAdmin() {
-		$result;
-
-		switch($this->url->getFile()) {
-			case self::PAGE_SIGN_OUT:
-				$result = new ModulePageSignOut($this->userPdbc, $this->url, $this->arguments, $this->user);
+		switch($this->parseGet()) {
+			case self::PAGE_SIGN_IN:
+				$page = new ModulePageSignIn($this->pdbc, $this->url, $this->parseRedirect());
 			break;
 
-			case self::PAGE_DASHBOARD:
-				$result = new ModulePageDashboard($this->userPdbc, $this->url, $this->arguments, $this->user);
+			case self::PAGE_SIGN_OUT:
+				$page = new ModulePageSignOut($this->pdbc, $this->url, $this->parseRedirect());
 			break;
 
 			case self::PAGE_ACCOUNT:
-				$result = new ModulePageAccount($this->userPdbc, $this->url, $this->arguments, $this->user);
+				$page = new ModulePageAccount($this->pdbc, $this->url, $this->parseRedirect());
 			break;
 
-			case self::PAGE_SITE:
-				$result = new ModulePageSite($this->userPdbc, $this->url, $this->arguments, $this->user);
+			case self::PAGE_DASHBOARD:
+				$page = new ModulePageDashboard($this->pdbc, $this->url, $this->parseRedirect(), $this->parseWebsite());
+			break;
+
+			case self::PAGE_WEBSITE:
+				$page = new ModulePageWebsite($this->pdbc, $this->url, $this->parseRedirect());
 			break;
 
 			default:
-				throw new \lib\core\StatusCodeException($this->url->getURLDirectory() . self::PAGE_DASHBOARD, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+				throw new \lib\core\ModuleException('get="' . $this->arguments['get']. '" is not supported.');
 			break;
 		}
 
-		return $result->get();
+		$page->run();
+		$this->isNamespace = $page->isNamespace();
+		$this->result = $page->__toString();
 	}
 
 	/**
+	 * Returns the get argument, if one is given.
 	 *
+	 * @return string                    the get argument, if one is given.
+	 * @throws \lib\core\ModuleException if the get argument isn't given.
 	 */
-	private function handleLogin() {
-		if($this->url->getFile() != self::PAGE_SIGN_IN) {
-			throw new \lib\core\StatusCodeException($this->url->getURLDirectory() . self::PAGE_SIGN_IN, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+	private function parseGet() {
+		if(isset($this->arguments['get'])) {
+			return $this->arguments['get'];
 		}
 
-		$result = new ModulePageSignIn($this->userPdbc, $this->url, $this->arguments, $this->user);
+		throw new \lib\core\ModuleException('get="" required.');
+	}
 
-		return $result->get();
+	/**
+	 * Returns the redirect argument, if one is given.
+	 *
+	 * @return string                    the redirect argument, if one is given.
+	 * @throws \lib\core\ModuleException if the redirect argument isn't given.
+	 */
+	private function parseRedirect() {
+		if(isset($this->arguments['redirect'])) {
+			return $this->arguments['redirect'];
+		}
+
+		throw new \lib\core\ModuleException('redirect="" required.');
+	}
+
+	/**
+	 * Returns the website argument, if one is given.
+	 *
+	 * @return string                    the website argument, if one is given.
+	 * @throws \lib\core\ModuleException if the website argument isn't given.
+	 */
+	private function parseWebsite() {
+		if(isset($this->arguments['website'])) {
+			return $this->arguments['website'];
+		}
+
+		throw new \lib\core\ModuleException('website="" required.');
 	}
 }
 

@@ -8,78 +8,53 @@ namespace lib\module\admin;
  * @version 1.0
  */
 abstract class ModulePageAbstract {
-	const GET_CONTENT = 'content';
-	const GET_LOGBOX = 'logbox';
-	const GET_MENU = 'menu';
+	const DEFAULT_NAMESPACE = FALSE;
+	
+	const USER_ID = 'user_id';
 
 	protected $pdbc;
 	protected $url;
-	protected $arguments;
-	protected $user;
+	protected $redirect;
+	protected $session;
+	protected $result;
+
+	protected $isNamespace;
 
 	/**
 	 *
 	 */
-	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, array $arguments, \lib\core\User $user) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $redirect) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
-		$this->arguments = $arguments;
-		$this->user = $user;
+		$this->redirect = $redirect;
+		$this->session = new ModuleSession($pdbc);
+		$this->result = '';
+
+		$this->isNamespace = self::DEFAULT_NAMESPACE;
+	}
+
+	/**
+	 * Returns the string representation of the Module object.
+	 *
+	 * @return string the string representation of the Module object.
+	 */
+	public function __toString() {
+		return $this->result;
+	}
+
+	/**
+	 * Returns true if the module uses namespaces.
+	 *
+	 * @return boolean true if the module uses namespace.
+	 */
+	public function isNamespace() {
+		return $this->isNamespace;
 	}
 
 	/**
 	 *
 	 */
-	public function get() {
-		if(!isset($this->arguments['get'])) {
-			throw new \Exception('Get="" required.');
-		}
-
-		switch($this->arguments['get']) {
-			case self::GET_CONTENT:
-				return $this->content();
-			break;
-
-			case self::GET_LOGBOX:
-				return $this->logBox();
-			break;
-
-			case self::GET_MENU:
-				return $this->menu();
-			break;
-
-			default:
-				throw new \Exception('Get="' . $this->arguments['get'] . '" not supported.');
-			break;
-		}
-	}
-
-	/**
-	 *
-	 */
-	public function hasAccess($id) {
-		$this->pdbc->query('SELECT `name`
-		                    FROM `website`
-		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"
-		                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
-
-		return $this->pdbc->fetch() != array();
-	}
-
-	/**
-	 *
-	 */
-	public abstract function content();
-
-	/**
-	 *
-	 */
-	public abstract function logBox();
-
-	/**
-	 *
-	 */
-	public abstract function menu();
+	public abstract function run();
 }
 
 ?>

@@ -8,43 +8,67 @@ namespace lib\module\admin;
  * @version 1.0
  */
 class ModulePageAccount extends ModulePageAbstract {
-	public function content() {
-		return $this->getAccount($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postAccount() : '');
-	}
-
-	/**
-	 *
-	 */
-	private function postAccount() {
-		if(!isset($_POST['password'], $_POST['email'])) {
-			return '<p class="msg-warning">Require password and email.</p>';
+	public function run() {
+		// Check session
+		if(!$this->session->isSignedIn()) {
+			throw new \lib\core\StatusCodeException($this->redirect, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
-		$this->pdbc->query('UPDATE `user`
-		                    SET ' . ($password != '' ? '`password` = "' . $this->pdbc->quote($_POST['password']) . '",' : '') . '
-		                        `email` = "' . $this->pdbc->quote($_POST['email']) . '"
-		                    WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
-
-		return !$this->pdbc->rowCount() ? '' : '<p class="msg-succes">Your changes have been saved successfully</p>';
+		$this->result = $this->accountPage($_SERVER['REQUEST_METHOD'] === 'POST' ? $this->accountPost() : $this->accountGet());
 	}
 
 	/**
 	 *
 	 */
-	private function getAccount($message = '') {
+	private function accountGet() {
 		$this->pdbc->query('SELECT `username`, `email`
 		                    FROM `user`
-		                    WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
+		                    WHERE `id` = "' . $this->pdbc->quote($this->session->getUserID()) . '"');
 
-		$user = $this->pdbc->fetch();
+		return $this->pdbc->fetch() + array(
+			'message' => ''
+		);
+	}
 
+	/**
+	 *
+	 */
+	private function accountPost() {
+		$fields = $this->accountGet();
+
+		// Check fields
+		if(!isset($_POST['password'], $_POST['email'])) {
+			$fields['message'] = '<p class="msg-warning">Require password and email.</p>';
+			return $fields;
+		}
+
+		$fields['email'] = $_POST['email'];
+
+		// Update
+		$this->pdbc->query('UPDATE `user`
+		                    SET ' . ($_POST['password'] != '' ? '`password` = "' . $this->pdbc->quote($_POST['password']) . '",' : '') . '
+		                        `email` = "' . $this->pdbc->quote($fields['email']) . '"
+		                    WHERE `id` = "' . $this->pdbc->quote($this->session->getUserID()) . '"');
+
+		if($this->pdbc->rowCount()) {
+			$fields['message'] = '<p class="msg-succes">Your changes have been saved successfully</p>';
+		}
+
+		return $fields;
+	}
+
+	/**
+	 *
+	 */
+	private function accountPage($fields) {
 		$form = new \lib\html\HTMLFormStacked();
 
 		$form->addInput('Username', array(
 			'type' => 'text',
 			'id' => 'form-username',
 			'name' => 'username',
-			'value' => $user['username'],
+			'value' => $fields['username'],
+			'placeholder' => 'Username',
 			'disabled' => 'disabled'
 		));
 
@@ -52,38 +76,22 @@ class ModulePageAccount extends ModulePageAbstract {
 			'type' => 'password',
 			'id' => 'form-password',
 			'name' => 'password',
-			'placeholder' => 'password'
+			'placeholder' => 'Password'
 		));
 
 		$form->addInput('Email', array(
 			'type' => 'email',
 			'id' => 'form-email',
 			'name' => 'email',
-			'value' => $user['email']
+			'placeholder' => 'Email',
+			'value' => $fields['email']
 		));
 
 		$form->addButton('Submit', array(
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-account">Account</h2>' . $message . $form->__toString();
-	}
-
-	public function logBox() {
-		$list = new \lib\html\HTMLList();
-
-		$list->addItem('<a class="icon icon-sign-out" href="' . $this->url->getDirectory() . Module::PAGE_SIGN_OUT . '">Sign Out</a>');
-
-		return $list->__toString();
-	}
-
-	public function menu() {
-		$list = new \lib\html\HTMLList();
-
-		$list->addItem('<a class="icon icon-dashboard" href="' . $this->url->getDirectory() . Module::PAGE_DASHBOARD . '">Dashboard</a>');
-		$list->addItem('<a class="icon icon-account" href="' . $this->url->getDirectory() . Module::PAGE_ACCOUNT . '">Account</a>');
-
-		return '<h2 class="icon icon-menu">Menu</h2>' . $list->__toString();
+		return '<h2 class="icon icon-account">Account</h2>' . $fields['message'] . $form->__toString();
 	}
 }
 

@@ -8,69 +8,87 @@ namespace lib\module\admin;
  * @version 1.0
  */
 class ModulePageDashboard extends ModulePageAbstract {
-	const ACTION_SETTINGS = 'settings';
-	const ACTION_STATUS = 'active';
+	private $website;
 
-	public function content() {
-		if(isset($_GET['action'], $_GET['id'])) {
-			return $this->handleAction($_GET['action'], intval($_GET['id']));
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $redirect, $website) {
+		parent::__construct($pdbc, $url, $redirect);
+		$this->website = $website;
+
+		$this->isNamespace = TRUE;
+	}
+
+	public function run() {
+		// Check session
+		if(!$this->session->isSignedIn()) {
+			throw new \lib\core\StatusCodeException($this->redirect, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
-		return $this->getDashboard();
+		// Check dashboard
+		if($this->url->getFile() === '') {
+			$this->result = $this->dashboardPage($this->dashboardGet());
+			return;
+		}
+
+		$id = intval($this->url->getFile());
+
+		// Check numeric & website access
+		if(!is_numeric($this->url->getFile()) || !$this->session->hasAccessWebsite($id)) {
+			throw new \lib\core\StatusCodeException($this->redirect, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		}
+
+		$this->result = $this->settingsPage($_SERVER['REQUEST_METHOD'] === 'POST' ? $this->settingsPost($id) : $this->settingsGet($id));
+
 	}
 
 	/**
 	 *
 	 */
-	private function handleAction($action, $id) {
-		if(!$this->hasAccess($id)) {
-			// You do not own this website.
-			throw new \lib\core\StatusCodeException($this->url->getURLPath(), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
-		}
-
-		switch($action) {
-			case self::ACTION_SETTINGS:
-				return $this->getSettings($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postSettings($id) : ''));
-			break;
-
-			case self::ACTION_STATUS:
-				return $this->getStatus($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postStatus($id) : ''));
-			break;
-
-			default:
-				// Action not supported.
-				throw new \lib\core\StatusCodeException($this->url->getURLPath(), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
-			break;
-		}
-	}
-
-	/**
-	 *
-	 */
-	private function postSettings($id) {
-		if(!isset($_POST['name'], $_POST['domain'])) {
-			return '<p class="msg-warning">Require name and domain.</p>';
-		}
-
-		$this->pdbc->query('UPDATE `website`
-		                    SET `name` =  "' . $this->pdbc->quote($_POST['name']) . '",
-		                        `domain` =  "' . $this->pdbc->quote($_POST['domain']) . '"
-		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"
-		                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
-
-		return !$this->pdbc->rowCount() ? '' : '<p class="msg-succes">Your changes have been saved successfully</p>';
-	}
-
-	/**
-	 *
-	 */
-	private function getSettings($id, $message = '') {
-		$this->pdbc->query('SELECT `name`, `domain`
+	private function settingsGet($id) {
+		$this->pdbc->query('SELECT `name`, `domain`, `active`
 		                    FROM `website`
 		                    WHERE `id` = ' . $this->pdbc->quote($id) . '
-		                    AND`uid` = ' . $this->pdbc->quote($this->user->getID()));
+		                    AND`uid` = ' . $this->pdbc->quote($this->session->getUserID()));
 
-		$website = $this->pdbc->fetch();
+		return $this->pdbc->fetch() + array(
+			'message' => ''
+		);
+	}
+
+	/**
+	 *
+	 */
+	private function settingsPost($id) {
+		if(!isset($_POST['name'], $_POST['domain'])) {
+			$fields = $this->settingsGet($id);
+			$fields['message'] = '<p class="msg-warning">Require name and domain.</p>';
+			return $fields;
+		}
+
+		$fields = array(
+			'name' => $_POST['name'],
+			'domain' => $_POST['domain'],
+			'active' => (isset($_POST['active']) ? 1 : 0),
+			'message' => ''
+		);
+
+		$this->pdbc->query('UPDATE `website`
+		                    SET `name` =  "' . $this->pdbc->quote($fields['name']) . '",
+		                        `domain` =  "' . $this->pdbc->quote($fields['domain']) . '",
+					`active` =  "' . $this->pdbc->quote($fields['active']) . '"
+		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"
+		                    AND `uid` = "' . $this->pdbc->quote($this->session->getUserID()) . '"');
+
+		if($this->pdbc->rowCount()) {
+			$fields['message'] = '<p class="msg-succes">Your changes have been saved successfully</p>';
+		}
+
+		return $fields;
+	}
+
+	/**
+	 *
+	 */
+	private function settingsPage($fields) {
 
 		$form = new \lib\html\HTMLFormStacked();
 
@@ -78,106 +96,62 @@ class ModulePageDashboard extends ModulePageAbstract {
 			'type' => 'text',
 			'id' => 'form-name',
 			'name' => 'name',
-			'value' => $website['name']
+			'placeholder' => 'Name',
+			'value' => $fields['name']
 		));
 
 		$form->addInput('Domain', array(
 			'type' => 'text',
 			'id' => 'form-domain',
 			'name' => 'domain',
-			'value' => $website['domain']
+			'placeholder' => 'Domain',
+			'value' => $fields['domain']
 		));
-
-		$form->addContent('<a href="' . $this->url->getPath() . '"><button type="button">Back</button></a>');
-
-		$form->addButton('Submit', array(
-			'type' => 'submit'
-		));
-
-		return '<h2 class="icon icon-settings">Website settings</h2>' . $message . $form->__toString();
-	}
-
-	/**
-	 *
-	 */
-	private function postStatus($id) {
-		$this->pdbc->query('UPDATE `website`
-		                    SET `active` =  "' . (isset($_POST['status']) ? 1 : 0) . '"
-		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"
-		                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
-
-		return !$this->pdbc->rowCount() ? '' : '<p class="msg-succes">Your changes have been saved successfully</p>';
-	}
-
-	/**
-	 *
-	 */
-	private function getStatus($id, $message = '') {
-		$this->pdbc->query('SELECT `active`
-		                    FROM `website`
-		                    WHERE `id` = ' . $this->pdbc->quote($id) . '
-		                    AND`uid` = ' . $this->pdbc->quote($this->user->getID()));
-
-		$website = $this->pdbc->fetch();
-
-		$form = new \lib\html\HTMLFormStacked();
 
 		$form->addInput('Active', array(
 			'type' => 'checkbox',
-			'id' => 'form-active-on',
+			'id' => 'form-active',
 			'name' => 'active',
 			'value' => '1'
-		) + ($website['active'] ? array('checked' => 'checked') : array()));
+		) + ($fields['active'] ? array('checked' => 'checked') : array()));
 
-		$form->addContent('<a href="' . $this->url->getPath() . '"><button type="button">Back</button></a>');
+		$form->addContent('<a href="' . $this->url->getDirectory() . '"><button type="button">Back</button></a>');
 
 		$form->addButton('Submit', array(
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-settings">Website status</h2>' . $form->__toString();
+		return '<h2 class="icon icon-settings">Website settings</h2>' . $fields['message'] . $form->__toString();
 	}
 
 	/**
 	 *
 	 */
-	private function getDashboard() {
+	private function dashboardGet() {
 		$this->pdbc->query('SELECT `id`,`name`,`active`
 		                    FROM `website`
-		                    WHERE `uid` = ' . $this->pdbc->quote($this->user->getID()));
+		                    WHERE `uid` = ' . $this->pdbc->quote($this->session->getUserID()));
 
-		$websites = $this->pdbc->fetchAll();
+		return $this->pdbc->fetchAll();
+	}
 
+	/**
+	 *
+	 */
+	private function dashboardPage($fieldsRow) {
 		$table = new \lib\html\HTMLTable();
-		$table->addHeaderRow(array('#','Website','Settings','Status'));
+		$table->addHeaderRow(array('#','Website','Status','Settings'));
 
-		foreach($websites as $website) {
+		foreach($fieldsRow as $fields) {
 			$table->openRow();
-			$table->addColumn($website['id']);
-			$table->addColumn('<a href="' . $this->url->getDirectory() . Module::PAGE_SITE . '?id=' . $website['id'] . '">' . $website['name'] . '</a>');
-			$table->addColumn('<a class="icon icon-settings" href="' . $this->url->getPath() . '?action=' . self::ACTION_SETTINGS . '&amp;id=' . $website['id'] . '"></a>');
-			$table->addColumn('<a class="icon icon-active-' . $website['active'] . '" href="' . $this->url->getPath() . '?action=' . self::ACTION_STATUS . '&amp;id=' . $website['id'] . '"></a>');
+			$table->addColumn($fields['id']);
+			$table->addColumn('<a href="' . $this->website . $fields['id'] . '">' . $fields['name'] . '</a>');
+			$table->addColumn('<span class="icon icon-active-' . $fields['active'] . '"></span>');
+			$table->addColumn('<a class="icon icon-settings" href="' . $this->url->getDirectory() . $fields['id'] . '"></a>');
 			$table->closeRow();
 		}
 
 		return '<h2 class="icon icon-dashboard">Dashboard</h2>' . $table->__toString();
-	}
-
-	public function logBox() {
-		$list = new \lib\html\HTMLList();
-
-		$list->addItem('<a class="icon icon-sign-out" href="' . $this->url->getDirectory() . Module::PAGE_SIGN_OUT . '">Sign Out</a>');
-
-		return $list->__toString();
-	}
-
-	public function menu() {
-		$list = new \lib\html\HTMLList();
-
-		$list->addItem('<a class="icon icon-dashboard" href="' . $this->url->getDirectory() . Module::PAGE_DASHBOARD . '">Dashboard</a>');
-		$list->addItem('<a class="icon icon-account" href="' . $this->url->getDirectory() . Module::PAGE_ACCOUNT . '">Account</a>');
-
-		return '<h2 class="icon icon-menu">Menu</h2>' . $list->__toString();
 	}
 }
 
