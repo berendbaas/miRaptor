@@ -130,7 +130,8 @@ class ModulePageDashboard extends ModulePageAbstract {
 	private function dashboardGet() {
 		$this->pdbc->query('SELECT `id`,`name`,`active`
 		                    FROM `website`
-		                    WHERE `uid` = ' . $this->pdbc->quote($this->session->getUserID()));
+		                    WHERE `uid` = ' . $this->pdbc->quote($this->session->getUserID()) . '
+				    ORDER BY `id`ASC');
 
 		return $this->pdbc->fetchAll();
 	}
