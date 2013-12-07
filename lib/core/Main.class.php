@@ -24,7 +24,9 @@ class Main implements Runnable {
 		$this->pdbc = $pdbc;
 		$this->url = self::initURL($defaultHost);
 		$this->userDirectory = $userDirectory;
+
 		$this->statusCode = StatusCodeException::SUCCESFULL_OK;
+		$this->time = microtime(TRUE);
 	}
 
 	/**
@@ -78,9 +80,8 @@ class Main implements Runnable {
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
 	private function log() {
-		// Time
-		$time = $_SERVER['REQUEST_TIME_FLOAT'];
-		$runtime = (microtime(TRUE) - $time) * 1000;
+		// Run time
+		$runtime = (microtime(TRUE) - $this->time) * 1000;
 		
 		// Request
 		$request = $this->pdbc->quote($this->url->getURL());
@@ -97,7 +98,7 @@ class Main implements Runnable {
 		                                       `referal`,
 		                                       `ip`)
 		                    VALUES (           NULL,
-		                                       "' . $time . '",
+		                                       "' . $this->time . '",
 		                                       "' . $runtime . '",
 		                                       "' . ob_get_length() . '",
 		                                       "' . $this->statusCode . '",
