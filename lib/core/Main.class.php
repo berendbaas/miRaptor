@@ -8,69 +8,103 @@ namespace lib\core;
  * @version 1.0
  */
 class Main implements Runnable {
-	private $statuscode;
-	private $config;
+	private $pdbc;
+	private $url;
+	private $userDirectory;
+	private $statusCode;
 
 	/**
+	 * Construct a Main object with the given PDBC object, default host & user folder.
 	 *
+	 * @param  PDBC   $config
+	 * @param  String $defaultHost
+	 * @param  String $userDirectory
 	 */
-	public function __construct(array $config) {
-		$this->statuscode = 200;
-		$this->config = $config;
+	public function __construct(\lib\pdbc\PDBC $pdbc, $defaultHost, $userDirectory) {
+		$this->pdbc = $pdbc;
+		$this->url = self::initURL($defaultHost);
+		$this->userDirectory = $userDirectory;
+
+		$this->statusCode = StatusCodeException::SUCCESFULL_OK;
+		$this->time = microtime(TRUE);
 	}
 
 	/**
-	 * 
+	 * Returns a URL object.
+	 *
+	 * @param  string $defaultHost
+	 * @return URL    a URL object.
 	 */
+	public static function initURL($defaultHost) {
+		$scheme = isset($_SERVER['HTTPS']) ? 'https' : 'http';
+		$host = empty($_SERVER['HTTP_HOST']) ? $defaultHost : $_SERVER['HTTP_HOST'];
+
+		return new URL($scheme, $host, $_SERVER['REQUEST_URI']);
+	}
+
 	public function run() {
+		// start buffer
 		ob_start();
 
 		try {
-			$request = $this->parseRequest();
-			$pdbc = $this->parsePDBC($this->config['mysql']);
-			$gatekeeper = $this->parseGatekeeper($pdbc, $request);
-			new Guide($pdbc, $request, $this->config['main']['user_location'] . $gatekeeper->getLocation());
-		} catch(\Exception $e) {
-			$this->statuscode = $e->getCode();
-			echo new Error($e);
-		} 
-		
-		if($pdbc != null) {
-			Logger::log($pdbc, $this->statuscode, ob_get_length());
-		}
+			// Gatekeeper
+			$gatekeeper = new Gatekeeper($this->pdbc, $this->url);
+			$this->pdbc->selectDatabase($gatekeeper->getDatabase());
 
+			// Guide
+			$guide = new Guide($this->pdbc, $this->url, $this->userDirectory . $gatekeeper->getLocation());
+			$guide->run();
+		} catch(StatusCodeException $e) {
+			$this->statusCode = $e->getCode();
+
+			$handler = new StatusCodeExceptionHandler($e);
+			$handler->setHeader();
+			echo $handler;
+		} catch(\Exception $e) {
+			$this->statusCode = StatusCodeException::ERROR_SERVER_INTERNAL_SERVER_ERROR;
+
+			$handler = new StatusCodeExceptionHandler($e);
+			$handler->setHeader();
+			echo $handler;
+		}
+		
+		// Log & end buffer
+		$this->log();
 		ob_end_flush();
 	}
 
 	/**
+	 * Log time & request related data.
 	 *
+	 * @return void
+	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
-	private function parseRequest() {
-		$method = $_SERVER['REQUEST_METHOD'];
-		$host = empty($_SERVER['HTTP_HOST']) ? $this->config['main']['default_host'] : $_SERVER['HTTP_HOST'];
-		$uri = new URI($_SERVER['REQUEST_URI']);
+	private function log() {
+		// Run time
+		$runtime = (microtime(TRUE) - $this->time) * 1000;
+		
+		// Request
+		$request = $this->pdbc->quote($this->url->getURL());
+		$referal = empty($_SERVER['HTTP_REFERER']) ? 'NULL' : '"' . $this->pdbc->quote($_SERVER['HTTP_REFERER']) . '"';
+		$ip = $this->pdbc->quote($_SERVER['REMOTE_ADDR']);
 
-		return new Request($method, $host, $uri);
-	}
-
-	/**
-	 *
-	 */
-	private function parsePDBC($config) {
-		$pdbc = new Mysql($config);
-		$pdbc->selectDatabase($config['database']);
-
-		return $pdbc;
-	}
-
-	/**
-	 *
-	 */
-	private function parseGatekeeper(PDBC $pdbc, Request $request) {
-		$gatekeeper = new Gatekeeper($pdbc, $request);
-		$pdbc->selectDatabase($gatekeeper->getDatabase());
-
-		return $gatekeeper;
+		// Insert
+		$this->pdbc->query('INSERT INTO `log` (`id`,
+		                                       `time`,
+		                                       `runtime`,
+		                                       `bandwidth`,
+		                                       `statuscode`,
+		                                       `request`,
+		                                       `referal`,
+		                                       `ip`)
+		                    VALUES (           NULL,
+		                                       "' . $this->time . '",
+		                                       "' . $runtime . '",
+		                                       "' . ob_get_length() . '",
+		                                       "' . $this->statusCode . '",
+		                                       "' . $request . '",
+		                                       ' . $referal . ',
+		                                       "' . $ip . '")');
 	}
 }
 

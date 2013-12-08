@@ -7,23 +7,16 @@
  * @version 1.0
  */
 
-// Globals
-define('MIRAPTOR_CACHE', FALSE);
-define('MIRAPTOR_DEBUG', TRUE);
-
-// Init config
+// Config
 $config = array();
+$config['default_host'] = 'www.example.org';
+$config['user_directory'] = 'users';
 
-// Main
-$config['main'] = array();
-$config['main']['default_host'] = 'www.example.org';
-$config['main']['user_location'] = 'users';
-
-// Mysql
-$config['mysql'] = array();
-$config['mysql']['username'] = 'username';
-$config['mysql']['password'] = 'password';
-$config['mysql']['database'] = 'database';
-$config['mysql']['hostname'] = 'localhost';
+// PDBC class
+$config['pdbc'] = array();
+$config['pdbc']['username'] = 'username';
+$config['pdbc']['password'] = 'password';
+$config['pdbc']['database'] = 'database';
+$config['pdbc']['hostname'] = 'localhost';
 
 ?>

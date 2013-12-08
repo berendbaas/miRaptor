@@ -15,8 +15,14 @@ function __autoload($class) {
 	include_once(str_replace('\\', '/', $class) . '.class.php');
 }
 
+// Globals
+define('MIRAPTOR_DB', $config['pdbc']['database']);
+define('MIRAPTOR_CACHE', FALSE);
+define('MIRAPTOR_DEBUG', FALSE);
+
 // Create and run main object
-$main = new lib\core\Main($config);
+$pdbc = new \lib\pdbc\Mysqli($config['pdbc']['hostname'], $config['pdbc']['username'], $config['pdbc']['password'], $config['pdbc']['database']);
+$main = new \lib\core\Main($pdbc, $config['default_host'], $config['user_directory']);
 $main->run();
 
 ?>

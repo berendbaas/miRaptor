@@ -8,58 +8,84 @@ namespace lib\core;
  * @version 1.0
  */
 class Tokenizer {
-	private $string;
-	private $token_start;
-	private $token_end;
+	private $input;
+	private $result;
+	private $token;
+
+	private $tokenStart;
+	private $tokenEnd;
 
 	/**
+	 * Construct a Tokenizer object with the given string.
 	 *
+	 * @param string $input
+	 * @param string $tokenStart = Token::DEFAULT_START
+	 * @param string $tokenEnd = Token::DEFAULT_END
 	 */
-	public function __construct($input = '', $token_start = Token::DEFAULT_START, $token_end = Token::DEFAULT_END) {
-		$this->string = $input;
-		$this->token_start = $token_start;
-		$this->token_end = $token_end;
+	public function __construct($input = '', $tokenStart = Token::DEFAULT_START, $tokenEnd = Token::DEFAULT_END) {
+		$this->input = $input;
+		$this->result = '';
+		$this->token = NULL;
+		$this->tokenStart = $tokenStart;
+		$this->tokenEnd = $tokenEnd;
+
+		$this->nextToken();
 	}
 
 	/**
+	 * Returns a string representation of the Tokenizer object.
 	 *
+	 * @return string a string representation of the Tokenizer object.
 	 */
 	public function __toString() {
-		return $this->string;
+		return $this->result . $this->input;
 	}
 
 	/**
+	 * Returns the first parsable token or NULL if none are found.
 	 *
+	 * @returns Token the first parsable token or NULL if none are found.
 	 */
-	public function replace($token, $replacement = '') {
-		$this->string = str_replace($token->__toString(), $replacement, $this->string);
+	public function getToken() {
+		return $this->token;
 	}
 
 	/**
+	 * Replace the first parsable token with the given content.
 	 *
+	 * @param  string  $replace = ''
+	 * @param  boolean $parsable = TRUE
+	 * @return void
 	 */
-	public function token() {
-		if(preg_match('/' . $this->token_start . '(.+?)' . $this->token_end .  '/i', $this->string, $token)) {
-			 return new Token($token[0]);
-		}
-
-		return NULL;
-	}
-
-	/**
-	 *
-	 */
-	public function tokens() {
-		if(preg_match_all('/' . $this->token_start . '(.+?)' . $this->token_end .  '/i', $this->string, $tokens)) {
-			foreach($tokens[0] as $token) {
-				$result[] = new Token($token);
+	public function replaceToken($replace = '', $parsable = TRUE) {
+		if($this->token !== NULL) {
+			if($parsable) {
+				$this->input = $replace . $this->input;
+			} else {
+				$this->result .= $replace;
 			}
 
-			return $result;
+			$this->nextToken();
+		}
+	}
 
+	/**
+	 * Iterate to the next token in the input.
+	 *
+	 * @return void
+	 */
+	private function nextToken() {
+		$buffer = preg_split('/(' . $this->tokenStart . '[\w\s="\/]+' . $this->tokenEnd . ')/i', $this->input, 2, PREG_SPLIT_DELIM_CAPTURE);
+
+		if(isset($buffer[2])) {
+			$this->input = $buffer[2];
+			$this->token = new Token($buffer[1], $this->tokenStart, $this->tokenEnd);
+		} else {
+			$this->input = '';
+			$this->token = NULL;
 		}
 
-		return NULL;
+		$this->result .= $buffer[0];
 	}
 }
 

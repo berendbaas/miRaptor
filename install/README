@@ -1,0 +1,24 @@
+####################
+# Install miRaptor #
+####################
+
+# STEP 1
+Clean LAMP server
+
+# STEP 2
+Enable mod_rewrite
+
+# STEP 3
+Copy miRaptor to /var/www/
+
+# STEP 4
+Import the .sql files from the install directory
+
+# STEP 5
+Update the domain & username credentials in the database.
+
+# STEP 6
+Add the correct default host and database credentials to the config.php file
+
+# STEP 7
+Remove the install directory and you are done! ^_^

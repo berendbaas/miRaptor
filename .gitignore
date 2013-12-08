@@ -1,3 +1,8 @@
+# IDE Files #
+#############
+*.sublime-project
+*.sublime-workspace
+
 # Compiled source #
 ###################
 *.com
@@ -23,7 +28,7 @@
 # Logs and databases #
 ######################
 *.log
-*.sql
+# *.sql untill the full install is done
 *.sqlite
 
 # OS generated files #
