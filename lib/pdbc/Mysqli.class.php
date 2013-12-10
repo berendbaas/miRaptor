@@ -25,15 +25,15 @@ class Mysqli implements PDBC {
 		$this->mysqli = new \Mysqli($this->hostname, $this->username, $this->password, $this->database);
 
 		if($this->mysqli->connect_errno) {
-			throw new PDBCException('Mysqli(' . $this->mysqli->connect_errno . '):' . $this->mysqli->connect_error);
+			throw new PDBCException('Mysqli(' . $this->mysqli->connect_errno . '): ' . $this->mysqli->connect_error);
 		}
 	}
 
 	public function __clone() {
 		$this->mysqli = new \Mysqli($this->hostname, $this->username, $this->password, $this->database);
 
-		if($this->mysqli->connect_errno) {
-			throw new PDBCException('Mysqli(' . $this->mysqli->connect_errno . '):' . $this->mysqli->connect_error);
+		if($this->mysqli->errno) {
+			throw new PDBCException('Mysqli(' . $this->mysqli->errno . '): ' . $this->mysqli->error);
 		}
 	}
 
@@ -41,7 +41,7 @@ class Mysqli implements PDBC {
 		$this->database = $database;
 
 		if(!$this->mysqli->select_db($database)) {
-			throw new PDBCException('Mysqli(' . $this->mysqli->connect_errno . '):' . $this->mysqli->connect_error);
+			throw new PDBCException('Mysqli(' . $this->mysqli->errno . '): ' . $this->mysqli->error);
 		}
 	}
 
@@ -53,7 +53,7 @@ class Mysqli implements PDBC {
 		$this->result = $this->mysqli->query($query);
 
 		if($this->result === FALSE) {
-			throw new PDBCException('Mysqli(' . $this->mysqli->connect_errno . '):' . $this->mysqli->connect_error);
+			throw new PDBCException('Mysqli(' . $this->mysqli->errno . '): ' . $this->mysqli->error);
 		}
 
 		return $this;
