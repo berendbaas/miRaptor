@@ -89,22 +89,14 @@ class Main implements Runnable {
 		$ip = $this->pdbc->quote($_SERVER['REMOTE_ADDR']);
 
 		// Insert
-		$this->pdbc->query('INSERT INTO `log` (`id`,
-		                                       `time`,
-		                                       `runtime`,
-		                                       `bandwidth`,
-		                                       `statuscode`,
-		                                       `request`,
-		                                       `referal`,
-		                                       `ip`)
-		                    VALUES (           NULL,
-		                                       "' . $this->time . '",
-		                                       "' . $runtime . '",
-		                                       "' . ob_get_length() . '",
-		                                       "' . $this->statusCode . '",
-		                                       "' . $request . '",
-		                                       ' . $referal . ',
-		                                       "' . $ip . '")');
+		$this->pdbc->query('INSERT INTO `log` (`date`, `runtime`, `bandwidth`, `statuscode`, `request`, `referal`, `ip`)
+		                    VALUES (FROM_UNIXTIME("' . $this->time . '"),
+		                            "' . $runtime . '",
+		                            "' . ob_get_length() . '",
+		                            "' . $this->statusCode . '",
+		                            "' . $request . '",
+		                            ' . $referal . ',
+		                            "' . $ip . '")');
 	}
 }
 
