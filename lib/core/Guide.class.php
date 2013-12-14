@@ -98,7 +98,8 @@ class Guide implements Runnable {
 		header('content-type: text/html');
 
 		// Content parse
-		$parser = new Parser($this->pdbc, $this->url);
+		$module = isset($_SERVER['HTTP_X_MIRAPTOR_AJAX']) ? $_SERVER['HTTP_X_MIRAPTOR_AJAX'] : Parser::DEFAULT_MODULE;
+		$parser = new Parser($this->pdbc, $this->url, $module);
 		$parser->run();
 
 		// Check namespacing
