@@ -52,7 +52,7 @@ class Main implements Runnable {
 			$this->pdbc->selectDatabase($gatekeeper->getDatabase());
 
 			// Guide
-			$guide = new Guide($this->pdbc, $this->url, $this->userDirectory . $gatekeeper->getLocation());
+			$guide = new Guide($this->pdbc, $this->url, $this->userDirectory . $gatekeeper->getDirectory());
 			$guide->run();
 		} catch(StatusCodeException $e) {
 			$this->statusCode = $e->getCode();

@@ -8,7 +8,7 @@ namespace lib\core;
  * @version 1.0
  */
 class Gatekeeper {
-	private $location;
+	private $directory;
 	private $database;
 
 	/**
@@ -16,53 +16,53 @@ class Gatekeeper {
 	 *
 	 * @param  \lib\pdbc\PDBC          $pdbc
 	 * @param  URL                     $url
-	 * @throws StatusCodeException     if the file isn't found at the current location or if the user doesn't exists.
+	 * @throws StatusCodeException     if the file isn't found at the current directory or if the user doesn't exists.
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
 	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url) {
-		// Get website location & database
-		$host = self::getHost($pdbc, $url);
-		$location = self::getUser($pdbc, $url, $host['uid']);
+		// Get website directory & database
+		$website = self::getWebsite($pdbc, $url);
+		$directory = self::getUser($pdbc, $url, $website['uid']);
 
-		// Set website location & database
-		$this->location = $location . $host['location'];
-		$this->database = $host['db'];
+		// Set website directory & database
+		$this->directory = $directory . $website['directory'];
+		$this->database = $website['db'];
 	}
 
 	/**
-	 * Returns an array with the user ID, location & database of the host.
+	 * Returns an array with the user ID, directory & database of the website.
 	 *
 	 * @param  \lib\pdbc\PDBC          $pdbc
 	 * @param  URL                     $url
-	 * @return array                   an array with the user ID, location & database of the host.
-	 * @throws StatusCodeException     if the file isn't found at the current location.
+	 * @return array                   an array with the user ID, directory & database of the website.
+	 * @throws StatusCodeException     if the file isn't found at the current directory.
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
-	private static function getHost(\lib\pdbc\PDBC $pdbc, URL $url) {
-		$pdbc->query('SELECT `uid`,`location`,`db`
+	private static function getWebsite(\lib\pdbc\PDBC $pdbc, URL $url) {
+		$pdbc->query('SELECT `uid`, `directory`, `db`
 		              FROM `website`
 		              WHERE `active` = 1
 		              AND `domain` = "' . $pdbc->quote($url->getHost()) . '"');
 
-		$host = $pdbc->fetch();
+		$website = $pdbc->fetch();
 
-		if(!$host) {
-			self::getHostException($pdbc, $url);
+		if(!$website) {
+			self::getWebsiteException($pdbc, $url);
 		}
 
-		return $host;
+		return $website;
 	}
 
 	/**
-	 * This function helps sefl::getHost() determine whether he has to throw a 301 or 404 exception.
+	 * This function helps self::getWebsite() determine whether he has to throw a 301 or 404 exception.
 	 *
 	 * @param  \lib\pdbc\PDBC          $pdbc
 	 * @param  URL                     $url
 	 * @return void
-	 * @throws StatusCodeException     if the file isn't found at the current location.
+	 * @throws StatusCodeException     if the file isn't found at the current directory.
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
-	private static function getHostException(\lib\pdbc\PDBC $pdbc, URL $url) {
+	private static function getWebsiteException(\lib\pdbc\PDBC $pdbc, URL $url) {
 		$pdbc->query('SELECT `website`.`domain`, `redirect`.`path`
 		              FROM `website`
 		              RIGHT JOIN (SELECT `wid`,`path`
@@ -80,19 +80,17 @@ class Gatekeeper {
 	}
 
 	/**
-	 * Returns the user location.
+	 * Returns the user directory.
 	 *
 	 * @param  \lib\pdbc\PDBC          $pdbc
 	 * @param  URL                     $url
 	 * @param  int                     $id
-	 * @return string                  the user location.
+	 * @return string                  the user directory.
 	 * @throws StatusCodeException     if the user doesn't exists.
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
 	private static function getUser(\lib\pdbc\PDBC $pdbc, URL $url, $id) {
-		$pdbc->query('SELECT `location`
-		              FROM `user`
-		              WHERE `id` = ' . $id);
+		$pdbc->query('SELECT `directory` FROM `user` WHERE `id` = ' . $id);
 
 		$user = $pdbc->fetch();
 
@@ -104,12 +102,12 @@ class Gatekeeper {
 	}
 
 	/**
-	 * Returns the location of the website.
+	 * Returns the directory of the website.
 	 * 
-	 * @return string the location of the website.
+	 * @return string the directory of the website.
 	 */
-	public function getLocation() {
-		return $this->location;
+	public function getDirectory() {
+		return $this->directory;
 	}
 
 	/**
