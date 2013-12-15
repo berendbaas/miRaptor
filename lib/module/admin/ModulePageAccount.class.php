@@ -9,8 +9,8 @@ namespace lib\module\admin;
  */
 class ModulePageAccount extends ModulePageAbstract {
 	public function run() {
-		// Check session
-		if(!$this->session->isSignedIn()) {
+		// Check user
+		if(!$this->user->isSignedIn()) {
 			throw new \lib\core\StatusCodeException($this->redirect, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
@@ -21,11 +21,9 @@ class ModulePageAccount extends ModulePageAbstract {
 	 *
 	 */
 	private function accountGet() {
-		$this->pdbc->query('SELECT `username`, `email`
-		                    FROM `user`
-		                    WHERE `id` = "' . $this->pdbc->quote($this->session->getUserID()) . '"');
-
-		return $this->pdbc->fetch() + array(
+		return array(
+			'username' => $this->user->getUsername(),
+			'email' => $this->user->getEmail(),
 			'message' => ''
 		);
 	}
@@ -34,40 +32,53 @@ class ModulePageAccount extends ModulePageAbstract {
 	 *
 	 */
 	private function accountPost() {
-		$fields = $this->accountGet();
+		$oldField = $this->accountGet();
 
-		// Check fields
+		// Check password
 		if(!isset($_POST['password'], $_POST['email'])) {
-			$fields['message'] = '<p class="msg-warning">Require password and email.</p>';
-			return $fields;
+			$oldField['message'] = '<p class="msg-warning">Require password and email.</p>';
+			return $oldField;
+		}
+		
+		$field = array(
+			'username' => $oldField['username'],
+			'email' => $_POST['email'],
+			'message' => ''
+		);
+
+		// Check password
+		if($_POST['password'] !== '') {
+			if(!$this->user->changePassword($_POST['password'])) {
+				$field['message'] = '<p class="msg-succes">Bad password.</p>';
+				return $field;
+			}
+
+			$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
 		}
 
-		$fields['email'] = $_POST['email'];
+		// Check data
+		if($field['email'] !== $oldField['email']) {
+			$this->pdbc->query('UPDATE `user`
+			                    SET `email` = "' . $this->pdbc->quote($field['email']) . '"
+			                    WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
 
-		// Update
-		$this->pdbc->query('UPDATE `user`
-		                    SET ' . ($_POST['password'] != '' ? '`password` = "' . $this->pdbc->quote($_POST['password']) . '",' : '') . '
-		                        `email` = "' . $this->pdbc->quote($fields['email']) . '"
-		                    WHERE `id` = "' . $this->pdbc->quote($this->session->getUserID()) . '"');
-
-		if($this->pdbc->rowCount()) {
-			$fields['message'] = '<p class="msg-succes">Your changes have been saved successfully</p>';
+			$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
 		}
 
-		return $fields;
+		return $field;
 	}
 
 	/**
 	 *
 	 */
-	private function accountPage($fields) {
+	private function accountPage($field) {
 		$form = new \lib\html\HTMLFormStacked();
 
 		$form->addInput('Username', array(
 			'type' => 'text',
 			'id' => 'form-username',
 			'name' => 'username',
-			'value' => $fields['username'],
+			'value' => $field['username'],
 			'placeholder' => 'Username',
 			'disabled' => 'disabled'
 		));
@@ -84,14 +95,14 @@ class ModulePageAccount extends ModulePageAbstract {
 			'id' => 'form-email',
 			'name' => 'email',
 			'placeholder' => 'Email',
-			'value' => $fields['email']
+			'value' => $field['email']
 		));
 
 		$form->addButton('Submit', array(
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-account">Account</h2>' . $fields['message'] . $form->__toString();
+		return '<h2 class="icon icon-account">Account</h2>' . $field['message'] . $form->__toString();
 	}
 }
 

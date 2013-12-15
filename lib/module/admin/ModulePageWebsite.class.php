@@ -22,17 +22,17 @@ class ModulePageWebsite extends ModulePageAbstract {
 	 *
 	 */
 	private function init() {
-		// Check session & file
-		if(!$this->session->isSignedIn() || $this->url->getFile() === '' || !is_numeric($this->url->getFile())) {
+		$website = new \lib\core\Website($this->pdbc, $this->user, $this->url->getFile());
+
+		// Check user & website
+		if(!$this->user->isSignedIn() || !$website->hasAccess()) {
 			throw new \lib\core\StatusCodeException($this->redirect, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
-		$id = intval($this->url->getFile());
-
 		$this->pdbc->query('SELECT `db`
 		                    FROM `website`
-		                    WHERE `id` = ' . $this->pdbc->quote($id) . '
-		                    AND `uid` = ' . $this->pdbc->quote($this->session->getUserID()));
+		                    WHERE `id` = ' . $this->pdbc->quote($website->getID()) . '
+		                    AND `uid` = ' . $this->pdbc->quote($this->user->getID()));
 
 		$database = $this->pdbc->fetch();
 

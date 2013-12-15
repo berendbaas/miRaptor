@@ -18,8 +18,8 @@ class ModulePageDashboard extends ModulePageAbstract {
 	}
 
 	public function run() {
-		// Check session
-		if(!$this->session->isSignedIn()) {
+		// Check user
+		if(!$this->user->isSignedIn()) {
 			throw new \lib\core\StatusCodeException($this->redirect, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
@@ -29,66 +29,81 @@ class ModulePageDashboard extends ModulePageAbstract {
 			return;
 		}
 
-		$id = intval($this->url->getFile());
+		$website = new \lib\core\Website($this->pdbc, $this->user, $this->url->getFile());
 
-		// Check numeric & website access
-		if(!is_numeric($this->url->getFile()) || !$this->session->hasAccessWebsite($id)) {
+		// Check website access
+		if(!$website->hasAccess()) {
 			throw new \lib\core\StatusCodeException($this->redirect, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
-		$this->result = $this->settingsPage($_SERVER['REQUEST_METHOD'] === 'POST' ? $this->settingsPost($id) : $this->settingsGet($id));
+		$this->result = $this->settingsPage($_SERVER['REQUEST_METHOD'] === 'POST' ? $this->settingsPost($website) : $this->settingsGet($website));
 
 	}
 
 	/**
 	 *
 	 */
-	private function settingsGet($id) {
-		$this->pdbc->query('SELECT `name`, `domain`, `active`
-		                    FROM `website`
-		                    WHERE `id` = ' . $this->pdbc->quote($id) . '
-		                    AND`uid` = ' . $this->pdbc->quote($this->session->getUserID()));
+	private function dashboardPage($fieldRow) {
+		$table = new \lib\html\HTMLTable();
+		$table->addHeaderRow(array('#','Website','Status','Settings'));
 
-		return $this->pdbc->fetch() + array(
-			'message' => ''
-		);
-	}
-
-	/**
-	 *
-	 */
-	private function settingsPost($id) {
-		if(!isset($_POST['name'], $_POST['domain'])) {
-			$fields = $this->settingsGet($id);
-			$fields['message'] = '<p class="msg-warning">Require name and domain.</p>';
-			return $fields;
+		foreach($fieldRow as $number => $field) {
+			$table->openRow();
+			$table->addColumn(++$number);
+			$table->addColumn('<a href="' . $this->website . $field['id'] . '">' . $field['name'] . '</a>');
+			$table->addColumn('<span class="icon icon-active-' . $field['active'] . '"></span>');
+			$table->addColumn('<a class="icon icon-settings" href="' . $this->url->getDirectory() . $field['id'] . '"></a>');
+			$table->closeRow();
 		}
 
-		$fields = array(
-			'name' => $_POST['name'],
-			'domain' => $_POST['domain'],
-			'active' => (isset($_POST['active']) ? 1 : 0),
+		return '<h2 class="icon icon-dashboard">Dashboard</h2>' . $table->__toString();
+	}
+
+	/**
+	 *
+	 */
+	private function settingsGet($website) {
+		return array(
+			'name' => $website->getName(),
+			'domain' => $website->getDomain(),
+			'active' => $website->getActive(),
 			'message' => ''
 		);
+	}
+
+	/**
+	 *
+	 */
+	private function settingsPost($website) {
+		$field = $this->settingsGet($website);
+
+		if(!isset($_POST['name'], $_POST['domain'])) {
+			$field['message'] = '<p class="msg-warning">Require name and domain.</p>';
+			return $field;
+		}
+
+		$field['name'] = $_POST['name'];
+		$field['domain'] = $_POST['domain'];
+		$field['active'] = (isset($_POST['active']) ? 1 : 0);
 
 		$this->pdbc->query('UPDATE `website`
-		                    SET `name` =  "' . $this->pdbc->quote($fields['name']) . '",
-		                        `domain` =  "' . $this->pdbc->quote($fields['domain']) . '",
-					`active` =  "' . $this->pdbc->quote($fields['active']) . '"
-		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"
-		                    AND `uid` = "' . $this->pdbc->quote($this->session->getUserID()) . '"');
+		                    SET `name` =  "' . $this->pdbc->quote($field['name']) . '",
+		                        `domain` =  "' . $this->pdbc->quote($field['domain']) . '",
+					`active` =  "' . $this->pdbc->quote($field['active']) . '"
+		                    WHERE `id` = "' . $this->pdbc->quote($website->getID()) . '"
+		                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
 
 		if($this->pdbc->rowCount()) {
-			$fields['message'] = '<p class="msg-succes">Your changes have been saved successfully</p>';
+			$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
 		}
 
-		return $fields;
+		return $field;
 	}
 
 	/**
 	 *
 	 */
-	private function settingsPage($fields) {
+	private function settingsPage($field) {
 
 		$form = new \lib\html\HTMLFormStacked();
 
@@ -97,7 +112,7 @@ class ModulePageDashboard extends ModulePageAbstract {
 			'id' => 'form-name',
 			'name' => 'name',
 			'placeholder' => 'Name',
-			'value' => $fields['name']
+			'value' => $field['name']
 		));
 
 		$form->addInput('Domain', array(
@@ -105,7 +120,7 @@ class ModulePageDashboard extends ModulePageAbstract {
 			'id' => 'form-domain',
 			'name' => 'domain',
 			'placeholder' => 'Domain',
-			'value' => $fields['domain']
+			'value' => $field['domain']
 		));
 
 		$form->addInput('Active', array(
@@ -113,7 +128,7 @@ class ModulePageDashboard extends ModulePageAbstract {
 			'id' => 'form-active',
 			'name' => 'active',
 			'value' => '1'
-		) + ($fields['active'] ? array('checked' => 'checked') : array()));
+		) + ($field['active'] ? array('checked' => 'checked') : array()));
 
 		$form->addContent('<a href="' . $this->url->getDirectory() . '"><button type="button">Back</button></a>');
 
@@ -121,7 +136,7 @@ class ModulePageDashboard extends ModulePageAbstract {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-settings">Website settings</h2>' . $fields['message'] . $form->__toString();
+		return '<h2 class="icon icon-settings">Website settings</h2>' . $field['message'] . $form->__toString();
 	}
 
 	/**
@@ -130,29 +145,10 @@ class ModulePageDashboard extends ModulePageAbstract {
 	private function dashboardGet() {
 		$this->pdbc->query('SELECT `id`,`name`,`active`
 		                    FROM `website`
-		                    WHERE `uid` = ' . $this->pdbc->quote($this->session->getUserID()) . '
+		                    WHERE `uid` = ' . $this->pdbc->quote($this->user->getID()) . '
 				    ORDER BY `id`ASC');
 
 		return $this->pdbc->fetchAll();
-	}
-
-	/**
-	 *
-	 */
-	private function dashboardPage($fieldsRow) {
-		$table = new \lib\html\HTMLTable();
-		$table->addHeaderRow(array('#','Website','Status','Settings'));
-
-		foreach($fieldsRow as $fields) {
-			$table->openRow();
-			$table->addColumn($fields['id']);
-			$table->addColumn('<a href="' . $this->website . $fields['id'] . '">' . $fields['name'] . '</a>');
-			$table->addColumn('<span class="icon icon-active-' . $fields['active'] . '"></span>');
-			$table->addColumn('<a class="icon icon-settings" href="' . $this->url->getDirectory() . $fields['id'] . '"></a>');
-			$table->closeRow();
-		}
-
-		return '<h2 class="icon icon-dashboard">Dashboard</h2>' . $table->__toString();
 	}
 }
 

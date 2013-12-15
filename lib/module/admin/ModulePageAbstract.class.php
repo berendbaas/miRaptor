@@ -15,7 +15,7 @@ abstract class ModulePageAbstract {
 	protected $pdbc;
 	protected $url;
 	protected $redirect;
-	protected $session;
+	protected $user;
 	protected $result;
 
 	protected $isNamespace;
@@ -27,7 +27,7 @@ abstract class ModulePageAbstract {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
 		$this->redirect = $redirect;
-		$this->session = new ModuleSession($pdbc);
+		$this->user = new \lib\core\User($pdbc);
 		$this->result = '';
 
 		$this->isNamespace = self::DEFAULT_NAMESPACE;
