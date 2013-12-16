@@ -44,6 +44,18 @@ class Mysqli implements PDBC {
 			throw new PDBCException('Mysqli(' . $this->mysqli->errno . '): ' . $this->mysqli->error);
 		}
 	}
+	
+	public function transactionBegin() {
+		$this->mysqli->autocommit(FALSE);
+	}
+
+	public function transactionCommit() {
+		$this->mysqli->commit();
+	}
+
+	public function transactionRollBack() {
+		$this->mysqli->rollback();
+	}
 
 	public function quote($string) {
 		return $this->mysqli->real_escape_string($string);
