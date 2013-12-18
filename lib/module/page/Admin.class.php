@@ -112,11 +112,9 @@ class Admin extends \lib\core\AbstractAdmin {
 		// Insert router
 		try {
 			$this->pdbc->query('INSERT INTO `router` (`pid`, `index`, `name`)
-			                    SELECT NULLIF("' . $this->pdbc->quote($field['parent']) . '", 0),
-			                           "' . $this->pdbc->quote($field['index']) . '",
-			                           "' . $this->pdbc->quote($field['name']) . '"
-			                    FROM `router` as `parent`
-			                    WHERE `id` = "' . $this->pdbc->quote($field['parent']) . '"');
+			                    VALUES (NULLIF("' . $this->pdbc->quote($field['parent']) . '", 0),
+			                                   "' . $this->pdbc->quote($field['index']) . '",
+			                                   "' . $this->pdbc->quote($field['name']) . '")');
 		} catch(\lib\pdbc\PDBCException $e) {
 			$this->pdbc->transactionRollBack();
 			$field['message'] = '<p class="msg-error">This page already exists. Please try again.</p>';
