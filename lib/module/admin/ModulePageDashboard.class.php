@@ -43,6 +43,18 @@ class ModulePageDashboard extends ModulePageAbstract {
 	/**
 	 *
 	 */
+	private function dashboardGet() {
+		$this->pdbc->query('SELECT `id`,`name`,`active`
+		                    FROM `website`
+		                    WHERE `uid` = ' . $this->pdbc->quote($this->user->getID()) . '
+				    ORDER BY `id` ASC');
+
+		return $this->pdbc->fetchAll();
+	}
+
+	/**
+	 *
+	 */
 	private function dashboardPage($fieldRow) {
 		$table = new \lib\html\HTMLTable();
 		$table->addHeaderRow(array('#','Website','Status','Settings'));
@@ -137,18 +149,6 @@ class ModulePageDashboard extends ModulePageAbstract {
 		));
 
 		return '<h2 class="icon icon-settings">Website settings</h2>' . $field['message'] . $form->__toString();
-	}
-
-	/**
-	 *
-	 */
-	private function dashboardGet() {
-		$this->pdbc->query('SELECT `id`,`name`,`active`
-		                    FROM `website`
-		                    WHERE `uid` = ' . $this->pdbc->quote($this->user->getID()) . '
-				    ORDER BY `id`ASC');
-
-		return $this->pdbc->fetchAll();
 	}
 }
 
