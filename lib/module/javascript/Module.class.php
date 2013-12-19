@@ -54,7 +54,6 @@ class Module extends \lib\core\AbstractModule {
 	 * @throws \lib\pdbc\PDBCException   if the given query can't be executed.
 	 */
 	private function get($name, $theme = NULL) {
-		//
 		if($theme === NULL) {
 			$query = 'SELECT `javascript`.`content`
 			          FROM `module_javascript` as `javascript`

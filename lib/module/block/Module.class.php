@@ -54,7 +54,6 @@ class Module extends \lib\core\AbstractModule {
 	 * @throws \lib\pdbc\PDBCException   if the given query can't be executed.
 	 */
 	private function get($name, $theme = NULL) {
-		//
 		if($theme === NULL) {
 			$query = 'SELECT `block`.`content`
 			          FROM `module_block` as `block`
@@ -65,6 +64,7 @@ class Module extends \lib\core\AbstractModule {
 			          WHERE `block`.`name` = "' . $this->pdbc->quote($name) . '"
 			          AND `page`.`id_router` = "' . $this->pdbc->quote($this->routerID) . '"
 				  LIMIT 1';
+		} else {
 			$query = 'SELECT `block`.`content`
 			          FROM `module_block` as `block`
 			          LEFT JOIN `module_theme` as `theme`
