@@ -47,7 +47,7 @@ class Admin extends \lib\core\AbstractAdmin {
 	private function overviewGet() {
 		$this->pdbc->query('SELECT `id`,`name`
 		                    FROM `module_theme`
-		                    ORDER BY `id` ASC');
+		                    ORDER BY `name` ASC');
 
 		return $this->pdbc->fetchAll();
 	}
@@ -95,11 +95,10 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		$field['name'] = $_POST['name'];
 
-		// Insert
-		$this->pdbc->query('INSERT IGNORE INTO `module_theme` (`name`)
-		                    VALUES ("' . $this->pdbc->quote($field['name']) . '")');
-
-		if(!$this->pdbc->rowCount()) {
+		// Update
+		try {
+			$this->pdbc->query('INSERT INTO `module_theme` (`name`) VALUES ("' . $this->pdbc->quote($field['name']) . '")');
+		} catch(\lib\pdbc\PDBCException $e) {
 			$field['message'] = '<p class="msg-error">This theme already exists. Please try again.</p>';
 			return $field;
 		}
@@ -163,12 +162,14 @@ class Admin extends \lib\core\AbstractAdmin {
 		$field['name'] = $_POST['name'];
 
 		// Update
-		$this->pdbc->query('UPDATE IGNORE `module_theme`
-		                    SET `name` = "'. $this->pdbc->quote($field['name']) .'"
-		                    WHERE `id` = "'. $this->pdbc->quote($id) .'"');
+		try {
+			$this->pdbc->query('UPDATE `module_theme` SET `name` = "'. $this->pdbc->quote($field['name']) .'" WHERE `id` = "'. $this->pdbc->quote($id) .'"');
+		} catch(\lib\pdbc\PDBCException $e) {
+			$field['message'] = '<p class="msg-error">This theme already exists. Please try again.</p>';
+			return $field;
+		}
 
-		$field['message'] = $this->pdbc->rowCount() ? '<p class="msg-succes">Your changes have been saved successfully.</p>' : '<p class="msg-error">This theme already exists. Please try again.</p>';
-
+		$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
 		return $field;
 	}
 
@@ -200,7 +201,7 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	private function removeGet($id) {
 		return array(
-			'message' => '<p>Are you sure you want to remove this theme? This action can\'t be undone!</p>'
+			'message' => ''
 		);
 	}
 
@@ -208,7 +209,13 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	private function removePost($id) {
-		$this->pdbc->query('DELETE FROM `module_theme` WHERE `id` = "' . $this->pdbc->quote($id) .'"');
+		try {
+			$this->pdbc->query('DELETE FROM `module_theme` WHERE `id` = "' . $this->pdbc->quote($id) .'"');
+		} catch(\lib\pdbc\PDBCException $e) {
+			return array(
+				'message' => '<p class="msg-error">Can\'t remove a theme that is used. Please try again after removing the block, javascript, stylesheet & template that use this theme.</p>'
+			);
+		}
 
 		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=theme', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
@@ -218,6 +225,9 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	private function removePage($field) {
 		$form = new \lib\html\HTMLFormStacked();
+		$list = new \lib\html\HTMLList();
+
+		$form->addContent('<p>Are you sure you want to remove this theme? This action can\'t be undone!</p>');
 
 		$form->addContent('<a href="' . $this->url->getPath() . '?module=theme' . '"><button type="button">No</button></a>');
 

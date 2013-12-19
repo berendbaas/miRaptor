@@ -104,12 +104,12 @@ class Admin extends \lib\core\AbstractAdmin {
 		$field['javascript'] = $_POST['javascript'];
 
 		// Insert
-		$this->pdbc->query('INSERT IGNORE INTO `module_javascript` (`id_theme`, `name`, `content`)
-		                    VALUES ("' . $this->pdbc->quote($field['theme']) . '",
-		                            "' . $this->pdbc->quote($field['name']) . '",
-		                            "' . $this->pdbc->quote($field['javascript']) . '")');
-
-		if(!$this->pdbc->rowCount()) {
+		try {
+			$this->pdbc->query('INSERT INTO `module_javascript` (`id_theme`, `name`, `content`)
+			                    VALUES ("' . $this->pdbc->quote($field['theme']) . '",
+			                            "' . $this->pdbc->quote($field['name']) . '",
+			                            "' . $this->pdbc->quote($field['javascript']) . '")');
+		} catch(\lib\pdbc\PDBCException $e) {
 			$field['message'] = '<p class="msg-error">This javascript already exists. Please try again.</p>';
 			return $field;
 		}
@@ -205,14 +205,18 @@ class Admin extends \lib\core\AbstractAdmin {
 		$field['javascript'] = $_POST['javascript'];
 
 		// Update
-		$this->pdbc->query('UPDATE IGNORE `module_javascript`
-		                    SET `id_theme` = "'. $this->pdbc->quote($field['theme']) .'",
-		                        `name` = "'. $this->pdbc->quote($field['name']) .'",
-		                        `content` = "'. $this->pdbc->quote($field['javascript']) .'"
+		try {
+			$this->pdbc->query('UPDATE `module_javascript`
+			                    SET `id_theme` = "'. $this->pdbc->quote($field['theme']) .'",
+			                        `name` = "'. $this->pdbc->quote($field['name']) .'",
+			                        `content` = "'. $this->pdbc->quote($field['javascript']) .'"
 		                    WHERE `id` = "'. $this->pdbc->quote($id) . '"');
+		} catch(\lib\pdbc\PDBCException $e) {
+			$field['message'] = '<p class="msg-error">This javascript already exists. Please try again.</p>';
+			return $field;
+		}
 
-		$field['message'] = $this->pdbc->rowCount() ? '<p class="msg-succes">Your changes have been saved successfully.</p>' : '<p class="msg-error">This theme already exists. Please try again.</p>';
-
+		$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
 		return $field;
 	}
 
@@ -274,7 +278,7 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	private function removeGet($id) {
 		return array(
-			'message' => '<p>Are you sure you want to remove this javascript? This action can\'t be undone!</p>'
+			'message' => ''
 		);
 	}
 
@@ -282,7 +286,13 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	private function removePost($id) {
-		$this->pdbc->query('DELETE FROM `module_javascript` WHERE `id` = "' . $this->pdbc->quote($id) .'"');
+		try {
+			$this->pdbc->query('DELETE FROM `module_javascript` WHERE `id` = "' . $this->pdbc->quote($id) .'"');
+		} catch(\lib\pdbc\PDBCException $e) {
+			return array(
+				'message' => '<p class="msg-error">Can\'t remove javascript.</p>'
+			);
+		}
 
 		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=javascript', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
@@ -292,6 +302,8 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	private function removePage($field) {
 		$form = new \lib\html\HTMLFormStacked();
+
+		$form->addContent('<p>Are you sure you want to remove this javascript This action can\'t be undone!</p>');
 
 		$form->addContent('<a href="' . $this->url->getPath() . '?module=javascript' . '"><button type="button">No</button></a>');
 

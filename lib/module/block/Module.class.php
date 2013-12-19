@@ -8,16 +8,13 @@ namespace lib\module\block;
  * @version 1.0
  */
 class Module extends \lib\core\AbstractModule {
-	const DEFAULT_THEME = '';
-
 	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $routerID, array $arguments) {
 			parent::__construct($pdbc, $url, $routerID, $arguments);
-			$this->isParsable = TRUE;
 			$this->isStatic = TRUE;
 	}
 
 	public function run() {
-		$this->result = $this->getBlock($this->parseName(), $this->parseTheme());
+		$this->result = $this->get($this->parseName(), $this->parseTheme());
 	}
 
 	/**
@@ -31,43 +28,58 @@ class Module extends \lib\core\AbstractModule {
 			return $this->arguments['name'];
 		}
 
-		throw new \lib\core\ModuleException('name="" required.');
+		throw new \lib\core\ModuleException('Name required.');
 	}
 
 	/**
-	 * Returns the theme argument or the default argument, if none is given.
+	 * Returns the theme argument or null, if none is given.
 	 *
-	 * @return string the theme argument or the default argument, if none is given.
+	 * @return string the theme argument or null, if none is given.
 	 */
 	private function parseTheme() {
 		if(isset($this->arguments['theme'])) {
 			return $this->arguments['theme'];
 		}
 
-		return self::DEFAULT_THEME;
+		return NULL;
 	}
 
 	/**
 	 * Returns the block with the given name and theme.
 	 *
 	 * @param  string                    $name
-	 * @param  string                    $group = self::DEFAULT_GROUP
+	 * @param  string                    $theme = NULL
 	 * @return string                    the block with the given name and theme.
 	 * @throws \lib\core\ModuleException if there is no block for the given name and theme.
 	 * @throws \lib\pdbc\PDBCException   if the given query can't be executed.
 	 */
-	private function getBlock($name, $theme = self::DEFAULT_THEME) {
-		$this->pdbc->query('SELECT `content`
-		                    FROM `module_block`
-		                    WHERE `name` = "' . $this->pdbc->quote($name) . '"
-		                    AND `id_theme` ' . ($theme == self::DEFAULT_THEME ? 'IS NULL' : '= (SELECT `id`
-		                                                                                        FROM `module_theme`
-		                                                                                        WHERE `name` = "' . $this->pdbc->quote($theme) . '")'));
+	private function get($name, $theme = NULL) {
+		//
+		if($theme === NULL) {
+			$query = 'SELECT `block`.`content`
+			          FROM `module_block` as `block`
+			          LEFT JOIN `module_template` as `template`
+			          ON `template`.`id_theme` = `block`.`id_theme`
+			          LEFT JOIN `module_page` as `page`
+			          ON `page`.`id_template` = `template`.`id`
+			          WHERE `block`.`name` = "' . $this->pdbc->quote($name) . '"
+			          AND `page`.`id_router` = "' . $this->pdbc->quote($this->routerID) . '"
+				  LIMIT 1';
+			$query = 'SELECT `block`.`content`
+			          FROM `module_block` as `block`
+			          LEFT JOIN `module_theme` as `theme`
+			          ON `theme`.`id` = `block`.`id_theme`
+			          WHERE `block`.`name` = "' . $this->pdbc->quote($name) . '"
+			          AND `theme`.`name` = "' . $this->pdbc->quote($theme) . '"
+				  LIMIT 1';
+		}
+
+		$this->pdbc->query($query);
 
 		$block = $this->pdbc->fetch();
 
-		if(!$block) {
-			throw new \lib\core\ModuleException('name="' . $name . '" does not exists.');
+		if($block === NULL) {
+			throw new \lib\core\ModuleException('Does not exists.');
 		}
 
 		return end($block);

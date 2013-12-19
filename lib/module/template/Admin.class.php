@@ -45,12 +45,12 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	private function overviewGet() {
-		$this->pdbc->query('SELECT `module_template`.`id`, `module_template`.`name`, `theme`.`name` AS `theme`
-		                    FROM `module_template`
+		$this->pdbc->query('SELECT `template`.`id`, `template`.`name`, `theme`.`name` AS `theme`
+		                    FROM `module_template` as `template`
 		                    LEFT JOIN (SELECT `id`, `name`
 		                               FROM `module_theme`) AS `theme`
-		                    ON `module_template`.`id_theme` = `theme`.`id`
-		                    ORDER BY `id` ASC');
+		                    ON `template`.`id_theme` = `theme`.`id`
+		                    ORDER BY `theme`.`name` ASC, template.`name` ASC');
 
 		return $this->pdbc->fetchAll();
 	}
@@ -104,12 +104,12 @@ class Admin extends \lib\core\AbstractAdmin {
 		$field['template'] = $_POST['template'];
 
 		// Insert
-		$this->pdbc->query('INSERT IGNORE INTO `module_template` (`id_theme`, `name`, `content`)
-		                    VALUES ("' . $this->pdbc->quote($field['theme']) . '",
-		                            "' . $this->pdbc->quote($field['name']) . '",
-		                            "' . $this->pdbc->quote($field['template']) . '")');
-
-		if(!$this->pdbc->rowCount()) {
+		try {
+			$this->pdbc->query('INSERT INTO `module_template` (`id_theme`, `name`, `content`)
+			                    VALUES ("' . $this->pdbc->quote($field['theme']) . '",
+			                            "' . $this->pdbc->quote($field['name']) . '",
+			                            "' . $this->pdbc->quote($field['template']) . '")');
+		} catch(\lib\pdbc\PDBCException $e) {
 			$field['message'] = '<p class="msg-error">This template already exists. Please try again.</p>';
 			return $field;
 		}
@@ -122,21 +122,20 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	private function newPage($field) {
 		// Get themes
-		$this->pdbc->query('SELECT `id`,`name` FROM `module_theme`');
+		$this->pdbc->query('SELECT `id`,`name` FROM `module_theme` ORDER BY `name`');
 
 		$themes = array();
 
 		while($theme = $this->pdbc->fetch()) {
+			$value = array(
+				'value' => $theme['id']
+			);
+
 			if($theme['id'] !== $field['theme']) {
-				$themes[$theme['name']] = array(
-					'value' => $theme['id']
-				);
-			} else {
-				$themes[$theme['name']] = array(
-					'value' => $theme['id'],
-					'selected' => 'selected'
-				);
+				$value['selected'] = 'selected';
 			}
+
+			$themes[$theme['name']] = $value;
 		}
 
 		// Form
@@ -205,14 +204,18 @@ class Admin extends \lib\core\AbstractAdmin {
 		$field['template'] = $_POST['template'];
 
 		// Update
-		$this->pdbc->query('UPDATE IGNORE `module_template`
-		                    SET `id_theme` = "'. $this->pdbc->quote($field['theme']) .'",
-		                        `name` = "'. $this->pdbc->quote($field['name']) .'",
-		                        `content` = "'. $this->pdbc->quote($field['template']) .'"
-		                    WHERE `id` = "'. $this->pdbc->quote($id) . '"');
+		try {
+			$this->pdbc->query('UPDATE `module_template`
+			                    SET `id_theme` = "'. $this->pdbc->quote($field['theme']) .'",
+			                        `name` = "'. $this->pdbc->quote($field['name']) .'",
+			                        `content` = "'. $this->pdbc->quote($field['template']) .'"
+			                    WHERE `id` = "'. $this->pdbc->quote($id) . '"');
+		} catch(\lib\pdbc\PDBCException $e) {
+			$field['message'] = '<p class="msg-error">This template already exists. Please try again.</p>';
+			return $field;
+		}
 
-		$field['message'] = $this->pdbc->rowCount() ? '<p class="msg-succes">Your changes have been saved successfully.</p>' : '<p class="msg-error">This theme already exists. Please try again.</p>';
-
+		$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
 		return $field;
 	}
 
@@ -274,7 +277,7 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	private function removeGet($id) {
 		return array(
-			'message' => '<p>Are you sure you want to remove this template? This action can\'t be undone!</p>'
+			'message' => ''
 		);
 	}
 
@@ -282,7 +285,14 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	private function removePost($id) {
-		$this->pdbc->query('DELETE FROM `module_template` WHERE `id` = "' . $this->pdbc->quote($id) .'"');
+		try {
+			$this->pdbc->query('DELETE FROM `module_template` WHERE `id` = "' . $this->pdbc->quote($id) .'"');
+		} catch(\lib\pdbc\PDBCException $e) {
+			return array(
+				'message' => '<p class="msg-error">Can\'t remove a template that is used. Please try again after removing the page that use this template.</p>'
+			);
+
+		}
 
 		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=template', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
@@ -292,6 +302,8 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	private function removePage($field) {
 		$form = new \lib\html\HTMLFormStacked();
+
+		$form->addContent('<p>Are you sure you want to remove this template? This action can\'t be undone!</p>');
 
 		$form->addContent('<a href="' . $this->url->getPath() . '?module=template' . '"><button type="button">No</button></a>');
 

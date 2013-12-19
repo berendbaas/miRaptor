@@ -8,15 +8,13 @@ namespace lib\module\stylesheet;
  * @version 1.0
  */
 class Module extends \lib\core\AbstractModule {
-	const DEFAULT_THEME = '';
-
 	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $routerID, array $arguments) {
 			parent::__construct($pdbc, $url, $routerID, $arguments);
 			$this->isStatic = TRUE;
 	}
 
 	public function run() {
-		$this->result = $this->getStylesheet($this->parseName(), $this->parseTheme());
+		$this->result = $this->get($this->parseName(), $this->parseTheme());
 	}
 
 	/**
@@ -30,43 +28,59 @@ class Module extends \lib\core\AbstractModule {
 			return $this->arguments['name'];
 		}
 
-		throw new \lib\core\ModuleException('name="" required.');
+		throw new \lib\core\ModuleException('Name required.');
 	}
 
 	/**
-	 * Returns the theme argument or the default argument, if none is given.
+	 * Returns the theme argument or null, if none is given.
 	 *
-	 * @return string the theme argument or the default argument, if none is given.
+	 * @return string the theme argument or null, if none is given.
 	 */
 	private function parseTheme() {
 		if(isset($this->arguments['theme'])) {
 			return $this->arguments['theme'];
 		}
 
-		return self::DEFAULT_THEME;
+		return NULL;
 	}
 
 	/**
 	 * Returns the stylesheet with the given name and theme.
 	 *
 	 * @param  string                    $name
-	 * @param  string                    $theme = self::DEFAULT_THEME
+	 * @param  string                    $theme = NULL
 	 * @return string                    the stylesheet with the given name and theme.
 	 * @throws \lib\core\ModuleException if there is no stylesheet for the given name and theme.
 	 * @throws \lib\pdbc\PDBCException   if the given query can't be executed.
 	 */
-	private function getStylesheet($name, $theme = self::DEFAULT_THEME) {
-		$this->pdbc->query('SELECT `content`
-		                    FROM `module_stylesheet`
-		                    WHERE `name` = "' . $this->pdbc->quote($name) . '"
-		                    AND `id_theme` ' . ($theme == self::DEFAULT_THEME ? 'IS NULL' : '= (SELECT `id`
-		                                                                                        FROM `module_theme`
-		                                                                                        WHERE `name` = "' . $this->pdbc->quote($theme) . '")'));
+	private function get($name, $theme = NULL) {
+		//
+		if($theme === NULL) {
+			$query = 'SELECT `stylesheet`.`content`
+			          FROM `module_stylesheet` as `stylesheet`
+			          LEFT JOIN `module_template` as `template`
+			          ON `template`.`id_theme` = `stylesheet`.`id_theme`
+			          LEFT JOIN `module_page` as `page`
+			          ON `page`.`id_template` = `template`.`id`
+			          WHERE `stylesheet`.`name` = "' . $this->pdbc->quote($name) . '"
+			          AND `page`.`id_router` = "' . $this->pdbc->quote($this->routerID) . '"
+			          LIMIT 1';
+		} else {
+			$query = 'SELECT `stylesheet`.`content`
+			          FROM `module_stylesheet` as `stylesheet`
+			          LEFT JOIN `module_theme` as `theme`
+			          ON `theme`.`id` = `stylesheet`.`id_theme`
+			          WHERE `stylesheet`.`name` = "' . $this->pdbc->quote($name) . '"
+			          AND `theme`.`name` = "' . $this->pdbc->quote($theme) . '"
+			          LIMIT 1';
+		}
+
+		$this->pdbc->query($query);
 
 		$stylesheet = $this->pdbc->fetch();
 
-		if(!$stylesheet) {
-			throw new \lib\core\ModuleException('name="' . $name . '" does not exists.');
+		if($stylesheet === NULL) {
+			throw new \lib\core\ModuleException('Does not exists.');
 		}
 
 		return <<<HTML
