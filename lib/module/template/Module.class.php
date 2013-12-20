@@ -15,13 +15,20 @@ class Module extends \lib\core\AbstractModule {
 	}
 
 	public function run() {
-		$this->pdbc->query('SELECT `content`
-		                    FROM `module_template`
-		                    WHERE `id` = (SELECT `id_template`
-		                                  FROM `module_page`
-	                                          WHERE `id_router` = "' . $this->pdbc->quote($this->routerID) . '")');
+		$this->pdbc->query('SELECT `template`.`content`
+		                    FROM `module_template` as `template`
+		                    JOIN `module_page` as `page`
+		                    ON `template`.`id` = `page`.`id_template`
+		                    WHERE `page`.`id_router` = "' . $this->pdbc->quote($this->routerID) . '"
+		                    LIMIT 1');
 
-		$this->result = end($this->pdbc->fetch());
+		$template = $this->pdbc->fetch();
+
+		if($template === NULL) {
+			throw new \lib\core\ModuleException('Does not exists.');
+		}
+
+		$this->result = end($template);
 	}
 }
 

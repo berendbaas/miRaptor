@@ -9,8 +9,8 @@ namespace lib\module\admin;
  */
 class ModulePageSignIn extends ModulePageAbstract {
 	public function run() {
-		// Check session
-		if($this->session->isSignedIn()) {
+		// Check user
+		if($this->user->isSignedIn()) {
 			throw new \lib\core\StatusCodeException($this->redirect, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
@@ -32,20 +32,20 @@ class ModulePageSignIn extends ModulePageAbstract {
 	 *
 	 */
 	private function signInPost() {
-		$fields = $this->signInGet();
+		$field = $this->signInGet();
 
 		// Check fields
 		if(!isset($_POST['username'], $_POST['password'])) {
-			$fields['message'] = '<p class="msg-warning">Require username and password.</p>';
-			return $fields;
+			$field['message'] = '<p class="msg-warning">Require username and password.</p>';
+			return $field;
 		}
 
-		$fields['username'] = $_POST['username'];
+		$field['username'] = $_POST['username'];
 
 		// Check credentials
-		if(!($this->session->signIn($fields['username'], $_POST['password']))) {
-			$fields['message'] = '<p class="msg-error">Invalid username or password. Please try again.</p>';
-			return $fields;
+		if(!($this->user->signIn($field['username'], $_POST['password']))) {
+			$field['message'] = '<p class="msg-error">Invalid username or password. Please try again.</p>';
+			return $field;
 		}
 
 		throw new \lib\core\StatusCodeException($this->redirect, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
@@ -54,7 +54,7 @@ class ModulePageSignIn extends ModulePageAbstract {
 	/**
 	 *
 	 */
-	private function signInPage($fields) {
+	private function signInPage($field) {
 		$form = new \lib\html\HTMLFormStacked();
 
 		$form->addInput('Username', array(
@@ -62,7 +62,7 @@ class ModulePageSignIn extends ModulePageAbstract {
 			'id' => 'form-username',
 			'name' => 'username',
 			'placeholder' => 'Username',
-			'value' => $fields['username']
+			'value' => $field['username']
 		));
 
 		$form->addInput('Password', array(
@@ -76,7 +76,7 @@ class ModulePageSignIn extends ModulePageAbstract {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-sign-in">Sign In</h2>' . $fields['message'] . $form->__toString();
+		return '<h2 class="icon icon-sign-in">Sign In</h2>' . $field['message'] . $form->__toString();
 	}
 }
 

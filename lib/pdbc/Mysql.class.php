@@ -36,6 +36,18 @@ class Mysql implements PDBC {
 
 		$this->mysqlSelectDatabase();
 	}
+	
+	public function transactionBegin() {
+		$this->query('START TRANSACTION');
+	}
+
+	public function transactionCommit() {
+		$this->query('COMMIT');
+	}
+
+	public function transactionRollBack() {
+		$this->query('ROLLBACK');
+	}
 
 	public function quote($string) {
 		$result = mysql_real_escape_string($string, $this->link);

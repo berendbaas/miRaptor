@@ -11,16 +11,22 @@ abstract class AbstractAdmin implements Runnable {
 	protected $pdbc;
 	protected $url;
 	protected $result;
+	protected $user;
+	protected $website;
 
 	/**
 	 * Construct an Admin object with the given PDBC & URL.
 	 *
 	 * @param \lib\pdbc\PDBC $pdbc
 	 * @param URL            $url
+	 * @param User           $user
+	 * @param Website        $website
 	 */
-	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, User $user, Website $website) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
+		$this->user = $user;
+		$this->website = $website;
 		$this->result = '';
 	}
 

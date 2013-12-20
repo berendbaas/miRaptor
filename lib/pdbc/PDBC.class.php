@@ -34,6 +34,30 @@ interface PDBC {
 	public function selectDatabase($database);
 
 	/**
+	 * Start transaction. Changes are not commited untill you end the transactions with PDBC::transactionCommit(). Or roll back all changes with PDBC::transactionRollBack().
+	 *
+	 * @return void
+	 * @throws PDBCException if the transactions can't be started.
+	 */
+	public function transactionBegin();
+
+	/**
+	 * End transactions. Commits the changes made, since the transactions is started. Changes will now be automatically be commited, as usual.
+	 *
+	 * @return void
+	 * @throws PDBCException if the transactions can't be commited.
+	 */
+	public function transactionCommit();
+
+	/**
+	 * End transactions. Rolls back the changes made, since the transactions is started. Changes will now be automatically be commited, as usual.
+	 *
+	 * @return void
+	 * @throws PDBCException if the transactions can't be rolled back.
+	 */
+	public function transactionRollBack();
+
+	/**
 	 * Returns a quoted string that is safe to pass into an SQL statement.
 	 *
 	 * @param  String        $string

@@ -11,6 +11,8 @@ class ModulePageWebsite extends ModulePageAbstract {
 	const ADMIN_CLASS = '\\Admin';
 	const ADMIN_NAMESPACE = 'lib\\module\\';
 
+	private $website;
+
 	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $redirect) {
 		parent::__construct($pdbc, $url, $redirect);
 		$this->init();
@@ -22,17 +24,17 @@ class ModulePageWebsite extends ModulePageAbstract {
 	 *
 	 */
 	private function init() {
-		// Check session & file
-		if(!$this->session->isSignedIn() || $this->url->getFile() === '' || !is_numeric($this->url->getFile())) {
+		$this->website = new \lib\core\Website($this->pdbc, $this->user, $this->url->getFile());
+
+		// Check user & website
+		if(!$this->user->isSignedIn() || !$this->website->hasAccess()) {
 			throw new \lib\core\StatusCodeException($this->redirect, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
-		$id = intval($this->url->getFile());
-
 		$this->pdbc->query('SELECT `db`
 		                    FROM `website`
-		                    WHERE `id` = ' . $this->pdbc->quote($id) . '
-		                    AND `uid` = ' . $this->pdbc->quote($this->session->getUserID()));
+		                    WHERE `id` = ' . $this->pdbc->quote($this->website->getID()) . '
+		                    AND `uid` = ' . $this->pdbc->quote($this->user->getID()));
 
 		$database = $this->pdbc->fetch();
 
@@ -110,7 +112,7 @@ class ModulePageWebsite extends ModulePageAbstract {
 
 		$admin = self::ADMIN_NAMESPACE . $_GET['module'] . self::ADMIN_CLASS;
 
-		$result = new $admin($this->pdbc, $this->url);
+		$result = new $admin($this->pdbc, $this->url, $this->user, $this->website);
 		$result->run();
 		return $result->__toString();
 	}

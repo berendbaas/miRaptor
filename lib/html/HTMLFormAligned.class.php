@@ -44,11 +44,7 @@ class HTMLFormAligned extends HTMLForm {
 		$content = PHP_EOL;
 
 		foreach($options as $optionKey => $optionValue) {
-			if(is_int($optionKey)) {
-				$content .= HTML::element('option', array('value' => $optionValue), $optionValue) . PHP_EOL;
-			} else {
-				$content .= HTML::element('option', $optionValue, $optionKey) . PHP_EOL;
-			}
+			$content .= HTML::element('option', $optionValue, $optionKey) . PHP_EOL;
 		}
 
 		$this->result .= '<div>';

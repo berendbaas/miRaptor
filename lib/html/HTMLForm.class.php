@@ -103,6 +103,14 @@ abstract class HTMLForm {
 	/**
 	 * Add a select box to the current form.
 	 *
+	 * The option array works like this:
+	 *
+	 * $name = 'Title'; // Option element name
+	 * $attributes = array('value' = 'Value'); // Option element attributes
+	 *
+	 * $options = array();
+	 * $options[$name] = $attributes;
+	 *
 	 * @param  string $title
 	 * @param  array  $options = array()
 	 * @param  array  $attributes = array()

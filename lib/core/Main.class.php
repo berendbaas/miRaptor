@@ -52,7 +52,7 @@ class Main implements Runnable {
 			$this->pdbc->selectDatabase($gatekeeper->getDatabase());
 
 			// Guide
-			$guide = new Guide($this->pdbc, $this->url, $this->userDirectory . $gatekeeper->getLocation());
+			$guide = new Guide($this->pdbc, $this->url, $this->userDirectory . $gatekeeper->getDirectory());
 			$guide->run();
 		} catch(StatusCodeException $e) {
 			$this->statusCode = $e->getCode();
@@ -89,22 +89,14 @@ class Main implements Runnable {
 		$ip = $this->pdbc->quote($_SERVER['REMOTE_ADDR']);
 
 		// Insert
-		$this->pdbc->query('INSERT INTO `log` (`id`,
-		                                       `time`,
-		                                       `runtime`,
-		                                       `bandwidth`,
-		                                       `statuscode`,
-		                                       `request`,
-		                                       `referal`,
-		                                       `ip`)
-		                    VALUES (           NULL,
-		                                       "' . $this->time . '",
-		                                       "' . $runtime . '",
-		                                       "' . ob_get_length() . '",
-		                                       "' . $this->statusCode . '",
-		                                       "' . $request . '",
-		                                       ' . $referal . ',
-		                                       "' . $ip . '")');
+		$this->pdbc->query('INSERT INTO `log` (`date`, `runtime`, `bandwidth`, `statuscode`, `request`, `referal`, `ip`)
+		                    VALUES (FROM_UNIXTIME("' . $this->time . '"),
+		                            "' . $runtime . '",
+		                            "' . ob_get_length() . '",
+		                            "' . $this->statusCode . '",
+		                            "' . $request . '",
+		                            ' . $referal . ',
+		                            "' . $ip . '")');
 	}
 }
 

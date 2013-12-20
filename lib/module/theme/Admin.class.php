@@ -13,25 +13,30 @@ class Admin extends \lib\core\AbstractAdmin {
 	const ACTION_REMOVE = 'remove';
 
 	public function run() {
-		$this->result = isset($_GET['action'], $_GET['tid']) ? $this->handleAction($_GET['action'], $_GET['tid']) : $this->getOverview();
-	}
+		if(!isset($_GET['action'])) {
+			$this->result = $this->overviewPage($this->overviewGet());
+			return;
+		}
 
-	/**
-	 *
-	 */
-	private function handleAction($action, $id) {
-		switch($action) {
+		switch($_GET['action']) {
 			case self::ACTION_NEW:
-				return $this->getNew($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postNew($id) : ''));
+				$this->result = $this->newPage($_SERVER['REQUEST_METHOD'] === 'POST' ? $this->newPost() : $this->newGet());
 			break;
-			case self::ACTION_EDIT:
-				return $this->getEdit($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postEdit($id) : ''));
-			break;
-			case self::ACTION_REMOVE:
-				return $this->getRemove($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postRemove($id) : ''));
-			break;
-			default:
 
+			case self::ACTION_EDIT:
+				if(isset($_GET['id'])) {
+					$this->result = $this->editPage($_SERVER['REQUEST_METHOD'] === 'POST' ? $this->editPost($_GET['id']) : $this->editGet($_GET['id']));
+				}
+			break;
+
+			case self::ACTION_REMOVE:
+				if(isset($_GET['id'])) {
+					$this->result = $this->removePage($_SERVER['REQUEST_METHOD'] === 'POST' ? $this->removePost($_GET['id']) : $this->removeGet($_GET['id']));
+				}
+			break;
+
+			default:
+				throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=theme', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 			break;
 		}
 	}
@@ -39,57 +44,72 @@ class Admin extends \lib\core\AbstractAdmin {
 	/**
 	 *
 	 */
-	private function postNew($id) {
-		$this->pdbc->query('INSERT INTO `module_theme` (`name`)
-		                    VALUES ("' . $this->pdbc->quote($_POST['name']) . '")');
-
-		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?id=' . $_GET['id'] .  '&module=theme', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
-	}
-
-	/**
-	 *
-	 */
-	private function getNew($id, $message = '') {
-		$form = new \lib\html\HTMLFormStacked();
-
-		$form->addInput('Name', array(
-			'type' => 'text',
-			'id' => 'form-name',
-			'name' => 'name',
-			'placeholder' => 'Name'
-		));
-
-		$form->addContent('<a href="' . $this->url->getPath() . '?id=' . $_GET['id'] .  '&amp;module=theme' . '"><button type="button">Back</button></a>');
-
-		$form->addButton('Submit', array(
-			'type' => 'submit'
-		));
-
-		return '<h2 class="icon icon-module-theme">New theme</h2>' . $message . $form->__toString();
-
-	}
-
-	/**
-	 *
-	 */
-	private function postEdit($id) {
-		$this->pdbc->query('UPDATE `module_theme`
-		                    SET `name` = "'. $this->pdbc->quote($_POST['name']) .'"
-		                    WHERE `id` = "'. $this->pdbc->quote($id) .'"');
-
-		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?id=' . $_GET['id'] .  '&module=theme', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
-	}
-
-	/**
-	 *
-	 */
-	private function getEdit($id, $message = '') {
-		$this->pdbc->query('SELECT `name`
+	private function overviewGet() {
+		$this->pdbc->query('SELECT `id`,`name`
 		                    FROM `module_theme`
-		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"');
+		                    ORDER BY `name` ASC');
 
-		$theme = $this->pdbc->fetch();
+		return $this->pdbc->fetchAll();
+	}
 
+	/**
+	 *
+	 */
+	private function overviewPage($fieldRow) {
+		$table = new \lib\html\HTMLTable();
+		$table->addHeaderRow(array('#','Name','Edit','Remove'));
+
+		foreach($fieldRow as $number => $field) {
+			$table->openRow();
+			$table->addColumn(++$number);
+			$table->addColumn($field['name']);
+			$table->addColumn('<a class="icon icon-edit" href="' . $this->url->getPath() . '?module=theme&amp;action=' . self::ACTION_EDIT . '&amp;id=' . $field['id'] . '"></a>');
+			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->getPath() . '?module=theme&amp;action=' . self::ACTION_REMOVE . '&amp;id=' . $field['id'] . '"></a>');
+			$table->closeRow();
+		}
+
+		return '<h2 class="icon icon-module-theme">Theme</h2>' . $table . '<p><a class="icon icon-new" href="' . $this->url->getPath() . '?module=theme&amp;action=' . self::ACTION_NEW . '">New theme</a></p>';
+	}
+
+	/**
+	 *
+	 */
+	private function newGet() {
+		return array(
+			'name' => '',
+			'message' => ''
+		);
+	}
+
+	/**
+	 *
+	 */
+	private function newPost() {
+		$field = $this->newGet();
+
+		// Check fields
+		if(!isset($_POST['name'])) {
+			$field['message'] = '<p class="msg-warning">Require name.</p>';
+			return $field;
+		}
+
+		$field['name'] = $_POST['name'];
+
+		// Update
+		try {
+			$this->pdbc->query('INSERT INTO `module_theme` (`name`) VALUES ("' . $this->pdbc->quote($field['name']) . '")');
+		} catch(\lib\pdbc\PDBCException $e) {
+			$field['message'] = '<p class="msg-error">This theme already exists. Please try again.</p>';
+			return $field;
+		}
+
+		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=theme', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+	}
+
+	/**
+	 *
+	 */
+	private function newPage($field) {
 		$form = new \lib\html\HTMLFormStacked();
 
 		$form->addInput('Name', array(
@@ -97,67 +117,125 @@ class Admin extends \lib\core\AbstractAdmin {
 			'id' => 'form-name',
 			'name' => 'name',
 			'placeholder' => 'Name',
-			'value' => $theme['name']
+			'value' => $field['name']
 		));
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?id=' . $_GET['id'] .  '&amp;module=theme' . '"><button type="button">Back</button></a>');
+		$form->addContent('<a href="' . $this->url->getPath() . '?module=theme"><button type="button">Back</button></a>');
 
 		$form->addButton('Submit', array(
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-theme">Edit theme</h2>' . $message . $form->__toString();
+		return '<h2 class="icon icon-module-theme">New theme</h2>' . $field['message'] . $form->__toString();
 	}
 
 	/**
 	 *
 	 */
-	private function postRemove($id) {
-		$this->pdbc->query('DELETE FROM `module_theme` WHERE `id` = "' . $this->pdbc->quote($id) .'"');
+	private function editGet($id) {
+		$this->pdbc->query('SELECT `name`
+		                    FROM `module_theme`
+		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"');
 
-		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?id=' . $_GET['id'] .  '&module=theme', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		return $this->pdbc->fetch() + array(
+			'message' => ''
+		);
 	}
 
 	/**
 	 *
 	 */
-	private function getRemove($id, $message = '') {
+	private function editPost($id) {
+		$field = $this->editGet($id);
+
+		// Check fields
+		if(!isset($_POST['name'])) {
+			$field['message'] = '<p class="msg-warning">Require name.</p>';
+			return $field;
+		}
+
+		// Check changes
+		if($field['name'] === $_POST['name']) {
+			return $field;
+		}
+
+		$field['name'] = $_POST['name'];
+
+		// Update
+		try {
+			$this->pdbc->query('UPDATE `module_theme` SET `name` = "'. $this->pdbc->quote($field['name']) .'" WHERE `id` = "'. $this->pdbc->quote($id) .'"');
+		} catch(\lib\pdbc\PDBCException $e) {
+			$field['message'] = '<p class="msg-error">This theme already exists. Please try again.</p>';
+			return $field;
+		}
+
+		$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
+		return $field;
+	}
+
+	/**
+	 *
+	 */
+	private function editPage($field) {
 		$form = new \lib\html\HTMLFormStacked();
 
-		$form->addContent('<label>Are you sure you want to remove this theme? This action can\'t be undone!</label>');
+		$form->addInput('Name', array(
+			'type' => 'text',
+			'id' => 'form-name',
+			'name' => 'name',
+			'placeholder' => 'Name',
+			'value' => $field['name']
+		));
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?id=' . $_GET['id'] .  '&amp;module=theme' . '"><button type="button">No</button></a>');
+		$form->addContent('<a href="' . $this->url->getPath() . '?module=theme' . '"><button type="button">Back</button></a>');
+
+		$form->addButton('Submit', array(
+			'type' => 'submit'
+		));
+
+		return '<h2 class="icon icon-module-theme">Edit theme</h2>' . $field['message'] . $form->__toString();
+	}
+
+	/**
+	 *
+	 */
+	private function removeGet($id) {
+		return array(
+			'message' => ''
+		);
+	}
+
+	/**
+	 *
+	 */
+	private function removePost($id) {
+		try {
+			$this->pdbc->query('DELETE FROM `module_theme` WHERE `id` = "' . $this->pdbc->quote($id) .'"');
+		} catch(\lib\pdbc\PDBCException $e) {
+			return array(
+				'message' => '<p class="msg-error">Can\'t remove a theme that is used. Please try again after removing the block, javascript, stylesheet & template that use this theme.</p>'
+			);
+		}
+
+		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=theme', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+	}
+
+	/**
+	 *
+	 */
+	private function removePage($field) {
+		$form = new \lib\html\HTMLFormStacked();
+		$list = new \lib\html\HTMLList();
+
+		$form->addContent('<p>Are you sure you want to remove this theme? This action can\'t be undone!</p>');
+
+		$form->addContent('<a href="' . $this->url->getPath() . '?module=theme' . '"><button type="button">No</button></a>');
 
 		$form->addButton('Yes', array(
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-theme">Remove theme</h2>' . $message . $form->__toString();
-	}
-
-	/**
-	 *
-	 */
-	private function getOverview() {
-		$this->pdbc->query('SELECT `id`,`name`
-		                    FROM `module_theme`
-		                    ORDER BY `id` ASC');
-
-		$themes = $this->pdbc->fetchAll();
-
-		$table = new \lib\html\HTMLTable();
-		$table->addHeaderRow(array('#','Name','Edit','Remove'));
-
-		foreach($themes as $test => $theme) {
-			$table->openRow();
-			$table->addColumn($theme['id']);
-			$table->addColumn($theme['name']);
-			$table->addColumn('<a class="icon icon-edit" href="' . $this->url->getPath() . '?id=' . $_GET['id'] . '&amp;module=theme&amp;action=' . self::ACTION_EDIT . '&amp;tid=' . $theme['id'] . '"></a>');
-			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->getPath() . '?id=' . $_GET['id'] . '&amp;module=theme&amp;action=' . self::ACTION_REMOVE . '&amp;tid=' . $theme['id'] . '"></a>');
-			$table->closeRow();
-		}
-
-		return '<h2 class="icon icon-module-theme">Theme</h2>' . $table . '<p><a class="icon icon-new" href="' . $this->url->getPath() . '?id=' . $_GET['id'] . '&amp;module=theme&amp;action=' . self::ACTION_NEW . '&amp;tid=0">New theme</a></p>';
+		return '<h2 class="icon icon-module-theme">Remove theme</h2>' . $field['message'] . $form->__toString();
 	}
 }
 

@@ -12,26 +12,33 @@ class Admin extends \lib\core\AbstractAdmin {
 	const ACTION_EDIT = 'edit';
 	const ACTION_REMOVE = 'remove';
 
+	const DEPTH_MARK = '&mdash; ';
+
 	public function run() {
-		$this->result = isset($_GET['action'], $_GET['tid']) ? $this->handleAction($_GET['action'], $_GET['tid']) : $this->getOverview();
-	}
+		if(!isset($_GET['action'])) {
+			$this->result = $this->overviewPage($this->overviewGet());
+			return;
+		}
 
-	/**
-	 *
-	 */
-	private function handleAction($action, $id) {
-		switch($action) {
+		switch($_GET['action']) {
 			case self::ACTION_NEW:
-				return $this->getNew($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postNew($id) : ''));
+				$this->result = $this->newPage($_SERVER['REQUEST_METHOD'] === 'POST' ? $this->newPost() : $this->newGet());
 			break;
+
 			case self::ACTION_EDIT:
-				return $this->getEdit($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postEdit($id) : ''));
+				if(isset($_GET['id'])) {
+					$this->result = $this->editPage($_SERVER['REQUEST_METHOD'] === 'POST' ? $this->editPost($_GET['id']) : $this->editGet($_GET['id']));
+				}
 			break;
+
 			case self::ACTION_REMOVE:
-				return $this->getRemove($id, ($_SERVER['REQUEST_METHOD'] == 'POST' ? $this->postRemove($id) : ''));
+				if(isset($_GET['id'])) {
+					$this->result = $this->removePage($_SERVER['REQUEST_METHOD'] === 'POST' ? $this->removePost($_GET['id']) : $this->removeGet($_GET['id']));
+				}
 			break;
+
 			default:
-				// TODO
+				throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=template', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 			break;
 		}
 	}
@@ -39,241 +46,479 @@ class Admin extends \lib\core\AbstractAdmin {
 	/**
 	 *
 	 */
-	private function postNew($id) {
-		$this->pdbc->query('INSERT IGNORE INTO `router` (`pid`,`index`,`name`,`uri`)
-		                    SELECT CASE COUNT(`r1`.`id`) WHEN 0 THEN NULL ELSE `r1`.`id` END,
-		                           MAX(`r2`.`index`) + 1,
-		                           "' . $this->pdbc->quote($_POST['name']) . '",
-		                           CONCAT(CASE COUNT(`r1`.`id`)
-		                                  WHEN 0 THEN "/"
-		                                  ELSE CASE `r1`.`root`
-		                                       WHEN 1 THEN CONCAT("/", LOWER(`r1`.`name`) ,"/")
-		                                       WHEN 0 THEN `r1`.`uri`
-		                                       END
-		                                  END,
-		                                  "' . strtolower($this->pdbc->quote($_POST['name'])) . '/")
-		                    FROM `router` AS `r1`, `router` AS `r2`
-		                    WHERE `r1`.`name` = "' . $this->pdbc->quote($_POST['parent']) . '"');
+	private function overviewGet() {
+		$this->pdbc->query('SELECT `id`, `name`, `depth`, `uri` FROM `router` ORDER BY `uri` ASC');
 
-		if(!$this->pdbc->rowCount()) {
-			return '<p class="msg-error">This page already exists. Please try again.</p>';
-		}
-
-		$this->pdbc->query('INSERT INTO `module_page` (`id_router`,`id_template`,`content`)
-		                    SELECT "' . $this->pdbc->insertID() . '",
-		                           `module_template`.`id`,
-		                           "' . $this->pdbc->quote($_POST['content']) . '"
-		                    FROM `module_template`
-		                    WHERE `module_template`.`name` = "' . $_POST['template'] . '"');
-
-		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?id=' . $_GET['id'] .  '&module=page', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		return $this->pdbc->fetchAll();
 	}
 
 	/**
 	 *
 	 */
-	private function getNew($id, $message = '') {
-		// Parents
-		$this->pdbc->query('SELECT `name` FROM `router`');
+	private function overviewPage($fieldRow) {
+		$table = new \lib\html\HTMLTable();
+		$table->addHeaderRow(array('#','Name','URI','Edit','Remove'));
 
-		$parents = array('');
+		foreach($fieldRow as $number => $field) {
+			$table->openRow();
+			$table->addColumn(++$number);
+			$table->addColumn($this->markDepth($field['name'], $field['depth']));
+			$table->addColumn($field['uri']);
+			$table->addColumn('<a class="icon icon-edit" href="' . $this->url->getPath() . '?module=page&amp;action=' . self::ACTION_EDIT . '&amp;id=' . $field['id'] . '"></a>');
+			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->getPath() . '?module=page&amp;action=' . self::ACTION_REMOVE . '&amp;id=' . $field['id'] . '"></a>');
+			$table->closeRow();
+		}
+
+		return '<h2 class="icon icon-module-page">Page</h2>' . $table . '<p><a class="icon icon-new" href="' . $this->url->getPath() . '?module=page&amp;action=' . self::ACTION_NEW . '">New page</a></p>';
+	}
+
+	/**
+	 *
+	 */
+	private function newGet() {
+		return array(
+			'parent' => '',
+			'index' => '0',
+			'name' => '',
+			'content' => '',
+			'template' => '',
+			'message' => ''
+		);
+	}
+
+	/**
+	 *
+	 */
+	private function newPost() {
+		$field = $this->newGet();
+
+		// Check fields
+		if(!isset($_POST['parent'], $_POST['index'], $_POST['name'], $_POST['content'], $_POST['template'])) {
+			$field['message'] = '<p class="msg-warning">Require parent, index, name, content & template.</p>';
+			return $field;
+		}
+
+		$field = array(
+			'parent' => $_POST['parent'],
+			'index' => $_POST['index'],
+			'name' => $_POST['name'],
+			'content' => $_POST['content'],
+			'template' => $_POST['template']
+		);
+
+		// Begin transaction
+		$this->pdbc->transactionBegin();
+
+		// Insert router
+		try {
+			$this->pdbc->query('INSERT INTO `router` (`pid`, `index`, `name`)
+			                    VALUES (NULLIF("' . $this->pdbc->quote($field['parent']) . '", 0),
+			                                   "' . $this->pdbc->quote($field['index']) . '",
+			                                   "' . $this->pdbc->quote($field['name']) . '")');
+		} catch(\lib\pdbc\PDBCException $e) {
+			$this->pdbc->transactionRollBack();
+			$field['message'] = '<p class="msg-error">This page already exists. Please try again.</p>';
+			return $field;
+		}
+
+		// Insert hierarchy
+		$insertID = $this->pdbc->insertID();
+
+		try {
+			$this->updateRouter($insertID);
+		} catch(\lib\pdbc\PDBCException $e) {
+			$this->pdbc->transactionRollBack();
+			$field['message'] = '<p class="msg-error">This URI already exists. Please try again.</p>';
+			return $field;
+		}
+
+		// Insert page
+		try {
+			$this->pdbc->query('INSERT INTO `module_page` (`id_router`,`id_template`,`content`)
+			                    SELECT "' . $insertID . '",
+			                           `id`,
+			                           "' . $this->pdbc->quote($field['content']) . '"
+			                    FROM `module_template`
+			                    WHERE `id` = "' . $this->pdbc->quote($field['template']) . '"');
+		} catch(\lib\pdbc\PDBCException $e) {
+			$this->pdbc->transactionRollBack();
+			$field['message'] = '<p class="msg-error">Template doesn\'t exists. Please try again.</p>';
+			return $field;
+		}
+
+		// Commit transaction
+		$this->pdbc->transactionCommit();
+
+		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=page', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+	}
+
+	/**
+	 *
+	 */
+	private function newPage($field) {
+		// Parents
+		$this->pdbc->query('SELECT `id`, `name`, `depth` FROM `router` WHERE `id`  ORDER BY `uri` ASC');
+
+		$parents = array('None' => array('value' => 0));
 
 		while($parent = $this->pdbc->fetch()) {
-			$parents[] = $parent['name'];
+			$name = $this->markDepth($parent['name'], $parent['depth']);
+			$value = array(
+				'value' => $parent['id']
+			);
+
+			if($parent['id'] === $field['parent']) {
+				$x['selected'] = 'selected';
+			}
+
+			$parents[$name] = $value;
 		}
 
 		// Templates
-		$this->pdbc->query('SELECT `name` FROM `module_template`');
+		$this->pdbc->query('SELECT `id`, `name` FROM `module_template` ORDER BY `id`');
 
 		$templates = array();
 
 		while($template = $this->pdbc->fetch()) {
-			$templates[] = $template['name'];
+			$value = ['value' => $template['id']];
+
+			if($template['id'] === $field['template']) {
+				$value['selected'] = 'selected';
+			}
+
+			$templates[$template['name']] = $value;
 		}
 
 		// Form
 		$form = new \lib\html\HTMLFormStacked();
 
-		$form->addInput('Name', array(
-			'type' => 'text',
-			'id' => 'form-name',
-			'name' => 'name',
-			'placeholder' => 'Name'
-		));
-
-		$form->addSelect('Parent', $parents, array(
-			'id' => 'form-parent',
-			'name' => 'parent'
-		));
-
-		$form->addTextarea('Content', '', array(
-			'id' => 'form-content',
-			'name' => 'content',
-			'placeholder' => 'Content'
-		));
-
-		$form->addSelect('Template', $templates, array(
-			'id' => 'form-template',
-			'name' => 'template'
-		));
-
-		$form->addContent('<a href="' . $this->url->getPath() . '?id=' . $_GET['id'] .  '&amp;module=page' . '"><button type="button">Back</button></a>');
-
-		$form->addButton('Submit', array(
-			'type' => 'submit'
-		));
-
-		return '<h2 class="icon icon-module-page">New page</h2>' . $message . $form->__toString();
-
-	}
-
-	/**
-	 *
-	 */
-	private function postEdit($id) {
-		$this->pdbc->query('UPDATE `module_page`
-		                    SET `content` = "'. $this->pdbc->quote($_POST['content']) .'"
-		                    WHERE `id` = "'. $this->pdbc->quote($id) .'"');
-
-		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?id=' . $_GET['id'] .  '&module=page', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
-	}
-
-	/**
-	 *
-	 */
-	private function getEdit($id, $message = '') {
-		// Parents
-		$this->pdbc->query('SELECT `name` FROM `router`');
-
-		$parents = array('');
-
-		while($parent = $this->pdbc->fetch()) {
-			$parents[] = $parent['name'];
-		}
-
-		// Templates
-		$this->pdbc->query('SELECT `name` FROM `module_template`');
-
-		$templates = array();
-
-		while($template = $this->pdbc->fetch()) {
-			$templates[] = $template['name'];
-		}
-
-		// Edit
-		$this->pdbc->query('SELECT `module_page`.`content`, `router`.`name`, `router`.`uri`
-		                    FROM `module_page`
-		                    LEFT JOIN (SELECT `id`,`name`,`uri`
-		                               FROM `router`) AS `router`
-		                    ON `module_page`.`id_router` = `router`.`id`
-		                    WHERE `module_page`.`id` = "' . $this->pdbc->quote($id) . '"');
-
-		$page = $this->pdbc->fetch();
-
-		// Form
-		$form = new \lib\html\HTMLFormStacked();
+		// Page
+		$form->openFieldset('Page');
 
 		$form->addInput('Name', array(
 			'type' => 'text',
 			'id' => 'form-name',
 			'name' => 'name',
 			'placeholder' => 'Name',
-			'value' => $page['name']
+			'value' => $field['name']
 		));
+
+		$form->addTextarea('Content', $field['content'], array(
+			'id' => 'form-content',
+			'name' => 'content',
+			'placeholder' => 'Content'
+		));
+
+		$form->closeFieldset();
+
+		// Hierarchy
+		$form->openFieldset('Hierarchy');
 
 		$form->addSelect('Parent', $parents, array(
 			'id' => 'form-parent',
 			'name' => 'parent'
 		));
 
-		$form->addInput('Uri', array(
-			'type' => 'text',
-			'id' => 'form-uri',
-			'name' => 'uri',
-			'placeholder' => 'Uri',
-			'value' => $page['uri'],
-			'disabled' => 'disabled'
+		$form->addInput('Index', array(
+			'type' => 'number',
+			'id' => 'form-index',
+			'name' => 'index',
+			'placeholder' => 'Index',
+			'value' => $field['index']
 		));
 
-		$form->addTextarea('Content', $page['content'], array(
-			'id' => 'form-content',
-			'name' => 'content',
-			'placeholder' => 'Content'
-		));
+		$form->closeFieldset();
+
+		// Style
+		$form->openFieldset('Style');
 
 		$form->addSelect('Template', $templates, array(
 			'id' => 'form-template',
 			'name' => 'template'
 		));
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?id=' . $_GET['id'] .  '&amp;module=page' . '"><button type="button">Back</button></a>');
+		$form->closeFieldset();
+
+		$form->addContent('<a href="' . $this->url->getPath() . '?module=page' . '"><button type="button">Back</button></a>');
 
 		$form->addButton('Submit', array(
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-page">Edit page</h2>' . $message . $form->__toString();
+		return '<h2 class="icon icon-module-page">New page</h2>' . $field['message'] . $form->__toString();
 	}
 
 	/**
 	 *
 	 */
-	private function postRemove($id) {
-		$this->pdbc->query('DELETE FROM `router` 
-		                    WHERE `id` = (SELECT `id_router`
-		                                  FROM `module_page`
-						  WHERE `id` = "' . $this->pdbc->quote($id) . '")');
+	private function editGet($id) {
+		$this->pdbc->query('SELECT `router`.`pid` as `parent`,
+		                           `router`.`index`,
+		                           `router`.`name`,
+		                           `module_page`.`content`,
+		                           `module_page`.`id_template` as `template`
+		                    FROM `router`
+		                    LEFT JOIN `module_page`
+		                    ON `router`.`id` = `module_page`.`id_router`
+		                    WHERE `router`.`id` = "' . $this->pdbc->quote($id) . '"');
 
-		if(!$this->pdbc->rowCount()) {
+		return $this->pdbc->fetch() + array(
+			'message' => ''
+		);
+	}
 
+	/**
+	 *
+	 */
+	private function editPost($id) {
+		$oldField = $this->editGet($id);
+
+		// Check fields
+		if(!isset($_POST['parent'], $_POST['index'], $_POST['name'], $_POST['content'], $_POST['template'])) {
+			$oldField['message'] = '<p class="msg-warning">Require parent, index, name, content & template.</p>';
+			return $oldField;
 		}
 
-		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?id=' . $_GET['id'] .  '&module=page', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		$field = array(
+			'parent' => $_POST['parent'],
+			'index' => $_POST['index'],
+			'name' => $_POST['name'],
+			'content' => $_POST['content'],
+			'template' => $_POST['template'],
+			'message' => ''
+		);
+
+		// Check changes
+		if($field['parent'] != $oldField['parent'] || $field['index'] != $oldField['index'] || $field['name'] != $oldField['name']) {
+			// Begin transaction
+			$this->pdbc->transactionBegin();
+
+			// Update router
+			try {
+				$this->pdbc->query('UPDATE `router`
+				                    SET `pid` = NULLIF("' . $this->pdbc->quote($field['parent']) . '", 0),
+				                        `index` = "' . $this->pdbc->quote($field['index']) . '",
+				                        `name` = "' . $this->pdbc->quote($field['name']) . '"
+				                    WHERE `id` = "'. $this->pdbc->quote($id) . '"');
+			} catch(\lib\pdbc\PDBCException $e) {
+				$this->pdbc->transactionRollBack();
+				$field['message'] = '<p class="msg-error">This page already exists. Please try again.</p>';
+				return $field;
+			}
+
+			// Update hierarchy
+			try {
+				$this->updateRouter($id);
+			} catch(\lib\pdbc\PDBCException $e) {
+				$this->pdbc->transactionRollBack();
+				$field['message'] = '<p class="msg-error">This URI already exists. Please try again.</p>';
+				return $field;
+			}
+
+			$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
+
+			// Commit transaction
+			$this->pdbc->transactionCommit();
+		}
+
+		// Check changes
+		if($field['content'] != $oldField['content'] || $field['template'] != $oldField['template']) {
+			// Update page
+			try {
+				$this->pdbc->query('INSERT INTO `module_page` (`id_router`,`id_template`,`content`)
+				                    SELECT "' . $insertID . '",
+				                           `id`,
+				                           "' . $this->pdbc->quote($field['content']) . '"
+				                    FROM `module_template`
+				                    WHERE `id` = "' . $this->pdbc->quote($field['template']) . '"');
+			} catch(\lib\pdbc\PDBCException $e) {
+				$field['message'] = '<p class="msg-error">Template doesn\'t exists. Please try again.</p>';
+				return $field;
+			}
+
+			$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
+		}
+
+		return $field;
 	}
 
 	/**
 	 *
 	 */
-	private function getRemove($id, $message = '') {
+	private function editPage($field) {
+		// Parents
+		$this->pdbc->query('SELECT `id`, `name`, `depth` FROM `router` ORDER BY `uri` ASC');
+
+		$parents = array('None' => array('value' => 0));
+
+		while($parent = $this->pdbc->fetch()) {
+			$name = $this->markDepth($parent['name'], $parent['depth']);
+			$value = array(
+				'value' => $parent['id']
+			);
+
+			if($parent['id'] === $field['parent']) {
+				$value['selected'] = 'selected';
+			}
+
+			$parents[$name] = $value;
+		}
+
+		// Templates
+		$this->pdbc->query('SELECT `id`, `name` FROM `module_template` ORDER BY `id` ASC');
+
+		$templates = array();
+
+		while($template = $this->pdbc->fetch()) {
+			$value = array(
+				'value' => $template['id']
+			);
+
+			if($template['id'] === $field['template']) {
+				$value['selected'] = 'selected';
+			}
+
+			$templates[$template['name']] = $value;
+		}
+
+		// Form
 		$form = new \lib\html\HTMLFormStacked();
 
-		$form->addContent('<label>Are you sure you want to remove this page? This action can\'t be undone!</label>');
+		// Page
+		$form->openFieldset('Page');
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?id=' . $_GET['id'] .  '&amp;module=page' . '"><button type="button">No</button></a>');
+		$form->addInput('Name', array(
+			'type' => 'text',
+			'id' => 'form-name',
+			'name' => 'name',
+			'placeholder' => 'Name',
+			'value' => $field['name']
+		));
+
+		$form->addTextarea('Content', $field['content'], array(
+			'id' => 'form-content',
+			'name' => 'content',
+			'placeholder' => 'Content'
+		));
+
+		$form->closeFieldset();
+
+		// Hierarchy
+		$form->openFieldset('Hierarchy');
+
+		$form->addSelect('Parent', $parents, array(
+			'id' => 'form-parent',
+			'name' => 'parent'
+		));
+
+		$form->addInput('Index', array(
+			'type' => 'number',
+			'id' => 'form-index',
+			'name' => 'index',
+			'placeholder' => 'Index',
+			'value' => $field['index']
+		));
+
+		$form->closeFieldset();
+
+		// Style
+		$form->openFieldset('Style');
+
+		$form->addSelect('Template', $templates, array(
+			'id' => 'form-template',
+			'name' => 'template'
+		));
+
+		$form->closeFieldset();
+
+		$form->addContent('<a href="' . $this->url->getPath() . '?module=page' . '"><button type="button">Back</button></a>');
+
+		$form->addButton('Submit', array(
+			'type' => 'submit'
+		));
+
+		return '<h2 class="icon icon-module-page">Edit page</h2>' . $field['message'] . $form->__toString();
+	}
+
+	/**
+	 *
+	 */
+	private function removeGet($id) {
+		return array(
+			'message' => ''
+		);
+	}
+
+	/**
+	 *
+	 */
+	private function removePost($id) {
+		try {
+			$this->pdbc->query('DELETE FROM `router` WHERE `id` = "' . $this->pdbc->quote($id) . '"');
+		} catch(\lib\pdbc\PDBCException $e) {
+			return array(
+				'message' => '<p class="msg-error">Can\'t remove a page with children. Please try again after removing the children.</p>'
+			);
+		}
+
+		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=page', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+	}
+
+	/**
+	 *
+	 */
+	private function removePage($field) {
+		$form = new \lib\html\HTMLFormStacked();
+
+		$form->addContent('<p>Are you sure you want to remove this page? This action can\'t be undone!</p>');
+
+		$form->addContent('<a href="' . $this->url->getPath() . '?module=page' . '"><button type="button">No</button></a>');
 
 		$form->addButton('Yes', array(
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-page">Remove page</h2>' . $message . $form->__toString();
+		return '<h2 class="icon icon-module-template">Remove page</h2>' . $field['message'] . $form->__toString();
 	}
 
 	/**
 	 *
 	 */
-	private function getOverview() {
-		$this->pdbc->query('SELECT `module_page`.`id`, `router`.`name`, `router`.`uri`
-		                    FROM `module_page`
-		                    LEFT JOIN (SELECT `id`,`name`,`uri`
-		                               FROM `router`) AS `router`
-		                    ON `module_page`.`id_router` = `router`.`id`');
+	private function updateRouter($id) {
+		// Update router
+		$this->pdbc->query('UPDATE `router`
+		                    LEFT JOIN `router` as `parent`
+		                    ON `router`.`pid` = `parent`.`id`
+		                    SET `router`.`depth` = CASE WHEN `router`.`pid` IS NULL THEN 0 ELSE `parent`.`depth` + 1 END,
+		                        `router`.`uri` = CONCAT(CASE WHEN `router`.`pid` IS NULL
+		                                                THEN "/"
+		                                                ELSE CASE `parent`.`root`
+		                                                     WHEN 0 THEN `parent`.`uri`
+		                                                     ELSE CONCAT("/", REPLACE(LOWER(`router`.`name`), " ", "-"), "/")
+		                                                     END
+		                                                END,
+		                                                REPLACE(LOWER(`router`.`name`), " ", "-"), "/")
+		                    WHERE `router`.`id` = "' . $this->pdbc->quote($id) . '"');
 
-		$pages = $this->pdbc->fetchAll();
+		// Select children
+		$this->pdbc->query('SELECT `id` FROM `router` as `r1` WHERE `pid` = "' . $this->pdbc->quote($id) . '"');
 
-		$table = new \lib\html\HTMLTable();
-		$table->addHeaderRow(array('#','Name','Uri','Edit','Remove'));
+		foreach($this->pdbc->fetchAll() as $child) {
+			!$this->updateRouter($child['id']);
+		}
+	}
 
-		foreach($pages as $test => $page) {
-			$table->openRow();
-			$table->addColumn($page['id']);
-			$table->addColumn($page['name']);
-			$table->addColumn($page['uri']);
-			$table->addColumn('<a class="icon icon-edit" href="' . $this->url->getPath() . '?id=' . $_GET['id'] . '&amp;module=page&amp;action=' . self::ACTION_EDIT . '&amp;tid=' . $page['id'] . '"></a>');
-			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->getPath() . '?id=' . $_GET['id'] . '&amp;module=page&amp;action=' . self::ACTION_REMOVE . '&amp;tid=' . $page['id'] . '"></a>');
-			$table->closeRow();
+	/**
+	 *
+	 */
+	private function markDepth($name, $depth) {
+		$result = $name;
+
+		for($i = 0; $i < $depth; $i++) {
+			$result = self::DEPTH_MARK . $result;
 		}
 
-		return '<h2 class="icon icon-module-page">Page</h2>' . $table . '<p><a class="icon icon-new" href="' . $this->url->getPath() . '?id=' . $_GET['id'] . '&amp;module=page&amp;action=' . self::ACTION_NEW . '&amp;tid=0">New page</a></p>';
+		return $result;
 	}
 }
 
