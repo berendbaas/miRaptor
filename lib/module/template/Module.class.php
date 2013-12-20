@@ -22,7 +22,13 @@ class Module extends \lib\core\AbstractModule {
 		                    WHERE `page`.`id_router` = "' . $this->pdbc->quote($this->routerID) . '"
 		                    LIMIT 1');
 
-		$this->result = end($this->pdbc->fetch());
+		$template = $this->pdbc->fetch();
+
+		if($template === NULL) {
+			throw new \lib\core\ModuleException('Does not exists.');
+		}
+
+		$this->result = end($template);
 	}
 }
 
