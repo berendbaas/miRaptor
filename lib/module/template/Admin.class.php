@@ -91,6 +91,7 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	private function newPost() {
+	var_dump($_POST);
 		$field = $this->newGet();
 
 		// Check fields
@@ -121,30 +122,30 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	private function newPage($field) {
+		// Form
+		$form = new \lib\html\HTMLFormStacked();
+
 		// Get themes
 		$this->pdbc->query('SELECT `id`,`name` FROM `module_theme` ORDER BY `name`');
 
-		$themes = array();
+		$form->openSelect('Theme', array(
+			'id' => 'form-theme',
+			'name' => 'theme'
+		));
 
 		while($theme = $this->pdbc->fetch()) {
-			$value = array(
+			$attributes = array(
 				'value' => $theme['id']
 			);
 
 			if($theme['id'] !== $field['theme']) {
-				$value['selected'] = 'selected';
+				$attributes['selected'] = 'selected';
 			}
 
-			$themes[$theme['name']] = $value;
+			$form->addOption($theme['name'], $attributes);
 		}
 
-		// Form
-		$form = new \lib\html\HTMLFormStacked();
-
-		$form->addSelect('Theme', $themes, array(
-			'id' => 'form-theme',
-			'name' => 'theme'
-		));
+		$form->closeSelect();
 
 		$form->addInput('Name', array(
 			'type' => 'text',
@@ -166,7 +167,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-template">Edit template</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-module-template">New template</h2>' . $field['message'] . $form->__toString();
 	}
 
 	/**
@@ -223,31 +224,30 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	private function editPage($field) {
-		// Get themes
-		$this->pdbc->query('SELECT `id`,`name` FROM `module_theme`');
-
-		$themes = array();
-
-		while($theme = $this->pdbc->fetch()) {
-			if($theme['id'] !== $field['theme']) {
-				$themes[$theme['name']] = array(
-					'value' => $theme['id']
-				);
-			} else {
-				$themes[$theme['name']] = array(
-					'value' => $theme['id'],
-					'selected' => 'selected'
-				);
-			}
-		}
-
 		// Form
 		$form = new \lib\html\HTMLFormStacked();
 
-		$form->addSelect('Theme', $themes, array(
+		// Get themes
+		$this->pdbc->query('SELECT `id`,`name` FROM `module_theme` ORDER BY `name`');
+
+		$form->openSelect('Theme', array(
 			'id' => 'form-theme',
 			'name' => 'theme'
 		));
+
+		while($theme = $this->pdbc->fetch()) {
+			$attributes = array(
+				'value' => $theme['id']
+			);
+
+			if($theme['id'] !== $field['theme']) {
+				$attributes['selected'] = 'selected';
+			}
+
+			$form->addOption($theme['name'], $attributes);
+		}
+
+		$form->closeSelect();
 
 		$form->addInput('Name', array(
 			'type' => 'text',

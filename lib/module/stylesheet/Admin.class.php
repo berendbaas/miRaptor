@@ -121,31 +121,30 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	private function newPage($field) {
-		// Get themes
-		$this->pdbc->query('SELECT `id`,`name` FROM `module_theme`');
-
-		$themes = array();
-
-		while($theme = $this->pdbc->fetch()) {
-			if($theme['id'] !== $field['theme']) {
-				$themes[$theme['name']] = array(
-					'value' => $theme['id']
-				);
-			} else {
-				$themes[$theme['name']] = array(
-					'value' => $theme['id'],
-					'selected' => 'selected'
-				);
-			}
-		}
-
 		// Form
 		$form = new \lib\html\HTMLFormStacked();
 
-		$form->addSelect('Theme', $themes, array(
+		// Get themes
+		$this->pdbc->query('SELECT `id`,`name` FROM `module_theme` ORDER BY `name`');
+
+		$form->openSelect('Theme', array(
 			'id' => 'form-theme',
 			'name' => 'theme'
 		));
+
+		while($theme = $this->pdbc->fetch()) {
+			$attributes = array(
+				'value' => $theme['id']
+			);
+
+			if($theme['id'] !== $field['theme']) {
+				$attributes['selected'] = 'selected';
+			}
+
+			$form->addOption($theme['name'], $attributes);
+		}
+
+		$form->closeSelect();
 
 		$form->addInput('Name', array(
 			'type' => 'text',
@@ -224,31 +223,30 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	private function editPage($field) {
-		// Get themes
-		$this->pdbc->query('SELECT `id`,`name` FROM `module_theme`');
-
-		$themes = array();
-
-		while($theme = $this->pdbc->fetch()) {
-			if($theme['id'] !== $field['theme']) {
-				$themes[$theme['name']] = array(
-					'value' => $theme['id']
-				);
-			} else {
-				$themes[$theme['name']] = array(
-					'value' => $theme['id'],
-					'selected' => 'selected'
-				);
-			}
-		}
-
 		// Form
 		$form = new \lib\html\HTMLFormStacked();
 
-		$form->addSelect('Theme', $themes, array(
+		// Get themes
+		$this->pdbc->query('SELECT `id`,`name` FROM `module_theme` ORDER BY `name`');
+
+		$form->openSelect('Theme', array(
 			'id' => 'form-theme',
 			'name' => 'theme'
 		));
+
+		while($theme = $this->pdbc->fetch()) {
+			$attributes = array(
+				'value' => $theme['id']
+			);
+
+			if($theme['id'] !== $field['theme']) {
+				$attributes['selected'] = 'selected';
+			}
+
+			$form->addOption($theme['name'], $attributes);
+		}
+
+		$form->closeSelect();
 
 		$form->addInput('Name', array(
 			'type' => 'text',

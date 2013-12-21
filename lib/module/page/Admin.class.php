@@ -156,40 +156,6 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	private function newPage($field) {
-		// Parents
-		$this->pdbc->query('SELECT `id`, `name`, `depth` FROM `router` ORDER BY `uri` ASC');
-
-		$parents = array('' => array('value' => 0));
-		$number = 1;
-
-		while($parent = $this->pdbc->fetch()) {
-			$name = $number++ . '. ' . $this->markDepth($parent['name'], $parent['depth']);
-			$value = array(
-				'value' => $parent['id']
-			);
-
-			if($parent['id'] === $field['parent']) {
-				$value['selected'] = 'selected';
-			}
-
-			$parents[$name] = $value;
-		}
-
-		// Templates
-		$this->pdbc->query('SELECT `id`, `name` FROM `module_template` ORDER BY `id`');
-
-		$templates = array();
-
-		while($template = $this->pdbc->fetch()) {
-			$value = ['value' => $template['id']];
-
-			if($template['id'] === $field['template']) {
-				$value['selected'] = 'selected';
-			}
-
-			$templates[$template['name']] = $value;
-		}
-
 		// Form
 		$form = new \lib\html\HTMLFormStacked();
 
@@ -215,10 +181,31 @@ class Admin extends \lib\core\AbstractAdmin {
 		// Hierarchy
 		$form->openFieldset('Hierarchy');
 
-		$form->addSelect('Parent', $parents, array(
+		// Get parents
+		$this->pdbc->query('SELECT `id`, `name`, `depth` FROM `router` ORDER BY `uri` ASC');
+		$number = 1;
+
+		$form->openSelect('Parent', array(
 			'id' => 'form-parent',
 			'name' => 'parent'
 		));
+
+		$form->addOption('', array('value' => 0));
+
+		while($parent = $this->pdbc->fetch()) {
+			$name = $number++ . '. ' . $this->markDepth($parent['name'], $parent['depth']);
+			$attributes = array(
+				'value' => $parent['id']
+			);
+
+			if($parent['id'] === $field['parent']) {
+				$attributes['selected'] = 'selected';
+			}
+
+			$form->addOption($name, $attributes);
+		}
+
+		$form->closeSelect();
 
 		$form->addInput('Index', array(
 			'type' => 'number',
@@ -233,10 +220,25 @@ class Admin extends \lib\core\AbstractAdmin {
 		// Style
 		$form->openFieldset('Style');
 
-		$form->addSelect('Template', $templates, array(
+		// Get templates
+		$this->pdbc->query('SELECT `id`, `name` FROM `module_template` ORDER BY `name` ASC');
+
+		$form->openSelect('Template', array(
 			'id' => 'form-template',
 			'name' => 'template'
 		));
+
+		while($template = $this->pdbc->fetch()) {
+			$attributes = ['value' => $template['id']];
+
+			if($template['id'] === $field['template']) {
+				$attributes['selected'] = 'selected';
+			}
+
+			$form->addOption($template['name'], $attributes);
+		}
+
+		$form->closeSelect();
 
 		$form->closeFieldset();
 
@@ -347,42 +349,6 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	private function editPage($field) {
-		// Parents
-		$this->pdbc->query('SELECT `id`, `name`, `depth` FROM `router` WHERE `uri` NOT LIKE "' . $field['uri'] . '%" ORDER BY `uri` ASC');
-
-		$parents = array('' => array('value' => 0));
-		$number = 1;
-
-		while($parent = $this->pdbc->fetch()) {
-			$name = $number++ . '. ' . $this->markDepth($parent['name'], $parent['depth']);
-			$value = array(
-				'value' => $parent['id']
-			);
-
-			if($parent['id'] === $field['parent']) {
-				$value['selected'] = 'selected';
-			}
-
-			$parents[$name] = $value;
-		}
-
-		// Templates
-		$this->pdbc->query('SELECT `id`, `name` FROM `module_template` ORDER BY `id` ASC');
-
-		$templates = array();
-
-		while($template = $this->pdbc->fetch()) {
-			$value = array(
-				'value' => $template['id']
-			);
-
-			if($template['id'] === $field['template']) {
-				$value['selected'] = 'selected';
-			}
-
-			$templates[$template['name']] = $value;
-		}
-
 		// Form
 		$form = new \lib\html\HTMLFormStacked();
 
@@ -408,10 +374,31 @@ class Admin extends \lib\core\AbstractAdmin {
 		// Hierarchy
 		$form->openFieldset('Hierarchy');
 
-		$form->addSelect('Parent', $parents, array(
+		// Get parents
+		$this->pdbc->query('SELECT `id`, `name`, `depth` FROM `router` WHERE `uri` NOT LIKE "' . $field['uri'] . '%" ORDER BY `uri` ASC');
+		$number = 1;
+
+		$form->openSelect('Parent', array(
 			'id' => 'form-parent',
 			'name' => 'parent'
 		));
+
+		$form->addOption('', array('value' => 0));
+
+		while($parent = $this->pdbc->fetch()) {
+			$name = $number++ . '. ' . $this->markDepth($parent['name'], $parent['depth']);
+			$attributes = array(
+				'value' => $parent['id']
+			);
+
+			if($parent['id'] === $field['parent']) {
+				$attributes['selected'] = 'selected';
+			}
+
+			$form->addOption($name, $attributes);
+		}
+
+		$form->closeSelect();
 
 		$form->addInput('Index', array(
 			'type' => 'number',
@@ -426,10 +413,25 @@ class Admin extends \lib\core\AbstractAdmin {
 		// Style
 		$form->openFieldset('Style');
 
-		$form->addSelect('Template', $templates, array(
+		// Get templates
+		$this->pdbc->query('SELECT `id`, `name` FROM `module_template` ORDER BY `name` ASC');
+
+		$form->openSelect('Template', array(
 			'id' => 'form-template',
 			'name' => 'template'
 		));
+
+		while($template = $this->pdbc->fetch()) {
+			$attributes = ['value' => $template['id']];
+
+			if($template['id'] === $field['template']) {
+				$attributes['selected'] = 'selected';
+			}
+
+			$form->addOption($template['name'], $attributes);
+		}
+
+		$form->closeSelect();
 
 		$form->closeFieldset();
 
