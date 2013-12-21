@@ -51,10 +51,12 @@ class Mysqli implements PDBC {
 
 	public function transactionCommit() {
 		$this->mysqli->commit();
+		$this->mysqli->autocommit(TRUE);
 	}
 
 	public function transactionRollBack() {
 		$this->mysqli->rollback();
+		$this->mysqli->autocommit(TRUE);
 	}
 
 	public function quote($string) {

@@ -157,18 +157,19 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	private function newPage($field) {
 		// Parents
-		$this->pdbc->query('SELECT `id`, `name`, `depth` FROM `router` WHERE `id`  ORDER BY `uri` ASC');
+		$this->pdbc->query('SELECT `id`, `name`, `depth` FROM `router` ORDER BY `uri` ASC');
 
-		$parents = array('None' => array('value' => 0));
+		$parents = array('' => array('value' => 0));
+		$number = 1;
 
 		while($parent = $this->pdbc->fetch()) {
-			$name = $this->markDepth($parent['name'], $parent['depth']);
+			$name = $number++ . '. ' . $this->markDepth($parent['name'], $parent['depth']);
 			$value = array(
 				'value' => $parent['id']
 			);
 
 			if($parent['id'] === $field['parent']) {
-				$x['selected'] = 'selected';
+				$value['selected'] = 'selected';
 			}
 
 			$parents[$name] = $value;
@@ -255,6 +256,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		$this->pdbc->query('SELECT `router`.`pid` as `parent`,
 		                           `router`.`index`,
 		                           `router`.`name`,
+					   `router`.`uri`,
 		                           `module_page`.`content`,
 		                           `module_page`.`id_template` as `template`
 		                    FROM `router`
@@ -280,9 +282,10 @@ class Admin extends \lib\core\AbstractAdmin {
 		}
 
 		$field = array(
-			'parent' => $_POST['parent'],
+			'parent' => $_POST['parent'] == 0 ? NULL : $_POST['parent'],
 			'index' => $_POST['index'],
 			'name' => $_POST['name'],
+			'uri' => $oldField['uri'],
 			'content' => $_POST['content'],
 			'template' => $_POST['template'],
 			'message' => ''
@@ -325,12 +328,10 @@ class Admin extends \lib\core\AbstractAdmin {
 		if($field['content'] != $oldField['content'] || $field['template'] != $oldField['template']) {
 			// Update page
 			try {
-				$this->pdbc->query('INSERT INTO `module_page` (`id_router`,`id_template`,`content`)
-				                    SELECT "' . $insertID . '",
-				                           `id`,
-				                           "' . $this->pdbc->quote($field['content']) . '"
-				                    FROM `module_template`
-				                    WHERE `id` = "' . $this->pdbc->quote($field['template']) . '"');
+				$this->pdbc->query('UPDATE `module_page`
+				                    SET `id_template` = "' . $this->pdbc->quote($field['template']) . '",
+				                        `content` = "' . $this->pdbc->quote($field['content']) . '"
+				                    WHERE `id_router` = "'. $this->pdbc->quote($id) . '"');
 			} catch(\lib\pdbc\PDBCException $e) {
 				$field['message'] = '<p class="msg-error">Template doesn\'t exists. Please try again.</p>';
 				return $field;
@@ -347,12 +348,13 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	private function editPage($field) {
 		// Parents
-		$this->pdbc->query('SELECT `id`, `name`, `depth` FROM `router` ORDER BY `uri` ASC');
+		$this->pdbc->query('SELECT `id`, `name`, `depth` FROM `router` WHERE `uri` NOT LIKE "' . $field['uri'] . '%" ORDER BY `uri` ASC');
 
-		$parents = array('None' => array('value' => 0));
+		$parents = array('' => array('value' => 0));
+		$number = 1;
 
 		while($parent = $this->pdbc->fetch()) {
-			$name = $this->markDepth($parent['name'], $parent['depth']);
+			$name = $number++ . '. ' . $this->markDepth($parent['name'], $parent['depth']);
 			$value = array(
 				'value' => $parent['id']
 			);
@@ -490,14 +492,17 @@ class Admin extends \lib\core\AbstractAdmin {
 		                    LEFT JOIN `router` as `parent`
 		                    ON `router`.`pid` = `parent`.`id`
 		                    SET `router`.`depth` = CASE WHEN `router`.`pid` IS NULL THEN 0 ELSE `parent`.`depth` + 1 END,
-		                        `router`.`uri` = CONCAT(CASE WHEN `router`.`pid` IS NULL
-		                                                THEN "/"
-		                                                ELSE CASE `parent`.`root`
-		                                                     WHEN 0 THEN `parent`.`uri`
-		                                                     ELSE CONCAT("/", REPLACE(LOWER(`router`.`name`), " ", "-"), "/")
-		                                                     END
-		                                                END,
-		                                                REPLACE(LOWER(`router`.`name`), " ", "-"), "/")
+		                        `router`.`uri` = CASE `router`.`root` WHEN 1
+		                                         THEN "/"
+		                                         ELSE CONCAT(CASE WHEN `router`.`pid` IS NULL
+		                                                     THEN "/"
+		                                                     ELSE CASE `parent`.`root`
+		                                                          WHEN 0 THEN `parent`.`uri`
+		                                                          ELSE CONCAT("/", REPLACE(LOWER(`router`.`name`), " ", "-"), "/")
+		                                                          END
+		                                                     END,
+		                                                     REPLACE(LOWER(`router`.`name`), " ", "-"), "/")
+		                                         END
 		                    WHERE `router`.`id` = "' . $this->pdbc->quote($id) . '"');
 
 		// Select children

@@ -45,12 +45,12 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	private function overviewGet() {
-		$this->pdbc->query('SELECT `module_javascript`.`id`, `module_javascript`.`name`, `theme`.`name` AS `theme`
-		                    FROM `module_javascript`
+		$this->pdbc->query('SELECT `javascript`.`id`, `javascript`.`name`, `theme`.`name` AS `theme`
+		                    FROM `module_javascript` as `javascript`
 		                    LEFT JOIN (SELECT `id`, `name`
 		                               FROM `module_theme`) AS `theme`
-		                    ON `module_javascript`.`id_theme` = `theme`.`id`
-		                    ORDER BY `id` ASC');
+		                    ON `javascript`.`id_theme` = `theme`.`id`
+		                    ORDER BY `theme`.`name` ASC, javascript.`name` ASC');
 
 		return $this->pdbc->fetchAll();
 	}

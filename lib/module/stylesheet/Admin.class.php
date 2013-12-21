@@ -45,12 +45,12 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	private function overviewGet() {
-		$this->pdbc->query('SELECT `module_stylesheet`.`id`, `module_stylesheet`.`name`, `theme`.`name` AS `theme`
-		                    FROM `module_stylesheet`
+		$this->pdbc->query('SELECT `stylesheet`.`id`, `stylesheet`.`name`, `theme`.`name` AS `theme`
+		                    FROM `module_stylesheet` as `stylesheet`
 		                    LEFT JOIN (SELECT `id`, `name`
 		                               FROM `module_theme`) AS `theme`
-		                    ON `module_stylesheet`.`id_theme` = `theme`.`id`
-		                    ORDER BY `id` ASC');
+		                    ON `stylesheet`.`id_theme` = `theme`.`id`
+		                    ORDER BY `theme`.`name` ASC, stylesheet.`name` ASC');
 
 		return $this->pdbc->fetchAll();
 	}
