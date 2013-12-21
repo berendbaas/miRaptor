@@ -26,27 +26,17 @@ class HTMLFormStacked extends HTMLForm {
 
 	public function addInput($title, array $attributes = array()) {
 		$this->addLabel($title, $this->labelAttributes($attributes));
-		$this->result .= HTML::openTag('input', $attributes, TRUE) . PHP_EOL;
+		parent::addInput($title, $attributes);
 	}
 
 	public function addTextarea($title, $content = '', array $attributes = array()) {
 		$this->addLabel($title, $this->labelAttributes($attributes));
-		$this->result .= HTML::element('textarea', $attributes, $content) . PHP_EOL;
+		parent::addTextarea($title, $content, $attributes);
 	}
 
-	public function addButton($content = '', array $attributes = array()) {
-		$this->result .= HTML::element('button', $attributes, $content) . PHP_EOL;
-	}
-
-	public function addSelect($title, array $options = array(), array $attributes = array()) {
-		$content = PHP_EOL;
-
-		foreach($options as $optionKey => $optionValue) {
-			$content .= HTML::element('option', $optionValue, $optionKey) . PHP_EOL;
-		}
-		
+	public function openSelect($title, array $attributes = array()) {
 		$this->addLabel($title, $this->labelAttributes($attributes));
-		$this->result .= HTML::element('select', $attributes, $content) . PHP_EOL;
+		parent::openSelect($title, $attributes);
 	}
 }
 

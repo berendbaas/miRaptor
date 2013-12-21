@@ -7,7 +7,7 @@ namespace lib\html;
  * @license http://opensource.org/licenses/Apache-2.0 Apache v2 License
  * @version 1.0
  */
-abstract class HTMLForm {
+class HTMLForm {
 	protected $result;
 
 	/**
@@ -33,6 +33,7 @@ abstract class HTMLForm {
 	 * Open a fieldset with the given legend.
 	 *
 	 * @param  string $legend = '';
+	 * @param  array  $attributes = array();
 	 * @return void
 	 */
 	public function openFieldset($legend = '', array $attributes = array()) {
@@ -64,32 +65,36 @@ abstract class HTMLForm {
 	/**
 	 * Add a label to the current form.
 	 *
-	 * @param  string $content
-	 * @param  string for
+	 * @param  string $title
+	 * @param  array  $attributes = array()
 	 * @return void
 	 */
-	public function addLabel($content, array $attributes = array()) {
-		$this->result .= HTML::element('label', $attributes, $content) . PHP_EOL;
+	public function addLabel($title, array $attributes = array()) {
+		$this->result .= HTML::element('label', $attributes, $title) . PHP_EOL;
 	}
 
 	/**
 	 * Add an input field to the current form.
 	 *
-	 * @param  string $title
+	 * @param  string $title = ''
 	 * @param  array  $attributes = array()
 	 * @return void
 	 */
-	public abstract function addInput($title, array $attributes = array());
+	public function addInput($title = '', array $attributes = array()) {
+		$this->result .= HTML::openTag('input', $attributes, TRUE) . PHP_EOL;
+	}
 
 	/**
 	 * Add a textarea to the current form.
 	 *
-	 * @param  string $title
+	 * @param  string $title = ''
 	 * @param  string $content = ''
 	 * @param  array  $attributes = array()
 	 * @return void
 	 */
-	public abstract function addTextarea($title, $content = '', array $attributes = array());
+	public function addTextarea($title = '', $content = '', array $attributes = array()) {
+		$this->result .= HTML::element('textarea', $attributes, $content) . PHP_EOL;
+	}
 
 	/**
 	 * Add a button to the current form.
@@ -98,16 +103,20 @@ abstract class HTMLForm {
 	 * @param  array  $attributes = array()
 	 * @return void
 	 */
-	public abstract function addButton($content = '', array $attributes = array());
+	public function addButton($content = '', array $attributes = array()) {
+		$this->result .= HTML::element('button', $attributes, $content) . PHP_EOL;
+	}
 
 	/**
 	 * Open a select box.
 	 *
-	 * @param  string $title
-	 * @param  array  $attributes = array()
+	 * @param  string $title = ''
+	 * @param  array $attributes = array()
 	 * @return void
 	 */
-	public abstract function openSelect($title, array $attributes = array());
+	public function openSelect($title = '', array $attributes = array()) {
+		$this->result .= HTML::openTag('select', $attributes) . PHP_EOL;
+	}
 
 	/**
 	 * Close a select box.
@@ -146,7 +155,7 @@ abstract class HTMLForm {
 	 * @return void
 	 */
 	public function addOption($title, array $attributes = array()) {
-		$this->result .= HTML::openTag($title, $attributes, TRUE);
+		$this->result .= HTML::element('option', $attributes, $title);
 	}
 }
 
