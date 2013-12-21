@@ -83,11 +83,11 @@ class Module extends \lib\core\AbstractModule {
 		}
 
 		return <<<HTML
-<style>
+<script>
 /* {$name} start */
 {$javascript['content']}
 /* {$name} end */
-</style>
+</script>
 HTML;
 	}
 }
