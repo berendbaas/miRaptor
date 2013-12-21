@@ -24,14 +24,14 @@ class HTMLFormAligned extends HTMLForm {
 		return $result;
 	}
 
-	public function addInput($title, array $attributes = array()) {
+	public function addInput($title = '', array $attributes = array()) {
 		$this->result .= '<div>';
 		$this->addLabel($title, $this->labelAttributes($attributes));
 		parent::addInput($title, $attributes);
 		$this->result .= '</div>' . PHP_EOL;
 	}
 
-	public function addTextarea($title, $content = '', array $attributes = array()) {
+	public function addTextarea($title = '', $content = '', array $attributes = array()) {
 		$this->result .= '<div>';
 		$this->addLabel($title, $this->labelAttributes($attributes));
 		parent::addTextarea($title, $content, $attributes);
@@ -44,7 +44,7 @@ class HTMLFormAligned extends HTMLForm {
 		$this->result .= '</div>' . PHP_EOL;
 	}
 
-	public function openSelect($title, array $attributes = array()) {
+	public function openSelect($title = '', array $attributes = array()) {
 		$this->result .= '<div>';
 		$this->addLabel($title, $this->labelAttributes($attributes));
 		parent::openSelect($title, $attributes);
