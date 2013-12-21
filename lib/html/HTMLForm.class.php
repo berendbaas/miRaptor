@@ -101,22 +101,53 @@ abstract class HTMLForm {
 	public abstract function addButton($content = '', array $attributes = array());
 
 	/**
-	 * Add a select box to the current form.
-	 *
-	 * The option array works like this:
-	 *
-	 * $name = 'Title'; // Option element name
-	 * $attributes = array('value' = 'Value'); // Option element attributes
-	 *
-	 * $options = array();
-	 * $options[$name] = $attributes;
+	 * Open a select box.
 	 *
 	 * @param  string $title
-	 * @param  array  $options = array()
 	 * @param  array  $attributes = array()
 	 * @return void
 	 */
-	public abstract function addSelect($title, array $options = array(), array $attributes = array());
+	public abstract function openSelect($title, array $attributes = array());
+
+	/**
+	 * Close a select box.
+	 *
+	 * @return void
+	 */
+	public function closeSelect() {
+		$this->result .= '</select>' . PHP_EOL;
+	}
+
+	/**
+	 * Open a select box optgroup with the given title.
+	 *
+	 * @param  string  $title
+	 * @param  boolean $disabled = FALSE
+	 * @return void
+	 */
+	public function openOptgroup($title, $disabled = FALSE) {
+		$this->result .= '<optgroup value="' . $title . '"' . ($disabled !== FALSE) ? '>' : ' disabled="disabled">' . PHP_EOL;
+	}
+
+	/**
+	 * Close a select box optgroup.
+	 *
+	 * @return void
+	 */
+	public function closeOptgroup() {
+		$this->result .= '</optgroup' . PHP_EOL;
+	}
+
+	/**
+	 * Add an option field to the current form.
+	 *
+	 * @param  string $title
+	 * @param  array  $attributes = array()
+	 * @return void
+	 */
+	public function addOption($title, array $attributes = array()) {
+		$this->result .= HTML::openTag($title, $attributes, TRUE);
+	}
 }
 
 ?>
