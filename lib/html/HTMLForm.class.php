@@ -13,12 +13,12 @@ class HTMLForm {
 	/**
 	 * Construct an HTML form object with the given method & action.
 	 *
-	 * @param string $method = 'post'
-	 * @param string $action = ''
+	 * @param array $arguments = array('method' => 'post', 'action' => '')
 	 */
-	public function __construct($method = 'post', $action = '') {
-		$this->result = '<form method="' . $method . '" action"' . $action . '">' . PHP_EOL;
+	public function __construct($arguments = array('method' => 'post', 'action' => '')) {
+		$this->result = HTML::openTag('form', $arguments);
 	}
+
 
 	/**
 	 * Returns the string representation of the HTML form object.
