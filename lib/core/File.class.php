@@ -8,8 +8,6 @@ namespace lib\core;
  * @version 1.0
  */
 class File {
-	private $user;
-	private $website;
 	private $path;
 	private $directory;
 	private $file;
@@ -17,21 +15,12 @@ class File {
 	/**
 	 * Constructs a File object.
 	 *
-	 * @param User    $user
-	 * @param Website $website
-	 * @param String  $path = ''
+	 * @param String $path = ''
 	 */
-	public function __construct(User $user, Website $website, $path = '') {
-		$this->user = $user;
-		$this->website = $website;
-
-		// Split URI in directory, file
-		$pos = strrpos($path, '/') + 1;
-
-		// Set directory, file & path.
-		$this->directory = substr($path, 0, $pos);
-		$this->file = strlen($path) > $pos ? substr($path, $pos) : '';
-		$this->path = $this->directory . $this->file;
+	public function __construct($path = '') {
+		$this->directory = dirname($path);
+		$this->file = basename($path);
+		$this->path = $this->directory . DIRECTORY_SEPARATOR . $this->file;
 	}
 
 	/**
@@ -112,7 +101,7 @@ class File {
 	 * @return string the name of the file.
 	 */
 	public function getName() {
-		return $this->name;
+		return $this->file;
 	}
 
 	/**
@@ -121,73 +110,179 @@ class File {
 	 * @return int the time of the last modification as a unixtimestap.
 	 */
 	public function getLastModified() {
-		return filemtime($this->path);
+		return ($result = filemtime($this->path)) === FALSE ? -1 : $result;
 	}
 
 	/**
-	 * Return the numer of bytes in the file.
+	 * Returns the numer of bytes in the file.
 	 *
-	 *
+	 * @return int the number of bytes in the file.
 	 */
 	public function getLength() {
-		return filesize($this->path);
+		return ($result = filesize($this->path)) === FALSE ? -1 : $result;
 	}
 
 	/**
+	 * Returns an array with the files in the current directory.
 	 *
+	 * @return array an array with the files in the current directory.
 	 */
 	public function listAll() {
-		if(!$this->isDirectory()) {
+		if(!$this->isDirectory() || !($iterator = dir($this->path))) {
 			return NULL;
 		}
+
+		$list = array();
+
+		while(($item = $iterator->read()) !== FALSE) {
+			$list[] = $item;
+		}
+
+		return $list;
 	}
 
 	/**
+	 * Returns an array with the files in the current directory.
 	 *
+	 * @return array an array with the files in the current directory.
 	 */
 	public function listFiles() {
-		if(!$this->isDirectory()) {
+		if(!$this->isDirectory() || !($iterator = dir($this->path))) {
 			return NULL;
 		}
+
+		$list = array();
+
+		while(($item = $iterator->read()) !== FALSE) {
+			if(is_file($this->path . DIRECTORY_SEPARATOR . $item)) {
+				$list[] = $item;
+			}
+		}
+
+		return $list;
 	}
 
 	/**
+	 * Returns an array with the directory in the current directory.
 	 *
+	 * @return array an array with the directory in the current directory.
 	 */
 	public function listDirectories() {
-		if(!$this->isDirectory()) {
+		if(!$this->isDirectory() || !($iterator = dir($this->path))) {
 			return NULL;
 		}
+
+		$list = array();
+
+		while(($item = $iterator->read()) !== FALSE) {
+			if(is_dir($this->path . DIRECTORY_SEPARATOR . $item)) {
+				$list[] = $item;
+			}
+		}
+
+		return $list;
 	}
 
 	/**
+	 * Returns true if the file has been created.
 	 *
+	 * @return boolean true if the file has been created.
 	 */
-	public function create() {
-
+	public function create($override = FALSE) {
+		return !exists($new) || $override ? (file_put_contents($this->path, '') === FALSE ? TRUE : FALSE) : FALSE;
 	}
 
 	/**
+	 * Returns true if the file is succesfully moved.
 	 *
+	 * @param  String  $path
+	 * @param  boolean $override = FALSE
+	 * @return boolean true if the file is succesfully moved.
 	 */
-	public function move($new, $override = FALSE) {
-		return !exists($new) || $override ? rename($old, $new) : FALSE;
+	public function move($path, $override = FALSE) {
+		if(exists($new) && !$override) {
+			return FALSE;
+		}
+
+		if(!rename($this->path, $path)) {
+			return FALSE;
+		}
+
+		$this->path = $path;
+		return TRUE;
 	}
 
 	/**
+	 * Returns true if the file is succesfully removed.
 	 *
+	 * @return boolean true if the file is succesfully removed.
 	 */
 	public function remove() {
 		return unlink($this->path);
 	}
 
 	/**
+	 * Returns true if the file is succesfully renamed.
 	 *
+	 * @param  String  $file
+	 * @param  boolean $override = FALSE
+	 * @return boolean true if the file is succesfully renamed.
 	 */
-	public function rename($file) {
-		$this->
+	public function rename($file, $override = FALSE) {
+		if(exists($new) && !$override) {
+			return FALSE;
+		}
 
-		return rename($this->path, $new);
+		$path = $this->directory . DIRECTORY_SEPARATOR . basename($file);
+
+		if(!rename($this->path, $path)) {
+			return FALSE;
+		}
+
+		$this->path = $path;
+		return TRUE;
+	}
+
+	/**
+	 * Returns the uploaded file, or NULL on failure.
+	 *
+	 * @param  array   $file
+	 * @param  string  $directory
+	 * @param  boolean $override = FALSE
+	 * @return File the uploaded file or NULL on failure.
+	 */
+	public static function upload($file, $directory, $override = FALSE) {
+		if(!isset($file['tmp_name'], $file['name'], $file['error']) && $file['error'] > 0) {
+			return NULL;
+		}
+
+		$file = new File($file['tmp_name']);
+
+		return $file->move($directory . DIRECTORY_SEPARATOR . $file['name'], $override) ? $file : NULL;
+	}
+
+	/**
+	 * Returns an array with the uploaded files.
+	 *
+	 * @param  array   $files
+	 * @param  string  $directory
+	 * @param  boolean $override = FALSE
+	 * @return array an array with the uploaded files.
+	 */
+	public static function multiUpload($files, $directory, $override = FALSE) {
+		$result = array();
+
+		foreach($files['name'] as $key => $value) {
+			if($files['error'][$key] > 0) {
+				$result[] = NULL;
+				continue;
+			}
+
+			$file = new File($file['tmp_name'][$key]);
+			$result[] = $file->move($directory . DIRECTORY_SEPARATOR . $value, $override) ? $file : NULL;
+		}
+
+		return $result;
 	}
 }
 
