@@ -188,8 +188,17 @@ class File {
 	 *
 	 * @return boolean true if the file has been created.
 	 */
-	public function create($override = FALSE) {
-		return !exists($new) || $override ? (file_put_contents($this->path, '') === FALSE ? TRUE : FALSE) : FALSE;
+	public function makeFile($override = FALSE) {
+		return !$this->exists() || $override ? (file_put_contents($this->path, '') === FALSE ? TRUE : FALSE) : FALSE;
+	}
+
+	/**
+	 * Returns true if the directory has been created.
+	 *
+	 * @return boolean true if the directory has been created.
+	 */
+	public function makeDirectory($permissions = '0755', $recursive = FALSE) {
+		return mkdir($this->path, $permissions, $recursive);
 	}
 
 	/**
@@ -200,10 +209,12 @@ class File {
 	 * @return boolean true if the file is succesfully moved.
 	 */
 	public function move($path, $override = FALSE) {
-		if(exists($new) && !$override) {
+		// Check if the file exists
+		if(file_exists($path) && !$override) {
 			return FALSE;
 		}
 
+		// Rename the file
 		if(!rename($this->path, $path)) {
 			return FALSE;
 		}
@@ -229,13 +240,13 @@ class File {
 	 * @return boolean true if the file is succesfully renamed.
 	 */
 	public function rename($file, $override = FALSE) {
-		if(exists($new) && !$override) {
+		// Check if the file exists
+		if(file_exists($path) && !$override) {
 			return FALSE;
 		}
 
-		$path = $this->directory . DIRECTORY_SEPARATOR . basename($file);
-
-		if(!rename($this->path, $path)) {
+		// Rename the file
+		if(!rename($this->path, $this->directory . DIRECTORY_SEPARATOR . basename($file))) {
 			return FALSE;
 		}
 
@@ -252,13 +263,18 @@ class File {
 	 * @return File the uploaded file or NULL on failure.
 	 */
 	public static function upload($file, $directory, $override = FALSE) {
-		if(!isset($file['tmp_name'], $file['name'], $file['error']) && $file['error'] > 0) {
+		// Check vars
+		if(!isset($file['tmp_name'], $file['name'], $file['error']) && is_uploaded_file($file['tmp_name']) && $file['error'] > 0) {
 			return NULL;
 		}
 
-		$file = new File($file['tmp_name']);
+		// Check if the file exists
+		if(file_exists($new) && !$override) {
+			return NULL;
+		}
 
-		return $file->move($directory . DIRECTORY_SEPARATOR . $file['name'], $override) ? $file : NULL;
+		$path = $directory . DIRECTORY_SEPARATOR . $file['name'];
+		return move_uploaded_file($file['tmp_name'], $path) ? new File($path) : NULL;
 	}
 
 	/**
@@ -273,13 +289,19 @@ class File {
 		$result = array();
 
 		foreach($files['name'] as $key => $value) {
+			// Check vars
 			if($files['error'][$key] > 0) {
 				$result[] = NULL;
 				continue;
 			}
 
-			$file = new File($file['tmp_name'][$key]);
-			$result[] = $file->move($directory . DIRECTORY_SEPARATOR . $value, $override) ? $file : NULL;
+			// Check if the file exists
+			if(file_exists($new) && !$override) {
+				return NULL;
+			}
+
+			$path = $directory . DIRECTORY_SEPARATOR . $value;
+			$result[] = move_uploaded_file($file['tmp_name'][$key], $path) ? new File($path) : NULL;
 		}
 
 		return $result;
