@@ -18,16 +18,16 @@ class Guide implements Runnable {
 	private $filename;
 
 	/**
-	 * Construct a Guide object with the given PDBC, URL & location.
+	 * Construct a Guide object with the given PDBC, URL & folder.
 	 *
 	 * @param  \lib\pdbc\PDBC $pdbc
 	 * @param  URL            $url
-	 * @param  string         $location
+	 * @param  string         $folder
 	 */
-	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $location) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $folder) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
-		$this->filename = $location . $url->getDirectory() . ($url->getFile() === '' ? self::DEFAULT_FILE : $url->getFile());
+		$this->filename = $folder . $url->getDirectory() . ($url->getFile() === '' ? self::DEFAULT_FILE : $url->getFile());
 	}
 
 	public function run() {
