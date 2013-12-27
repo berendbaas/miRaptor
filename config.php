@@ -9,10 +9,13 @@
 
 // Config
 $config = array();
+$config['cache'] = FALSE;
+$config['debug'] = TRUE;
 $config['default_host'] = 'www.example.org';
+$config['timezone'] = 'Europe/Amsterdam';
 $config['user_directory'] = 'users';
 
-// PDBC class
+// PHP DataBase Connector (PDBC)
 $config['pdbc'] = array();
 $config['pdbc']['username'] = 'username';
 $config['pdbc']['password'] = 'password';
