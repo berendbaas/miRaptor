@@ -96,7 +96,7 @@ class ModulePageWebsite extends ModulePageAbstract {
 	private function content() {
 		// Check module get
 		if(!isset($_GET['module'])) {
-			return 'TODO Website dashboard';
+			return '<h2>Website</h2><p>Comming soon.</p>';
 		}
 
 		$module = $_GET['module'];

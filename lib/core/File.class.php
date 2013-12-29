@@ -13,11 +13,11 @@ class File {
 	private $file;
 
 	/**
-	 * Constructs a File object.
+	 * Constructs a File object with the given path.
 	 *
-	 * @param String $path = ''
+	 * @param String $path
 	 */
-	public function __construct($path = '') {
+	public function __construct($path) {
 		$this->directory = dirname($path);
 		$this->file = basename($path);
 		$this->path = $this->directory . DIRECTORY_SEPARATOR . $this->file;
@@ -125,17 +125,23 @@ class File {
 	/**
 	 * Returns an array with the files in the current directory.
 	 *
+	 * @param  boolean $showHidden = FALSE
 	 * @return array an array with the files in the current directory.
 	 */
-	public function listAll() {
-		if(!$this->isDirectory() || !($iterator = dir($this->path))) {
+	public function listAll($showHidden = FALSE) {
+		if(!$this->isDirectory()) {
 			return NULL;
 		}
 
+		$iterator = new \DirectoryIterator($this->path);
 		$list = array();
 
-		while(($item = $iterator->read()) !== FALSE) {
-			$list[] = $item;
+		while($iterator->valid()) {
+			if($showHidden || !$iterator->isDot()) {
+				$list[] = $iterator->getFilename();
+			}
+
+			$iterator->next();
 		}
 
 		return $list;
@@ -144,19 +150,23 @@ class File {
 	/**
 	 * Returns an array with the files in the current directory.
 	 *
+	 * @param  boolean $showHidden = FALSE
 	 * @return array an array with the files in the current directory.
 	 */
-	public function listFiles() {
-		if(!$this->isDirectory() || !($iterator = dir($this->path))) {
+	public function listFiles($showHidden = FALSE) {
+		if(!$this->isDirectory()) {
 			return NULL;
 		}
 
+		$iterator = new \DirectoryIterator($this->path);
 		$list = array();
 
-		while(($item = $iterator->read()) !== FALSE) {
-			if(is_file($this->path . DIRECTORY_SEPARATOR . $item)) {
-				$list[] = $item;
+		while($iterator->valid()) {
+			if($iterator->isFile() && ($showHidden || !$iterator->isDot())) {
+				$list[] = $iterator->getFilename();
 			}
+
+			$iterator->next();
 		}
 
 		return $list;
@@ -165,19 +175,23 @@ class File {
 	/**
 	 * Returns an array with the directory in the current directory.
 	 *
+	 * @param  boolean $showHidden = FALSE
 	 * @return array an array with the directory in the current directory.
 	 */
-	public function listDirectories() {
-		if(!$this->isDirectory() || !($iterator = dir($this->path))) {
+	public function listDirectories($showHidden = FALSE) {
+		if(!$this->isDirectory()) {
 			return NULL;
 		}
 
+		$iterator = new \DirectoryIterator($this->path);
 		$list = array();
 
-		while(($item = $iterator->read()) !== FALSE) {
-			if(is_dir($this->path . DIRECTORY_SEPARATOR . $item)) {
-				$list[] = $item;
+		while($iterator->valid()) {
+			if($iterator->isDir() && ($showHidden || !$iterator->isDot())) {
+				$list[] = $iterator->getFilename();
 			}
+
+			$iterator->next();
 		}
 
 		return $list;
@@ -186,6 +200,7 @@ class File {
 	/**
 	 * Returns true if the file has been created.
 	 *
+	 * @param  boolean $override = FALSE
 	 * @return boolean true if the file has been created.
 	 */
 	public function makeFile($override = FALSE) {
@@ -195,10 +210,16 @@ class File {
 	/**
 	 * Returns true if the directory has been created.
 	 *
+	 * @param  int     $permissions = 0755
+	 * @param  boolean $recursive = FALSE
 	 * @return boolean true if the directory has been created.
 	 */
-	public function makeDirectory($permissions = '0755', $recursive = FALSE) {
-		return mkdir($this->path, $permissions, $recursive);
+	public function makeDirectory($permissions = 0775, $recursive = FALSE) {
+		$old = umask(0777 - $permissions);
+		$result = mkdir($this->path, $permissions, $recursive);
+		umask($old);
+
+		return $result;
 	}
 
 	/**
@@ -228,8 +249,24 @@ class File {
 	 *
 	 * @return boolean true if the file is succesfully removed.
 	 */
-	public function remove() {
+	public function removeFile() {
 		return unlink($this->path);
+	}
+
+	/**
+	 * Returns true if the directory is succesfully removed.
+	 *
+	 * @param  boolean $recursive = FALSE
+	 * @return boolean true if the directory is succesfully removed.
+	 */
+	public function removeDirectory($recursive = FALSE) {
+		if($recursive) {
+			foreach(new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->path, \FilesystemIterator::SKIP_DOTS), \RecursiveIteratorIterator::CHILD_FIRST) as $path) {
+   				$path->isFile() ? unlink($path->getPathname()) : rmdir($path->getPathname());
+			}
+		}
+
+		return rmdir($this->path);
 	}
 
 	/**
@@ -257,6 +294,7 @@ class File {
 	/**
 	 * Returns the uploaded file, or NULL on failure.
 	 *
+	 *
 	 * @param  array   $file
 	 * @param  string  $directory
 	 * @param  boolean $override = FALSE
@@ -264,21 +302,34 @@ class File {
 	 */
 	public static function upload($file, $directory, $override = FALSE) {
 		// Check vars
-		if(!isset($file['tmp_name'], $file['name'], $file['error']) && is_uploaded_file($file['tmp_name']) && $file['error'] > 0) {
+		if(!isset($file['tmp_name'], $file['name'], $file['error'])) {
 			return NULL;
 		}
 
-		// Check if the file exists
-		if(file_exists($new) && !$override) {
+		// Check errors
+		if(!is_uploaded_file($file['tmp_name']) || $file['error'] > 0) {
 			return NULL;
 		}
 
-		$path = $directory . DIRECTORY_SEPARATOR . $file['name'];
-		return move_uploaded_file($file['tmp_name'], $path) ? new File($path) : NULL;
+		$upload = new File($directory . DIRECTORY_SEPARATOR . $file['name']);
+
+		// Check file
+		if($upload->exists() && !$override) {
+			return NULL;
+		}
+
+		return move_uploaded_file($file['tmp_name'], $upload->getPath()) ? $upload  : NULL;
 	}
 
 	/**
 	 * Returns an array with the uploaded files.
+	 *
+	 * array(
+	 *     index => array(
+	 *         'name' => $filename,
+	 *         'file' => new File($directory . $filename)
+	 *     )
+	 * )
 	 *
 	 * @param  array   $files
 	 * @param  string  $directory
@@ -289,19 +340,35 @@ class File {
 		$result = array();
 
 		foreach($files['name'] as $key => $value) {
+			// New
+			$new = array(
+				'name' => $files['name'][$key],
+				'file' => NULL
+			);
+
 			// Check vars
-			if($files['error'][$key] > 0) {
-				$result[] = NULL;
+			if(!isset($files['tmp_name'][$key], $files['error'][$key])) {
+				$result[] = $new;
 				continue;
 			}
 
-			// Check if the file exists
-			if(file_exists($new) && !$override) {
-				return NULL;
+			// Check errors
+			if(!is_uploaded_file($files['tmp_name'][$key]) || $files['error'][$key] > 0) {
+				$result[] = $new;
+				continue;
 			}
 
-			$path = $directory . DIRECTORY_SEPARATOR . $value;
-			$result[] = move_uploaded_file($file['tmp_name'][$key], $path) ? new File($path) : NULL;
+			$upload = new File($directory . DIRECTORY_SEPARATOR . $files['name'][$key]);
+
+			// Check file
+			if($upload->exists() && !$override) {
+				$result[] = $new;
+				continue;
+			}
+
+			// Add file
+			$new['file'] = (move_uploaded_file($files['tmp_name'][$key], $upload->getPath()) ? $upload : NULL);
+			$result[] = $new;
 		}
 
 		return $result;

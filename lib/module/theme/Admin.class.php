@@ -225,7 +225,6 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	private function removePage($field) {
 		$form = new \lib\html\HTMLFormStacked();
-		$list = new \lib\html\HTMLList();
 
 		$form->addContent('<p>Are you sure you want to remove this theme? This action can\'t be undone!</p>');
 
