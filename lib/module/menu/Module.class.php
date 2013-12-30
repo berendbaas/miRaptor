@@ -9,6 +9,8 @@ namespace lib\module\menu;
  */
 class Module extends \lib\core\AbstractModule {
 	const DEFAULT_ID = 0;
+	const DEFAULT_START_LEVEL = 0;
+	const DEFAULT_END_LEVEL = -1;
 	const DEFAULT_DEPTH = -1;
 
 	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $routerID, array $arguments) {
@@ -17,21 +19,40 @@ class Module extends \lib\core\AbstractModule {
 	}
 
 	public function run() {
-		$this->result = $this->getMenu($this->parseID(), $this->parseDepth());
+		// Get arguments
+		$startLevel = $this->parseStartLevel();
+		$endLevel = $this->parseEndLevel();
+		$depth = $this->parseDepth();
+
+		// Depth
+		if($endLevel !== self::DEFAULT_END_LEVEL) {
+			if($depth !== self::DEFAULT_DEPTH) {
+				throw new \lib\core\ModuleException('The end level & depth cannot be specified at the same time.');
+			}
+
+			if($endLevel <= $startLevel) {
+				throw new \lib\core\ModuleException('The end level must be larger then the start level');
+			}
+
+			$depth = $endLevel - $startLevel;
+		}
+
+		// Result
+		$this->result = $this->getMenu($this->parseURI($startLevel), $depth);
 	}
 
 	/**
-	 * Returns the router ID that belongs to the given URI argument.
+	 * Returns the router ID that belongs to the given start leven & URI argument.
 	 *
-	 * @param  string $uri
-	 * @return int                       the router ID that belongs to the given URI argument.
+	 * @param  int                       $startLevel
+	 * @return int                       the router ID that belongs to the given start leven & URI argument.
 	 * @throws \lib\core\ModuleException if the given URI doesn't exists.
 	 * @throws \lib\pdbc\PDBCException   if the given query can't be executed.
 	 */
-	private function parseID() {
+	private function parseURI($startLevel) {
 		// Uri isn't given
 		if(!isset($this->arguments['uri'])) {
-			return 0;
+			return self::DEFAULT_ID;
 		}
 
 		// Uri is empty
@@ -40,17 +61,53 @@ class Module extends \lib\core\AbstractModule {
 		}
 
 		// Uri is given & not empty
-		$this->pdbc->query('SELECT `id`
+		$this->pdbc->query('SELECT `id`, `depth`
 		                    FROM `router`
 		                    WHERE `uri` = "' . $this->pdbc->quote($uri) . '"');
 
-		$id = $this->pdbc->fetch();
+		$start = $this->pdbc->fetch();
 
-		if(!$id) {
-			throw new \lib\core\ModuleException('uri="' . $uri . '" doesnt exists.');
+		// Check uri
+		if(!$start) {
+			throw new \lib\core\ModuleException('The URI doesn\'t exists.');
 		}
 
-		return $id['id'];
+		// Check startLevel
+		if($start['depth'] < $startLevel) {
+			throw new \lib\core\ModuleException('The start level can\'t be smaller then the uri level.');
+		}
+
+		return $start['id'];
+	}
+
+	/**
+	 * Returns the depth argument or the default argument, if none is given.
+	 *
+	 * @return string the depth argument or the default argument, if none is given.
+	 */
+	private function parseStartLevel() {
+		if(isset($this->arguments['startLevel'])) {
+			$startLevel = intval($this->arguments['startLevel']);
+
+			return ($startLevel < 1) ? self::DEFAULT_START_LEVEL : $startLevel;
+		}
+
+		return self::DEFAULT_START_LEVEL;
+	}
+
+	/**
+	 * Returns the depth argument or the default argument, if none is given.
+	 *
+	 * @return string the depth argument or the default argument, if none is given.
+	 */
+	private function parseEndLevel() {
+		if(isset($this->arguments['endLevel'])) {
+			$endLevel = intval($this->arguments['endLevel']);
+
+			return ($endLevel < 1) ? self::DEFAULT_END_LEVEL : $endLevel;
+		}
+
+		return self::DEFAULT_END_LEVEL;
 	}
 
 	/**
@@ -72,11 +129,11 @@ class Module extends \lib\core\AbstractModule {
 	 * Returns the menu with the given pid and depth.
 	 *
 	 * @param  int                     $pid
-	 * @param  int                     $depth = self::DEFAULT_DEPTH
+	 * @param  int                     $depth = self::DEPTH
 	 * @return string                  the stylesheet with the given name and group.
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
-	private function getMenu($pid, $depth = self::DEFAULT_DEPTH) {
+	private function getMenu($pid, $depth) {
 		if($depth != 0) {
 			$this->pdbc->query('SELECT `id`,`name`,`uri`
 			                    FROM `router`
