@@ -125,23 +125,35 @@ class File {
 	/**
 	 * Returns an array with the files in the current directory.
 	 *
+	 * @param  boolean $recursive = FALSE
 	 * @param  boolean $showHidden = FALSE
-	 * @return array an array with the files in the current directory.
+	 * @return array   an array with the files in the current directory.
 	 */
-	public function listAll($showHidden = FALSE) {
+	public function listAll($recursive = FALSE, $showHidden = FALSE) {
+		// Check file
 		if(!$this->isDirectory()) {
 			return NULL;
 		}
 
-		$iterator = new \DirectoryIterator($this->path);
+		// Check flags
+		$flags = \FilesystemIterator::KEY_AS_PATHNAME | \FilesystemIterator::CURRENT_AS_FILEINFO;
+
+		if(!$showHidden) {
+			$flags = $flags | \FilesystemIterator::SKIP_DOTS;
+		}
+
+		// Check recursive
+		if($recursive) { //
+			$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->path, $flags), \RecursiveIteratorIterator::SELF_FIRST);
+		} else {
+			$iterator = new \FilesystemIterator($this->path, $flags);
+		}
+
+		// Iterate
 		$list = array();
 
-		while($iterator->valid()) {
-			if($showHidden || !$iterator->isDot()) {
-				$list[] = $iterator->getFilename();
-			}
-
-			$iterator->next();
+		foreach($iterator as $index => $element) {
+			$list[] = $element->getFilename();
 		}
 
 		return $list;
@@ -150,48 +162,76 @@ class File {
 	/**
 	 * Returns an array with the files in the current directory.
 	 *
+	 * @param  boolean $recursive = FALSE
 	 * @param  boolean $showHidden = FALSE
-	 * @return array an array with the files in the current directory.
+	 * @return array   an array with the files in the current directory.
 	 */
-	public function listFiles($showHidden = FALSE) {
+	public function listFiles($recursive = FALSE, $showHidden = FALSE) {
+		// Check file
 		if(!$this->isDirectory()) {
 			return NULL;
 		}
 
-		$iterator = new \DirectoryIterator($this->path);
+		// Check flags
+		$flags = \FilesystemIterator::KEY_AS_PATHNAME | \FilesystemIterator::CURRENT_AS_FILEINFO;
+
+		if(!$showHidden) {
+			$flags = $flags | \FilesystemIterator::SKIP_DOTS;
+		}
+
+		// Check recursive
+		if($recursive) { //
+			$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->path, $flags), \RecursiveIteratorIterator::SELF_FIRST);
+		} else {
+			$iterator = new \FilesystemIterator($this->path, $flags);
+		}
+
+		// Iterate
 		$list = array();
 
-		while($iterator->valid()) {
-			if($iterator->isFile() && ($showHidden || !$iterator->isDot())) {
-				$list[] = $iterator->getFilename();
+		foreach($iterator as $index => $element) {
+			if($element->isFile()) {
+				$list[] = $element->getFilename();
 			}
-
-			$iterator->next();
 		}
 
 		return $list;
 	}
 
 	/**
-	 * Returns an array with the directory in the current directory.
+	 * Returns an array with the directories in the current directory.
 	 *
+	 * @param  boolean $recursive = FALSE
 	 * @param  boolean $showHidden = FALSE
-	 * @return array an array with the directory in the current directory.
+	 * @return array   an array with the directories in the current directory.
 	 */
-	public function listDirectories($showHidden = FALSE) {
+	public function listDirectories($recursive = FALSE, $showHidden = FALSE) {
+		// Check file
 		if(!$this->isDirectory()) {
 			return NULL;
 		}
 
-		$iterator = new \DirectoryIterator($this->path);
+		// Check flags
+		$flags = \FilesystemIterator::KEY_AS_PATHNAME | \FilesystemIterator::CURRENT_AS_FILEINFO;
+
+		if(!$showHidden) {
+			$flags = $flags | \FilesystemIterator::SKIP_DOTS;
+		}
+
+		// Check recursive
+		if($recursive) { //
+			$iterator = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($this->path, $flags), \RecursiveIteratorIterator::SELF_FIRST);
+		} else {
+			$iterator = new \FilesystemIterator($this->path, $flags);
+		}
+
+		// Iterate
 		$list = array();
 
-		while($iterator->valid()) {
-			if($iterator->isDir() && ($showHidden || !$iterator->isDot())) {
-				$list[] = $iterator->getFilename();
+		foreach($iterator as $index => $element) {
+			if($element->isDir()) {
+				$list[] = $element->getFilename();
 			}
-
-			$iterator->next();
 		}
 
 		return $list;
@@ -210,11 +250,11 @@ class File {
 	/**
 	 * Returns true if the directory has been created.
 	 *
-	 * @param  int     $permissions = 0755
 	 * @param  boolean $recursive = FALSE
+	 * @param  int     $permissions = 0755
 	 * @return boolean true if the directory has been created.
 	 */
-	public function makeDirectory($permissions = 0775, $recursive = FALSE) {
+	public function makeDirectory($recursive = FALSE, $permissions = 0775) {
 		$old = umask(0777 - $permissions);
 		$result = mkdir($this->path, $permissions, $recursive);
 		umask($old);
@@ -277,13 +317,15 @@ class File {
 	 * @return boolean true if the file is succesfully renamed.
 	 */
 	public function rename($file, $override = FALSE) {
+		$path = $this->directory . DIRECTORY_SEPARATOR . basename($file);
+
 		// Check if the file exists
 		if(file_exists($path) && !$override) {
 			return FALSE;
 		}
 
 		// Rename the file
-		if(!rename($this->path, $this->directory . DIRECTORY_SEPARATOR . basename($file))) {
+		if(!rename($this->path, $path)) {
 			return FALSE;
 		}
 
@@ -293,7 +335,6 @@ class File {
 
 	/**
 	 * Returns the uploaded file, or NULL on failure.
-	 *
 	 *
 	 * @param  array   $file
 	 * @param  string  $directory
