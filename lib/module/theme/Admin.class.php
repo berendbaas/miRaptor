@@ -77,7 +77,7 @@ class Admin extends \lib\core\AbstractAdmin {
 	private function newGet() {
 		return array(
 			'name' => '',
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -89,7 +89,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		// Check fields
 		if(!isset($_POST['name'])) {
-			$field['message'] = '<p class="msg-warning">Require name.</p>';
+			$field['error'] = '<p class="msg-warning">Require name.</p>';
 			return $field;
 		}
 
@@ -99,7 +99,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		try {
 			$this->pdbc->query('INSERT INTO `module_theme` (`name`) VALUES ("' . $this->pdbc->quote($field['name']) . '")');
 		} catch(\lib\pdbc\PDBCException $e) {
-			$field['message'] = '<p class="msg-error">This theme already exists. Please try again.</p>';
+			$field['error'] = '<p class="msg-error">This theme already exists. Please try again.</p>';
 			return $field;
 		}
 
@@ -126,7 +126,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-theme">New theme</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-module-theme">New theme</h2>' . $field['error'] . $form->__toString();
 	}
 
 	/**
@@ -138,7 +138,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"');
 
 		return $this->pdbc->fetch() + array(
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -150,7 +150,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		// Check fields
 		if(!isset($_POST['name'])) {
-			$field['message'] = '<p class="msg-warning">Require name.</p>';
+			$field['error'] = '<p class="msg-warning">Require name.</p>';
 			return $field;
 		}
 
@@ -165,11 +165,11 @@ class Admin extends \lib\core\AbstractAdmin {
 		try {
 			$this->pdbc->query('UPDATE `module_theme` SET `name` = "'. $this->pdbc->quote($field['name']) .'" WHERE `id` = "'. $this->pdbc->quote($id) .'"');
 		} catch(\lib\pdbc\PDBCException $e) {
-			$field['message'] = '<p class="msg-error">This theme already exists. Please try again.</p>';
+			$field['error'] = '<p class="msg-error">This theme already exists. Please try again.</p>';
 			return $field;
 		}
 
-		$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
+		$field['error'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
 		return $field;
 	}
 
@@ -193,7 +193,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-theme">Edit theme</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-module-theme">Edit theme</h2>' . $field['error'] . $form->__toString();
 	}
 
 	/**
@@ -201,7 +201,7 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	private function removeGet($id) {
 		return array(
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -213,7 +213,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			$this->pdbc->query('DELETE FROM `module_theme` WHERE `id` = "' . $this->pdbc->quote($id) .'"');
 		} catch(\lib\pdbc\PDBCException $e) {
 			return array(
-				'message' => '<p class="msg-error">Can\'t remove a theme that is used. Please try again after removing the block, javascript, stylesheet & template that use this theme.</p>'
+				'error' => '<p class="msg-error">Can\'t remove a theme that is used. Please try again after removing the block, javascript, stylesheet & template that use this theme.</p>'
 			);
 		}
 
@@ -234,7 +234,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-theme">Remove theme</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-module-theme">Remove theme</h2>' . $field['error'] . $form->__toString();
 	}
 }
 

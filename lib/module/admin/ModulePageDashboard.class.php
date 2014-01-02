@@ -79,7 +79,7 @@ class ModulePageDashboard extends ModulePageAbstract {
 			'name' => $website->getName(),
 			'domain' => $website->getDomain(),
 			'active' => $website->getActive(),
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -90,7 +90,7 @@ class ModulePageDashboard extends ModulePageAbstract {
 		$field = $this->settingsGet($website);
 
 		if(!isset($_POST['name'], $_POST['domain'])) {
-			$field['message'] = '<p class="msg-warning">Require name and domain.</p>';
+			$field['error'] = '<p class="msg-warning">Require name and domain.</p>';
 			return $field;
 		}
 
@@ -106,7 +106,7 @@ class ModulePageDashboard extends ModulePageAbstract {
 		                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
 
 		if($this->pdbc->rowCount()) {
-			$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
+			$field['error'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
 		}
 
 		return $field;
@@ -148,7 +148,7 @@ class ModulePageDashboard extends ModulePageAbstract {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-settings">Website settings</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-settings">Website settings</h2>' . $field['error'] . $form->__toString();
 	}
 }
 

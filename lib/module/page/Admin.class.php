@@ -82,7 +82,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'name' => '',
 			'content' => '',
 			'template' => '',
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -94,7 +94,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		// Check fields
 		if(!isset($_POST['parent'], $_POST['index'], $_POST['name'], $_POST['content'], $_POST['template'])) {
-			$field['message'] = '<p class="msg-warning">Require parent, index, name, content & template.</p>';
+			$field['error'] = '<p class="msg-warning">Require parent, index, name, content & template.</p>';
 			return $field;
 		}
 
@@ -117,7 +117,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			                                   "' . $this->pdbc->quote($field['name']) . '")');
 		} catch(\lib\pdbc\PDBCException $e) {
 			$this->pdbc->transactionRollBack();
-			$field['message'] = '<p class="msg-error">This page already exists. Please try again.</p>';
+			$field['error'] = '<p class="msg-error">This page already exists. Please try again.</p>';
 			return $field;
 		}
 
@@ -128,7 +128,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			$this->updateRouter($insertID);
 		} catch(\lib\pdbc\PDBCException $e) {
 			$this->pdbc->transactionRollBack();
-			$field['message'] = '<p class="msg-error">This URI already exists. Please try again.</p>';
+			$field['error'] = '<p class="msg-error">This URI already exists. Please try again.</p>';
 			return $field;
 		}
 
@@ -142,7 +142,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			                    WHERE `id` = "' . $this->pdbc->quote($field['template']) . '"');
 		} catch(\lib\pdbc\PDBCException $e) {
 			$this->pdbc->transactionRollBack();
-			$field['message'] = '<p class="msg-error">Template doesn\'t exists. Please try again.</p>';
+			$field['error'] = '<p class="msg-error">Template doesn\'t exists. Please try again.</p>';
 			return $field;
 		}
 
@@ -248,7 +248,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-page">New page</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-module-page">New page</h2>' . $field['error'] . $form->__toString();
 	}
 
 	/**
@@ -267,7 +267,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		                    WHERE `router`.`id` = "' . $this->pdbc->quote($id) . '"');
 
 		return $this->pdbc->fetch() + array(
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -279,7 +279,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		// Check fields
 		if(!isset($_POST['parent'], $_POST['index'], $_POST['name'], $_POST['content'], $_POST['template'])) {
-			$oldField['message'] = '<p class="msg-warning">Require parent, index, name, content & template.</p>';
+			$oldField['error'] = '<p class="msg-warning">Require parent, index, name, content & template.</p>';
 			return $oldField;
 		}
 
@@ -290,7 +290,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'uri' => $oldField['uri'],
 			'content' => $_POST['content'],
 			'template' => $_POST['template'],
-			'message' => ''
+			'error' => ''
 		);
 
 		// Check changes
@@ -307,7 +307,7 @@ class Admin extends \lib\core\AbstractAdmin {
 				                    WHERE `id` = "'. $this->pdbc->quote($id) . '"');
 			} catch(\lib\pdbc\PDBCException $e) {
 				$this->pdbc->transactionRollBack();
-				$field['message'] = '<p class="msg-error">This page already exists. Please try again.</p>';
+				$field['error'] = '<p class="msg-error">This page already exists. Please try again.</p>';
 				return $field;
 			}
 
@@ -316,11 +316,11 @@ class Admin extends \lib\core\AbstractAdmin {
 				$this->updateRouter($id);
 			} catch(\lib\pdbc\PDBCException $e) {
 				$this->pdbc->transactionRollBack();
-				$field['message'] = '<p class="msg-error">This URI already exists. Please try again.</p>';
+				$field['error'] = '<p class="msg-error">This URI already exists. Please try again.</p>';
 				return $field;
 			}
 
-			$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
+			$field['error'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
 
 			// Commit transaction
 			$this->pdbc->transactionCommit();
@@ -335,11 +335,11 @@ class Admin extends \lib\core\AbstractAdmin {
 				                        `content` = "' . $this->pdbc->quote($field['content']) . '"
 				                    WHERE `id_router` = "'. $this->pdbc->quote($id) . '"');
 			} catch(\lib\pdbc\PDBCException $e) {
-				$field['message'] = '<p class="msg-error">Template doesn\'t exists. Please try again.</p>';
+				$field['error'] = '<p class="msg-error">Template doesn\'t exists. Please try again.</p>';
 				return $field;
 			}
 
-			$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
+			$field['error'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
 		}
 
 		return $field;
@@ -441,7 +441,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-page">Edit page</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-module-page">Edit page</h2>' . $field['error'] . $form->__toString();
 	}
 
 	/**
@@ -449,7 +449,7 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	private function removeGet($id) {
 		return array(
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -461,7 +461,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			$this->pdbc->query('DELETE FROM `router` WHERE `id` = "' . $this->pdbc->quote($id) . '"');
 		} catch(\lib\pdbc\PDBCException $e) {
 			return array(
-				'message' => '<p class="msg-error">Can\'t remove a page with children. Please try again after removing the children.</p>'
+				'error' => '<p class="msg-error">Can\'t remove a page with children. Please try again after removing the children.</p>'
 			);
 		}
 
@@ -482,7 +482,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-template">Remove page</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-module-template">Remove page</h2>' . $field['error'] . $form->__toString();
 	}
 
 	/**

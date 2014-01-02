@@ -24,7 +24,7 @@ class ModulePageSignIn extends ModulePageAbstract {
 		return array(
 			'username' => '',
 			'password' => '',
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -36,7 +36,7 @@ class ModulePageSignIn extends ModulePageAbstract {
 
 		// Check fields
 		if(!isset($_POST['username'], $_POST['password'])) {
-			$field['message'] = '<p class="msg-warning">Require username and password.</p>';
+			$field['error'] = '<p class="msg-warning">Require username and password.</p>';
 			return $field;
 		}
 
@@ -44,7 +44,7 @@ class ModulePageSignIn extends ModulePageAbstract {
 
 		// Check credentials
 		if(!($this->user->signIn($field['username'], $_POST['password']))) {
-			$field['message'] = '<p class="msg-error">Invalid username or password. Please try again.</p>';
+			$field['error'] = '<p class="msg-error">Invalid username or password. Please try again.</p>';
 			return $field;
 		}
 
@@ -76,7 +76,7 @@ class ModulePageSignIn extends ModulePageAbstract {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-sign-in">Sign In</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-sign-in">Sign In</h2>' . $field['error'] . $form->__toString();
 	}
 }
 

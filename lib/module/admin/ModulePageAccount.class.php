@@ -24,7 +24,7 @@ class ModulePageAccount extends ModulePageAbstract {
 		return array(
 			'username' => $this->user->getUsername(),
 			'email' => $this->user->getEmail(),
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -43,17 +43,17 @@ class ModulePageAccount extends ModulePageAbstract {
 		$field = array(
 			'username' => $oldField['username'],
 			'email' => $_POST['email'],
-			'message' => ''
+			'error' => ''
 		);
 
 		// Check password
 		if($_POST['password'] !== '') {
 			if(!$this->user->changePassword($_POST['password'])) {
-				$field['message'] = '<p class="msg-succes">Bad password.</p>';
+				$field['error'] = '<p class="msg-succes">Bad password.</p>';
 				return $field;
 			}
 
-			$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
+			$field['error'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
 		}
 
 		// Check data
@@ -62,7 +62,7 @@ class ModulePageAccount extends ModulePageAbstract {
 			                    SET `email` = "' . $this->pdbc->quote($field['email']) . '"
 			                    WHERE `id` = "' . $this->pdbc->quote($this->user->getID()) . '"');
 
-			$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
+			$field['error'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
 		}
 
 		return $field;
@@ -102,7 +102,7 @@ class ModulePageAccount extends ModulePageAbstract {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-account">Account</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-account">Account</h2>' . $field['error'] . $form->__toString();
 	}
 }
 

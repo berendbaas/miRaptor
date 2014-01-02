@@ -83,7 +83,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'name' => '',
 			'theme' => '',
 			'javascript' => '',
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -95,7 +95,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		// Check fields
 		if(!isset($_POST['theme'], $_POST['name'], $_POST['javascript'])) {
-			$field['message'] = '<p class="msg-warning">Require theme, name & javascript.</p>';
+			$field['error'] = '<p class="msg-warning">Require theme, name & javascript.</p>';
 			return $field;
 		}
 
@@ -110,7 +110,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			                            "' . $this->pdbc->quote($field['name']) . '",
 			                            "' . $this->pdbc->quote($field['javascript']) . '")');
 		} catch(\lib\pdbc\PDBCException $e) {
-			$field['message'] = '<p class="msg-error">This javascript already exists. Please try again.</p>';
+			$field['error'] = '<p class="msg-error">This javascript already exists. Please try again.</p>';
 			return $field;
 		}
 
@@ -166,7 +166,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-javascript">Edit javascript</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-module-javascript">Edit javascript</h2>' . $field['error'] . $form->__toString();
 	}
 
 	/**
@@ -178,7 +178,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		                    WHERE `id` = "' . $this->pdbc->quote($id) . '"');
 
 		return $this->pdbc->fetch() + array(
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -190,7 +190,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		// Check fields
 		if(!isset($_POST['theme'], $_POST['name'], $_POST['javascript'])) {
-			$field['message'] = '<p class="msg-warning">Require theme, name & javascript.</p>';
+			$field['error'] = '<p class="msg-warning">Require theme, name & javascript.</p>';
 			return $field;
 		}
 
@@ -211,11 +211,11 @@ class Admin extends \lib\core\AbstractAdmin {
 			                        `content` = "'. $this->pdbc->quote($field['javascript']) .'"
 		                    WHERE `id` = "'. $this->pdbc->quote($id) . '"');
 		} catch(\lib\pdbc\PDBCException $e) {
-			$field['message'] = '<p class="msg-error">This javascript already exists. Please try again.</p>';
+			$field['error'] = '<p class="msg-error">This javascript already exists. Please try again.</p>';
 			return $field;
 		}
 
-		$field['message'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
+		$field['error'] = '<p class="msg-succes">Your changes have been saved successfully.</p>';
 		return $field;
 	}
 
@@ -268,7 +268,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-javascript">Edit javascript</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-module-javascript">Edit javascript</h2>' . $field['error'] . $form->__toString();
 	}
 
 	/**
@@ -276,7 +276,7 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	private function removeGet($id) {
 		return array(
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -288,7 +288,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			$this->pdbc->query('DELETE FROM `module_javascript` WHERE `id` = "' . $this->pdbc->quote($id) .'"');
 		} catch(\lib\pdbc\PDBCException $e) {
 			return array(
-				'message' => '<p class="msg-error">Can\'t remove javascript.</p>'
+				'error' => '<p class="msg-error">Can\'t remove javascript.</p>'
 			);
 		}
 
@@ -309,7 +309,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-javascript">Remove javascript</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-module-javascript">Remove javascript</h2>' . $field['error'] . $form->__toString();
 	}
 }
 
