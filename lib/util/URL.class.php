@@ -182,30 +182,60 @@ class URL {
 	 * Set the scheme.
 	 *
 	 * @param  string $scheme
-	 * @return void
+	 * @return URL    $this
 	 */
 	public function setScheme($scheme) {
 		$this->scheme = $scheme;
+
+		return $this;
 	}
 
 	/**
 	 * Set the host.
 	 *
 	 * @param  string $host
-	 * @return void
+	 * @return URL    $this
 	 */
 	public function setHost($host) {
 		$this->host = $host;
+
+		return $this;
 	}
 
 	/**
 	 * Set the path.
 	 *
 	 * @param  string $path
-	 * @return void
+	 * @return URL    $this
 	 */
 	public function setPath($path) {
 		$this->path = $path;
+
+		return $this;
+	}
+
+	/**
+	 * Set the directory.
+	 *
+	 * @param  string $directory
+	 * @return URL    $this
+	 */
+	public function setDirectory($directory) {
+		$this->path = $directory . $this->getFile();
+
+		return $this;
+	}
+
+	/**
+	 * Set the file.
+	 *
+	 * @param  string $file
+	 * @return URL    $this
+	 */
+	public function setFile($file) {
+		$this->path = $this->getDirectory() . $file;
+
+		return $this;
 	}
 
 	/**
@@ -213,7 +243,7 @@ class URL {
 	 *
 	 * @param  array   $query
 	 * @param  boolean $encode = FALSE
-	 * @return void
+	 * @return URL      $this
 	 */
 	public function buildQuery(array $query, $encode = FALSE) {
 		// Build
@@ -221,26 +251,32 @@ class URL {
 
 		// Encode
 		if($encode) $this->query = htmlentities($this->query);
+
+		return $this;
 	}
 
 	/**
 	 * Set the query.
 	 *
 	 * @param  string $query
-	 * @return void
+	 * @return URL    $this
 	 */
 	public function setQuery($query) {
 		$this->query = $query;
+
+		return $this;
 	}
 
 	/**
 	 * Set the fragment.
 	 *
 	 * @param  string $fragment
-	 * @return void
+	 * @return URL    $this
 	 */
 	public function setFragment($fragment) {
 		$this->fragment = $fragment;
+
+		return $this;
 	}
 
 	/**
