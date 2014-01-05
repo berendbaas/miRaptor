@@ -10,7 +10,7 @@ namespace lib\module\admin;
 class ModulePageDashboard extends ModulePageAbstract {
 	private $website;
 
-	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $redirect, $website) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\util\URL $url, $redirect, $website) {
 		parent::__construct($pdbc, $url, $redirect);
 		$this->website = $website;
 

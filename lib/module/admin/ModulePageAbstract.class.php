@@ -23,7 +23,7 @@ abstract class ModulePageAbstract {
 	/**
 	 *
 	 */
-	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $redirect) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\util\URL $url, $redirect) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
 		$this->redirect = $redirect;

@@ -21,7 +21,7 @@ class Admin extends \lib\core\AbstractAdmin {
 	private $file;
 	private $fileURL;
 
-	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, \lib\core\User $user, \lib\core\Website $website) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\util\URL $url, \lib\core\User $user, \lib\core\Website $website) {
 		parent::__construct($pdbc, $url, $user, $website);
 
 		// Check folder
@@ -30,7 +30,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		}
 
 		$this->folder = $_GET['folder'];
-		$this->file = new \lib\core\File(getcwd() . '/users' . $user->getDirectory() . $website->getDirectory() . self::ROOT_FOLDER . $this->folder);
+		$this->file = new \lib\util\File(getcwd() . '/users' . $user->getDirectory() . $website->getDirectory() . self::ROOT_FOLDER . $this->folder);
 		$this->fileURL = '//' . $website->getHost() . self::ROOT_FOLDER . $this->folder;
 	}
 
@@ -156,7 +156,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		}
 
 		$field['name'] = $_POST['name'];
-		$directory = new \lib\core\File($this->file->getPath() . DIRECTORY_SEPARATOR . $field['name']);
+		$directory = new \lib\util\File($this->file->getPath() . DIRECTORY_SEPARATOR . $field['name']);
 
 		// Create directory
 		if(!$directory->makeDirectory()) {
@@ -216,7 +216,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		}
 
 		// Check upload
-		$uploads = \lib\core\File::multiUpload($_FILES['file'], $this->file->getPath(), TRUE);
+		$uploads = \lib\util\File::multiUpload($_FILES['file'], $this->file->getPath(), TRUE);
 		$errors = array();
 
 		foreach($uploads as $upload) {
@@ -292,7 +292,6 @@ class Admin extends \lib\core\AbstractAdmin {
 		}
 
 		$field['name'] = $_POST['name'];
-		$file = new \lib\core\File();
 
 		// Rename
 		if(!$this->file->rename($field['name'])) {

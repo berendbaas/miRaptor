@@ -37,7 +37,7 @@ class Main implements Runnable {
 		$scheme = isset($_SERVER['HTTPS']) ? 'https://' : 'http://';
 		$host = empty($_SERVER['HTTP_HOST']) ? $defaultHost : $_SERVER['HTTP_HOST'];
 
-		return new URL($scheme . $host . $_SERVER['REQUEST_URI']);
+		return new \lib\util\URL($scheme . $host . $_SERVER['REQUEST_URI']);
 	}
 
 	public function run() {

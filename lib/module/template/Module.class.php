@@ -8,7 +8,7 @@ namespace lib\module\template;
  * @version 1.0
  */
 class Module extends \lib\core\AbstractModule {
-	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $routerID, array $arguments) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\util\URL $url, $routerID, array $arguments) {
 			parent::__construct($pdbc, $url, $routerID, $arguments);
 			$this->isParsable = TRUE;
 			$this->isStatic = TRUE;

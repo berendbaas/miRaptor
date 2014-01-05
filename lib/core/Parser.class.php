@@ -31,11 +31,11 @@ class Parser implements Runnable {
 	 * Construct a Parser object with the given PDBC & URL.
 	 *
 	 * @param  \lib\pdbc\PDBC          $pdbc
-	 * @param  URL                     $url
+	 * @param  \lib\util\URL  $url
 	 * @throws StatusCodeException     if the requested file doesn't exists.
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
-	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $module = self::DEFAULT_MODULE) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\util\URL $url, $module = self::DEFAULT_MODULE) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
 		

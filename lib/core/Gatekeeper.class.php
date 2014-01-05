@@ -19,12 +19,12 @@ class Gatekeeper {
 	 * Construct a Gatekeeper object with the given PDBC, URL & user directory.
 	 *
 	 * @param \lib\pdbc\PDBC $pdbc
-	 * @param URL            $url
+	 * @param \lib\util\URL  $url
 	 * @param string         $userDirectory
 	 * @throws StatusCodeException     if the requested website can't be found.
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
-	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $userDirectory) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\util\URL $url, $userDirectory) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
 		$this->userDirectory = $userDirectory;
@@ -53,7 +53,7 @@ class Gatekeeper {
 			$this->redirect();
 		}
 		
-		$this->file = new File($this->userDirectory . $website['directory'] . $this->url->getDirectory() . ($this->url->getFile() === '' ? self::DEFAULT_FILE : $this->url->getFile()));
+		$this->file = new \lib\util\File($this->userDirectory . $website['directory'] . $this->url->getDirectory() . ($this->url->getFile() === '' ? self::DEFAULT_FILE : $this->url->getFile()));
 		$this->pdbc = clone $this->pdbc;
 		$this->pdbc->selectDatabase($website['db']);
 	}

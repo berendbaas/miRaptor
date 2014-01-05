@@ -26,11 +26,11 @@ abstract class AbstractModule implements Runnable {
 	 * Construct a Module object with the given PDBC, URL, pageID & arguments.
 	 *
 	 * @param \lib\pdbc\PDBC  $pdbc
-	 * @param URL             $url
+	 * @param \lib\util\URL   $url
 	 * @param int             $pageID
 	 * @param array           $arguments
 	 */
-	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $routerID, array $arguments) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\util\URL $url, $routerID, array $arguments) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
 		$this->routerID = $routerID;

@@ -13,7 +13,7 @@ class ModulePageWebsite extends ModulePageAbstract {
 
 	private $website;
 
-	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $redirect) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\util\URL $url, $redirect) {
 		parent::__construct($pdbc, $url, $redirect);
 		$this->init();
 		

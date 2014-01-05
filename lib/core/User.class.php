@@ -21,7 +21,7 @@ class User {
 	 */
 	public function __construct(\lib\pdbc\PDBC $pdbc) {
 		$this->pdbc = $pdbc;
-		$this->session = new Session();
+		$this->session = new \lib\util\Session();
 		$this->user = $this->session->get(self::SESSION_KEY);
 	}
 

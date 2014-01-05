@@ -13,7 +13,7 @@ class Module extends \lib\core\AbstractModule {
 	const DEFAULT_END_LEVEL = -1;
 	const DEFAULT_DEPTH = -1;
 
-	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, $routerID, array $arguments) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\util\URL $url, $routerID, array $arguments) {
 			parent::__construct($pdbc, $url, $routerID, $arguments);
 			$this->isStatic = TRUE;
 	}
