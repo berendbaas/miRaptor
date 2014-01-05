@@ -31,7 +31,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		$this->folder = $_GET['folder'];
 		$this->file = new \lib\core\File(getcwd() . '/users' . $user->getDirectory() . $website->getDirectory() . self::ROOT_FOLDER . $this->folder);
-		$this->fileURL = '//' . $website->getDomain() . self::ROOT_FOLDER . $this->folder;
+		$this->fileURL = '//' . $website->getHost() . self::ROOT_FOLDER . $this->folder;
 	}
 
 	public function run() {

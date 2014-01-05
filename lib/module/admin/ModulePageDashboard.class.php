@@ -77,7 +77,7 @@ class ModulePageDashboard extends ModulePageAbstract {
 	private function settingsGet($website) {
 		return array(
 			'name' => $website->getName(),
-			'domain' => $website->getDomain(),
+			'host' => $website->getHost(),
 			'active' => $website->getActive(),
 			'error' => ''
 		);
@@ -89,18 +89,18 @@ class ModulePageDashboard extends ModulePageAbstract {
 	private function settingsPost($website) {
 		$field = $this->settingsGet($website);
 
-		if(!isset($_POST['name'], $_POST['domain'])) {
-			$field['error'] = '<p class="msg-warning">Require name and domain.</p>';
+		if(!isset($_POST['name'], $_POST['host'])) {
+			$field['error'] = '<p class="msg-warning">Require name and host.</p>';
 			return $field;
 		}
 
 		$field['name'] = $_POST['name'];
-		$field['domain'] = $_POST['domain'];
+		$field['host'] = $_POST['host'];
 		$field['active'] = (isset($_POST['active']) ? 1 : 0);
 
 		$this->pdbc->query('UPDATE `website`
 		                    SET `name` =  "' . $this->pdbc->quote($field['name']) . '",
-		                        `domain` =  "' . $this->pdbc->quote($field['domain']) . '",
+		                        `host` =  "' . $this->pdbc->quote($field['host']) . '",
 					`active` =  "' . $this->pdbc->quote($field['active']) . '"
 		                    WHERE `id` = "' . $this->pdbc->quote($website->getID()) . '"
 		                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
@@ -127,12 +127,12 @@ class ModulePageDashboard extends ModulePageAbstract {
 			'value' => $field['name']
 		));
 
-		$form->addInput('Domain', array(
+		$form->addInput('Host', array(
 			'type' => 'text',
-			'id' => 'form-domain',
-			'name' => 'domain',
-			'placeholder' => 'Domain',
-			'value' => $field['domain']
+			'id' => 'form-host',
+			'name' => 'host',
+			'placeholder' => 'Host',
+			'value' => $field['host']
 		));
 
 		$form->addInput('Active', array(

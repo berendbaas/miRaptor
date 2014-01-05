@@ -19,7 +19,7 @@ class Website {
 		$this->pdbc = $pdbc;
 		$this->user = $user;
 		
-		$this->pdbc->query('SELECT `id`, `name`, `directory`, `domain`, `active`
+		$this->pdbc->query('SELECT `id`, `name`, `directory`, `host`, `active`
 		                    FROM `website`
 		                    WHERE `id` = "' . $this->pdbc->quote($websiteID) . '"
 		                    AND `uid` = "' . $this->pdbc->quote($this->user->getID()) . '"');
@@ -64,12 +64,12 @@ class Website {
 	}
 
 	/**
-	 * Returns the website domain.
+	 * Returns the website host.
 	 *
-	 * @return string the website domain.
+	 * @return string the website host.
 	 */
-	public function getDomain() {
-		return isset($this->website['domain']) ? $this->website['domain'] : NULL;
+	public function getHost() {
+		return isset($this->website['host']) ? $this->website['host'] : NULL;
 	}
 
 	/**
