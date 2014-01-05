@@ -105,20 +105,20 @@ class File {
 	}
 
 	/**
-	 * Returns the time of the last modification as a unixtimestap.
+	 * Returns the time of the last modification as a unixtimestap, or -1 on failure.
 	 *
-	 * @return int the time of the last modification as a unixtimestap.
+	 * @return int the time of the last modification as a unixtimestap, or -1 on failure.
 	 */
-	public function getLastModified() {
+	public function lastModified() {
 		return ($result = filemtime($this->path)) === FALSE ? -1 : $result;
 	}
 
 	/**
-	 * Returns the numer of bytes in the file.
+	 * Returns the numer of bytes in the file, or -1 on failure.
 	 *
-	 * @return int the number of bytes in the file.
+	 * @return int the number of bytes in the file, or -1 on failure.
 	 */
-	public function getLength() {
+	public function length() {
 		return ($result = filesize($this->path)) === FALSE ? -1 : $result;
 	}
 
