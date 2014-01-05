@@ -84,7 +84,7 @@ class ModulePageWebsite extends ModulePageAbstract {
 		$list = new \lib\html\HTMLList();
 
 		foreach($modules as $module) {
-			$list->addItem('<a href="' . $this->url->getURLPath() . '?module=' . $module['name'] . '">' . ucfirst($module['name']) . '</a>');
+			$list->addItem('<a href="' . $this->url->buildQuery(array('module' => $module['name'])) . '">' . ucfirst($module['name']) . '</a>');
 		}
 
 		return $list->__toString();

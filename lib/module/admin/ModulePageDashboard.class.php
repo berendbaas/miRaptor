@@ -64,7 +64,7 @@ class ModulePageDashboard extends ModulePageAbstract {
 			$table->addColumn(++$number);
 			$table->addColumn('<a href="' . $this->website . $field['id'] . '">' . $field['name'] . '</a>');
 			$table->addColumn('<span class="icon icon-active-' . $field['active'] . '"></span>');
-			$table->addColumn('<a class="icon icon-settings" href="' . $this->url->getDirectory() . $field['id'] . '"></a>');
+			$table->addColumn('<a class="icon icon-settings" href="' . $this->url->setFile($field['id']) . '"></a>');
 			$table->closeRow();
 		}
 

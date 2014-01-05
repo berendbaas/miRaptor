@@ -38,7 +38,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			break;
 
 			default:
-				throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=template', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+				throw new \lib\core\StatusCodeException($this->url->buildQuery(array('module' => 'page')), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 			break;
 		}
 	}
@@ -64,12 +64,12 @@ class Admin extends \lib\core\AbstractAdmin {
 			$table->addColumn(++$number);
 			$table->addColumn($this->markDepth($field['name'], $field['depth']));
 			$table->addColumn($field['uri']);
-			$table->addColumn('<a class="icon icon-edit" href="' . $this->url->getPath() . '?module=page&amp;action=' . self::ACTION_EDIT . '&amp;id=' . $field['id'] . '"></a>');
-			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->getPath() . '?module=page&amp;action=' . self::ACTION_REMOVE . '&amp;id=' . $field['id'] . '"></a>');
+			$table->addColumn('<a class="icon icon-edit" href="' . $this->url->buildQuery(array('module' => 'page', 'action' => self::ACTION_EDIT, 'id' => $field['id']), TRUE) . '"></a>');
+			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->buildQuery(array('module' => 'page', 'action' => self::ACTION_REMOVE, 'id' => $field['id']), TRUE) . '"></a>');
 			$table->closeRow();
 		}
 
-		return '<h2 class="icon icon-module-page">Page</h2>' . $table . '<p><a class="icon icon-new" href="' . $this->url->getPath() . '?module=page&amp;action=' . self::ACTION_NEW . '">New page</a></p>';
+		return '<h2 class="icon icon-module-page">Page</h2>' . $table . '<p><a class="icon icon-new" href="' . $this->url->buildQuery(array('module' => 'page', 'action' => self::ACTION_NEW), TRUE) . '">New page</a></p>';
 	}
 
 	/**
@@ -149,7 +149,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		// Commit transaction
 		$this->pdbc->transactionCommit();
 
-		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=page', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		throw new \lib\core\StatusCodeException($this->url->buildQuery(array('module' => 'page')), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
 
 	/**
@@ -242,7 +242,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		$form->closeFieldset();
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?module=page' . '"><button type="button">Back</button></a>');
+		$form->addContent('<a href="' . $this->url->buildQuery(array('module' => 'page'), TRUE) . '"><button type="button">Back</button></a>');
 
 		$form->addButton('Submit', array(
 			'type' => 'submit'
@@ -435,7 +435,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		$form->closeFieldset();
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?module=page' . '"><button type="button">Back</button></a>');
+		$form->addContent('<a href="' . $this->url->buildQuery(array('module' => 'page'), TRUE) . '"><button type="button">Back</button></a>');
 
 		$form->addButton('Submit', array(
 			'type' => 'submit'
@@ -465,7 +465,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			);
 		}
 
-		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=page', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		throw new \lib\core\StatusCodeException($this->url->buildQuery(array('module' => 'page')), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
 
 	/**
@@ -476,7 +476,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		$form->addContent('<p>Are you sure you want to remove this page? This action can\'t be undone!</p>');
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?module=page' . '"><button type="button">No</button></a>');
+		$form->addContent('<a href="' . $this->url->buildQuery(array('module' => 'page'), TRUE) . '"><button type="button">No</button></a>');
 
 		$form->addButton('Yes', array(
 			'type' => 'submit'
@@ -508,7 +508,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		                    WHERE `router`.`id` = "' . $this->pdbc->quote($id) . '"');
 
 		// Select children
-		$this->pdbc->query('SELECT `id` FROM `router` as `r1` WHERE `pid` = "' . $this->pdbc->quote($id) . '"');
+		$this->pdbc->query('SELECT `id` FROM `router` WHERE `pid` = "' . $this->pdbc->quote($id) . '"');
 
 		foreach($this->pdbc->fetchAll() as $child) {
 			!$this->updateRouter($child['id']);

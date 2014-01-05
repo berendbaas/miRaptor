@@ -79,10 +79,7 @@ class Gatekeeper {
 			throw new StatusCodeException('Gatekeeper: unknown host - ' . $this->url->getHost(), StatusCodeException::ERROR_CLIENT_NOT_FOUND);
 		}
 
-		$this->url->setHost($redirect['host']);
-		$this->url->setPath($redirect['path']);
-
-		throw new StatusCodeException($this->url, StatusCodeException::REDIRECTION_MOVED_PERMANENTLY);
+		throw new StatusCodeException($this->url->setHost($redirect['host'])->setPath($redirect['path']), StatusCodeException::REDIRECTION_MOVED_PERMANENTLY);
 	}
 
 	/**

@@ -26,7 +26,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		// Check folder
 		if(!isset($_GET['folder']) || strpos($_GET['folder'],'..') !== FALSE || strpos($_GET['folder'],'//') !== FALSE) {
-			throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . self::ROOT_URL, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+			throw new \lib\core\StatusCodeException($this->url->buildQuery(array('module' => 'file', 'folder' => self::ROOT_URL)), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
 		$this->folder = $_GET['folder'];
@@ -39,7 +39,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		if(!$this->file->exists()) {
 			// Check if root try to create the directory
 			if($this->folder !== self::ROOT_URL || $this->file->makeDirectory(TRUE)) {
-				throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . self::ROOT_URL, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+				throw new \lib\core\StatusCodeException($this->url->buildQuery(array('module' => 'file', 'folder' => self::ROOT_URL)), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 			}
 
 			$this->result = '<h2 class="icon icon-module-file">File</h2><p>The file module directory doesn\'t exists. Contact your system administrator.</p>';
@@ -70,7 +70,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			break;
 
 			default:
-				throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . self::ROOT_URL, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+				throw new \lib\core\StatusCodeException($this->url->buildQuery(array('module' => 'file', 'folder' => self::ROOT_URL)), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 			break;
 		}
 	}
@@ -93,7 +93,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		$folder = self::ROOT_URL;
 
 		for($i = 0; $i < $length; $i++) {
-			$breadcrumb .= '<li><a href="' . $this->url->getPath() . '?module=file&amp;folder=' . $folder . '">' . $segment[$i] . '</a></li>';
+			$breadcrumb .= '<li><a href="' . $this->url->buildQuery(array('module' => 'file', 'folder' => $folder), TRUE) . '">' . $segment[$i] . '</a></li>';
 			$folder .= $segment[$i + 1] . DIRECTORY_SEPARATOR;
 		}
 
@@ -111,9 +111,9 @@ class Admin extends \lib\core\AbstractAdmin {
 		foreach($directories as $directory) {
 			$table->openRow();
 			$table->addColumn(++$number);
-			$table->addColumn('<a class="icon icon-folder" href="' . $this->url->getPath() . '?module=file&amp;folder=' . $this->folder . $directory . '/">' . $directory . '</a');
-			$table->addColumn('<a class="icon icon-rename" href="' . $this->url->getPath() . '?module=file&amp;action=' . self::ACTION_RENAME . '&amp;folder=' . $this->folder . $directory . '/"></a>');
-			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->getPath() . '?module=file&amp;action=' . self::ACTION_REMOVE . '&amp;folder=' . $this->folder . $directory . '/"></a>');
+			$table->addColumn('<a class="icon icon-folder" href="' . $this->url->buildQuery(array('module' => 'file', 'folder' => $this->folder . $directory), TRUE) . '/">' . $directory . '</a');
+			$table->addColumn('<a class="icon icon-rename" href="' . $this->url->buildQuery(array('module' => 'file', 'action' => self::ACTION_RENAME, 'folder' => $this->folder . $directory), TRUE) . '/"></a>');
+			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->buildQuery(array('module' => 'file', 'action' => self::ACTION_REMOVE, 'folder' => $this->folder . $directory), TRUE) . '/"></a>');
 			$table->closeRow();
 		}
 
@@ -125,12 +125,12 @@ class Admin extends \lib\core\AbstractAdmin {
 			$table->openRow();
 			$table->addColumn(++$number);
 			$table->addColumn('<a class="icon icon-file" href="' . $this->fileURL . $file . '" target="_blank">' . $file . '</span>');
-			$table->addColumn('<a class="icon icon-rename" href="' . $this->url->getPath() . '?module=file&amp;action=' . self::ACTION_RENAME . '&amp;folder=' . $this->folder . $file . '"></a>');
-			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->getPath() . '?module=file&amp;action=' . self::ACTION_REMOVE . '&amp;folder=' . $this->folder . $file . '"></a>');
+			$table->addColumn('<a class="icon icon-rename" href="' . $this->url->buildQuery(array('module' => 'file', 'action' => self::ACTION_RENAME, 'folder' => $this->folder . $file), TRUE) . '/"></a>');
+			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->buildQuery(array('module' => 'file', 'action' => self::ACTION_REMOVE, 'folder' => $this->folder . $file), TRUE) . '/"></a>');
 			$table->closeRow();
 		}
 
-		return '<h2 class="icon icon-module-file">File</h2>' . $breadcrumb . $table . '<p><a class="icon icon-new" href="' . $this->url->getPath() . '?module=file&amp;action=' . self::ACTION_NEW . '&amp;folder=' . $this->folder . '">New folder</a><a class="icon icon-upload" href="' . $this->url->getPath() . '?module=file&amp;action=' . self::ACTION_UPLOAD . '&amp;folder=' . $this->folder . '">Upload files</a></p>';
+		return '<h2 class="icon icon-module-file">File</h2>' . $breadcrumb . $table . '<p><a class="icon icon-new" href="' . $this->url->buildQuery(array('module' => 'file', 'action' => self::ACTION_NEW, 'folder' => $this->folder), TRUE) . '">New folder</a><a class="icon icon-upload" href="' . $this->url->buildQuery(array('module' => 'file', 'action' => self::ACTION_UPLOAD, 'folder' => $this->folder), TRUE) . '">Upload files</a></p>';
 	}
 
 	/**
@@ -164,7 +164,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			return $field;
 		}
 
-		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . $this->folder, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		throw new \lib\core\StatusCodeException($this->url->buildQuery(array('module' => 'file', 'folder' => $this->folder)), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
 
 	/**
@@ -181,7 +181,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'value' => $field['name']
 		));
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?module=file&amp;folder=' . $this->folder . '"><button type="button">Back</button></a>');
+		$form->addContent('<a href="' . $this->url->buildQuery(array('module' => 'file', 'folder' => $this->folder), TRUE) . '"><button type="button">Back</button></a>');
 
 		$form->addButton('Submit', array(
 			'type' => 'submit'
@@ -233,7 +233,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			return $field;
 		}
 
-		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . $this->folder, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		throw new \lib\core\StatusCodeException($this->url->buildQuery(array('module' => 'file', 'folder' => $this->folder)), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
 
 	/**
@@ -254,7 +254,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'multiple' => 'multiple'
 		));
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?module=file&amp;folder=' . $this->folder . '"><button type="button">Back</button></a>');
+		$form->addContent('<a href="' . $this->url->buildQuery(array('module' => 'file', 'folder' => $this->folder), TRUE) . '"><button type="button">Back</button></a>');
 
 		$form->addButton('Submit', array(
 			'type' => 'submit'
@@ -299,7 +299,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			return $field;
 		}
 
-		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . dirname($this->folder) . '/', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		throw new \lib\core\StatusCodeException($this->url->buildQuery(array('module' => 'file', 'folder' => dirname($this->folder) . '/')), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
 
 	/**
@@ -316,7 +316,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'value' => $field['name']
 		));
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?module=file&amp;folder=' . dirname($this->folder) . '/"><button type="button">Back</button></a>');
+		$form->addContent('<a href="' . $this->url->buildQuery(array('module' => 'file', 'folder' => dirname($this->folder) . '/'), TRUE) . '"><button type="button">Back</button></a>');
 
 		$form->addButton('Submit', array(
 			'type' => 'submit'
@@ -352,7 +352,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			}
 		}
 
-		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . dirname($this->folder) . '/', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		throw new \lib\core\StatusCodeException($this->url->buildQuery(array('module' => 'file', 'folder' => dirname($this->folder) . '/')), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
 
 	/**
@@ -376,7 +376,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		$form->addContent('<p>Are you sure you want to permanently remove this ' . ($this->file->isDirectory() ? 'directory' : 'file') . '? This action can\'t be undone!</p>');
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?module=file&amp;folder=' . dirname($this->folder) . '/"><button type="button">Back</button></a>');
+		$form->addContent('<a href="' . $this->url->buildQuery(array('module' => 'file', 'folder' => dirname($this->folder) . '/'), TRUE) . '"><button type="button">No</button></a>');
 
 		$form->addButton('Yes', array(
 			'type' => 'submit'

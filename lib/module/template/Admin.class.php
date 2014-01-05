@@ -36,7 +36,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			break;
 
 			default:
-				throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=template', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+				throw new \lib\core\StatusCodeException($this->url->buildQuery(array('module' => 'template')), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 			break;
 		}
 	}
@@ -67,12 +67,12 @@ class Admin extends \lib\core\AbstractAdmin {
 			$table->addColumn(++$number);
 			$table->addColumn($field['name']);
 			$table->addColumn($field['theme']);
-			$table->addColumn('<a class="icon icon-edit" href="' . $this->url->getPath() . '?module=template&amp;action=' . self::ACTION_EDIT . '&amp;id=' . $field['id'] . '"></a>');
-			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->getPath() . '?module=template&amp;action=' . self::ACTION_REMOVE . '&amp;id=' . $field['id'] . '"></a>');
+			$table->addColumn('<a class="icon icon-edit" href="' . $this->url->buildQuery(array('module' => 'template', 'action' => self::ACTION_EDIT, 'id' => $field['id']), TRUE) . '"></a>');
+			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->buildQuery(array('module' => 'template', 'action' => self::ACTION_REMOVE, 'id' => $field['id']), TRUE) . '"></a>');
 			$table->closeRow();
 		}
 
-		return '<h2 class="icon icon-module-template">Template</h2>' . $table . '<p><a class="icon icon-new" href="' . $this->url->getPath() . '?module=template&amp;action=' . self::ACTION_NEW . '">New template</a></p>';
+		return '<h2 class="icon icon-module-template">Template</h2>' . $table . '<p><a class="icon icon-new" href="' . $this->url->buildQuery(array('module' => 'template', 'action' => self::ACTION_NEW), TRUE) . '">New template</a></p>';
 	}
 
 	/**
@@ -115,7 +115,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			return $field;
 		}
 
-		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=template', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		throw new \lib\core\StatusCodeException($this->url->buildQuery(array('module' => 'theme')), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
 
 	/**
@@ -161,7 +161,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'placeholder' => 'Template'
 		));
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?module=template' . '"><button type="button">Back</button></a>');
+		$form->addContent('<a href="' . $this->url->buildQuery(array('module' => 'theme'), TRUE) . '"><button type="button">Back</button></a>');
 
 		$form->addButton('Submit', array(
 			'type' => 'submit'
@@ -263,7 +263,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'placeholder' => 'Template'
 		));
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?module=template' . '"><button type="button">Back</button></a>');
+		$form->addContent('<a href="' . $this->url->buildQuery(array('module' => 'theme'), TRUE) . '"><button type="button">Back</button></a>');
 
 		$form->addButton('Submit', array(
 			'type' => 'submit'
@@ -294,7 +294,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		}
 
-		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=template', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		throw new \lib\core\StatusCodeException($this->url->buildQuery(array('module' => 'theme')), \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
 
 	/**
@@ -305,7 +305,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		$form->addContent('<p>Are you sure you want to remove this template? This action can\'t be undone!</p>');
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?module=template' . '"><button type="button">No</button></a>');
+		$form->addContent('<a href="' . $this->url->buildQuery(array('module' => 'theme'), TRUE) . '"><button type="button">No</button></a>');
 
 		$form->addButton('Yes', array(
 			'type' => 'submit'
