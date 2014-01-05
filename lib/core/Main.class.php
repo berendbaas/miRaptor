@@ -24,9 +24,7 @@ class Main implements Runnable {
 		$this->pdbc = $pdbc;
 		$this->url = self::initURL($defaultHost);
 		$this->userDirectory = $userDirectory;
-
 		$this->statusCode = StatusCodeException::SUCCESFULL_OK;
-		$this->time = microtime(TRUE);
 	}
 
 	/**
@@ -36,10 +34,10 @@ class Main implements Runnable {
 	 * @return URL    a URL object.
 	 */
 	public static function initURL($defaultHost) {
-		$scheme = isset($_SERVER['HTTPS']) ? 'https' : 'http';
+		$scheme = isset($_SERVER['HTTPS']) ? 'https://' : 'http://';
 		$host = empty($_SERVER['HTTP_HOST']) ? $defaultHost : $_SERVER['HTTP_HOST'];
 
-		return new URL($scheme, $host, $_SERVER['REQUEST_URI']);
+		return new URL($scheme . $host . $_SERVER['REQUEST_URI']);
 	}
 
 	public function run() {
@@ -81,7 +79,7 @@ class Main implements Runnable {
 	 */
 	private function log() {
 		// Run time
-		$runtime = (microtime(TRUE) - $this->time) * 1000;
+		$runtime = (microtime(TRUE) - $_SERVER['REQUEST_TIME_FLOAT']) * 1000;
 		
 		// Request
 		$request = $this->pdbc->quote($this->url->getURL());
@@ -90,7 +88,7 @@ class Main implements Runnable {
 
 		// Insert
 		$this->pdbc->query('INSERT INTO `log` (`date`, `runtime`, `bandwidth`, `statuscode`, `request`, `referal`, `ip`)
-		                    VALUES (FROM_UNIXTIME("' . $this->time . '"),
+		                    VALUES (FROM_UNIXTIME("' . $_SERVER['REQUEST_TIME_FLOAT'] . '"),
 		                            "' . $runtime . '",
 		                            "' . ob_get_length() . '",
 		                            "' . $this->statusCode . '",
