@@ -8,14 +8,13 @@ namespace lib\module\file;
  * @version 1.0
  */
 class Admin extends \lib\core\AbstractAdmin {
-	const FOLDER_DEFAULT = '/';
-	const FOLDER_FILESYSTEM = '/_file';
-	const FOLDER_HOME = 'Files';
+	const ROOT_NAME = 'Files';
+	const ROOT_FOLDER = '/_file';
+	const ROOT_URL = '/';
 
 	const ACTION_NEW = 'new';
 	const ACTION_UPLOAD = 'upload';
 	const ACTION_RENAME = 'rename';
-	const ACTION_MOVE = 'move';
 	const ACTION_REMOVE = 'remove';
 
 	private $folder;
@@ -25,22 +24,29 @@ class Admin extends \lib\core\AbstractAdmin {
 	public function __construct(\lib\pdbc\PDBC $pdbc, \lib\core\URL $url, \lib\core\User $user, \lib\core\Website $website) {
 		parent::__construct($pdbc, $url, $user, $website);
 
-		// Check get
-		if(!isset($_GET['folder']) || strpos($_GET['folder'],'..') !== FALSE) {
-			throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . self::FOLDER_DEFAULT, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+		// Check folder
+		if(!isset($_GET['folder']) || strpos($_GET['folder'],'..') !== FALSE || strpos($_GET['folder'],'//') !== FALSE) {
+			throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . self::ROOT_URL, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 		}
 
 		$this->folder = $_GET['folder'];
-		$this->file = new \lib\core\File(getcwd() . '/users' . $user->getDirectory() . $website->getDirectory() . self::FOLDER_FILESYSTEM . $this->folder);
-		$this->fileURL = '//' . $website->getDomain() . self::FOLDER_FILESYSTEM . $this->folder;
-
-		// Check exists
-		if(!$this->file->exists()) {
-			throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . self::FOLDER_DEFAULT, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
-		}
+		$this->file = new \lib\core\File(getcwd() . '/users' . $user->getDirectory() . $website->getDirectory() . self::ROOT_FOLDER . $this->folder);
+		$this->fileURL = '//' . $website->getDomain() . self::ROOT_FOLDER . $this->folder;
 	}
 
 	public function run() {
+		// Check file
+		if(!$this->file->exists()) {
+			// Check if root try to create the directory
+			if($this->folder !== self::ROOT_URL || $this->file->makeDirectory(TRUE)) {
+				throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . self::ROOT_URL, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+			}
+
+			$this->result = '<h2 class="icon icon-module-file">File</h2><p>The file module directory doesn\'t exists. Contact your system administrator.</p>';
+			return;
+		}
+
+		// Check action
 		if(!isset($_GET['action'])) {
 			$this->result = $this->overviewPage();
 			return;
@@ -59,16 +65,12 @@ class Admin extends \lib\core\AbstractAdmin {
 				$this->result = $this->renamePage($_SERVER['REQUEST_METHOD'] === 'POST' ? $this->renamePost() : $this->renameGet());
 			break;
 
-			case self::ACTION_MOVE:
-				$this->result = $this->movePage($_SERVER['REQUEST_METHOD'] === 'POST' ? $this->movePost() : $this->moveGet());
-			break;
-
 			case self::ACTION_REMOVE:
 				$this->result = $this->removePage($_SERVER['REQUEST_METHOD'] === 'POST' ? $this->removePost() : $this->removeGet());
 			break;
 
 			default:
-				throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . self::FOLDER_DEFAULT, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
+				throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . self::ROOT_URL, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 			break;
 		}
 	}
@@ -84,11 +86,11 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		// Breadcrumb
 		$segment = explode('/', $this->folder);
-		$segment[0] = self::FOLDER_HOME;
+		$segment[0] = self::ROOT_NAME;
 		$length = count($segment) - 1;
 
 		$breadcrumb = '<ul class="breadcrumb">';
-		$folder = self::FOLDER_DEFAULT;
+		$folder = self::ROOT_URL;
 
 		for($i = 0; $i < $length; $i++) {
 			$breadcrumb .= '<li><a href="' . $this->url->getPath() . '?module=file&amp;folder=' . $folder . '">' . $segment[$i] . '</a></li>';
@@ -99,7 +101,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		// Tables
 		$table = new \lib\html\HTMLTable();
-		$table->addHeaderRow(array('#','Name','Rename','Move','Delete'));
+		$table->addHeaderRow(array('#','Name','Rename','Delete'));
 		$number = 0;
 
 		// Directories
@@ -111,7 +113,6 @@ class Admin extends \lib\core\AbstractAdmin {
 			$table->addColumn(++$number);
 			$table->addColumn('<a class="icon icon-folder" href="' . $this->url->getPath() . '?module=file&amp;folder=' . $this->folder . $directory . '/">' . $directory . '</a');
 			$table->addColumn('<a class="icon icon-rename" href="' . $this->url->getPath() . '?module=file&amp;action=' . self::ACTION_RENAME . '&amp;folder=' . $this->folder . $directory . '/"></a>');
-			$table->addColumn('<a class="icon icon-move" href="' . $this->url->getPath() . '?module=file&amp;action=' . self::ACTION_MOVE . '&amp;folder=' . $this->folder . $directory . '/"></a>');
 			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->getPath() . '?module=file&amp;action=' . self::ACTION_REMOVE . '&amp;folder=' . $this->folder . $directory . '/"></a>');
 			$table->closeRow();
 		}
@@ -125,7 +126,6 @@ class Admin extends \lib\core\AbstractAdmin {
 			$table->addColumn(++$number);
 			$table->addColumn('<a class="icon icon-file" href="' . $this->fileURL . $file . '" target="_blank">' . $file . '</span>');
 			$table->addColumn('<a class="icon icon-rename" href="' . $this->url->getPath() . '?module=file&amp;action=' . self::ACTION_RENAME . '&amp;folder=' . $this->folder . $file . '"></a>');
-			$table->addColumn('<a class="icon icon-move" href="' . $this->url->getPath() . '?module=file&amp;action=' . self::ACTION_MOVE . '&amp;folder=' . $this->folder . $file . '"></a>');
 			$table->addColumn('<a class="icon icon-remove" href="' . $this->url->getPath() . '?module=file&amp;action=' . self::ACTION_REMOVE . '&amp;folder=' . $this->folder . $file . '"></a>');
 			$table->closeRow();
 		}
@@ -139,7 +139,7 @@ class Admin extends \lib\core\AbstractAdmin {
 	public function newGet() {
 		return array(
 			'name' => '',
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -150,8 +150,8 @@ class Admin extends \lib\core\AbstractAdmin {
 		$field = $this->newGet();
 
 		// Check fields
-		if(!isset($field['name'])) {
-			$field['message'] = '<p class="msg-warning">Require name.</p>';
+		if(!isset($_POST['name'])) {
+			$field['error'] = '<p class="msg-warning">Require name.</p>';
 			return $field;
 		}
 
@@ -160,7 +160,7 @@ class Admin extends \lib\core\AbstractAdmin {
 
 		// Create directory
 		if(!$directory->makeDirectory()) {
-			$field['message'] = '<p class="msg-warning">Directory already exists.</p>';
+			$field['error'] = '<p class="msg-error">Directory already exists.</p>';
 			return $field;
 		}
 
@@ -187,20 +187,35 @@ class Admin extends \lib\core\AbstractAdmin {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-file">New directory</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-module-file">New directory</h2>' . $field['error'] . $form->__toString();
 	}
 
 	/**
 	 *
 	 */
 	public function uploadGet() {
-		return array('message' => '');
+		return array('error' => '');
 	}
 
 	/**
 	 *
 	 */
 	public function uploadPost() {
+		$field = $this->uploadGet();
+
+		// Check fields
+		if(!isset($_FILES['file'])) {
+			$field['error'] = '<p class="msg-warning">Require file.</p>';
+			return $field;
+		}
+
+		// Check folder
+		if(!$this->file->isDirectory()) {
+			$field['error'] = '<p class="msg-warning">You can only upload to an existing folder.</p>';
+			return $field;
+		}
+
+		// Check upload
 		$uploads = \lib\core\File::multiUpload($_FILES['file'], $this->file->getPath(), TRUE);
 		$errors = array();
 
@@ -214,9 +229,8 @@ class Admin extends \lib\core\AbstractAdmin {
 			$list = new \lib\html\HTMLList();
 			$list->addItems($errors);
 
-			return array(
-				'message' => '<p class="msg-error">The following files weren\'t uploaded correctly.</p>' . $list
-			);
+			$field['error'] = '<p class="msg-error">The following files weren\'t uploaded correctly.</p>' . $list;
+			return $field;
 		}
 
 		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . $this->folder, \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
@@ -246,7 +260,7 @@ class Admin extends \lib\core\AbstractAdmin {
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-file">Upload files</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-module-file">Upload files</h2>' . $field['error'] . $form->__toString();
 	}
 
 	/**
@@ -255,7 +269,7 @@ class Admin extends \lib\core\AbstractAdmin {
 	public function renameGet() {
 		return array(
 			'name' => $this->file->getName(),
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -263,35 +277,53 @@ class Admin extends \lib\core\AbstractAdmin {
 	 *
 	 */
 	public function renamePost() {
-		return '';
+		$field = $this->renameGet();
+
+		// Check root
+		if($this->folder === self::ROOT_URL) {
+			$field['error'] = '<p class="msg-warning">Can\'t rename the root folder.</p>';
+			return $field;
+		}
+
+		// Check fields
+		if(!isset($_POST['name'])) {
+			$field['error'] = '<p class="msg-warning">Require name.</p>';
+			return $field;
+		}
+
+		$field['name'] = $_POST['name'];
+		$file = new \lib\core\File();
+
+		// Rename
+		if(!$this->file->rename($field['name'])) {
+			$field['error'] = '<p class="msg-warning">The given name is in use.</p>';
+			return $field;
+		}
+
+		throw new \lib\core\StatusCodeException($this->url->getURLPath() . '?module=file&folder=' . dirname($this->folder) . '/', \lib\core\StatusCodeException::REDIRECTION_SEE_OTHER);
 	}
 
 	/**
 	 *
 	 */
 	public function renamePage($field) {
-		return $field['name'];
-	}
+		$form = new \lib\html\HTMLFormStacked();
 
-	/**
-	 *
-	 */
-	public function moveGet() {
-		return '';
-	}
+		$form->addInput('Name', array(
+			'type' => 'text',
+			'id' => 'form-name',
+			'name' => 'name',
+			'placeholder' => 'Name',
+			'value' => $field['name']
+		));
 
-	/**
-	 *
-	 */
-	public function movePost() {
-		return '';
-	}
+		$form->addContent('<a href="' . $this->url->getPath() . '?module=file&amp;folder=' . dirname($this->folder) . '/"><button type="button">Back</button></a>');
 
-	/**
-	 *
-	 */
-	public function movePage($field) {
-		return '';
+		$form->addButton('Submit', array(
+			'type' => 'submit'
+		));
+
+		return '<h2 class="icon icon-module-file">Rename file</h2>' . $field['error'] . $form->__toString();
 	}
 
 	/**
@@ -299,7 +331,7 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	public function removeGet() {
 		return array(
-			'message' => ''
+			'error' => ''
 		);
 	}
 
@@ -308,15 +340,15 @@ class Admin extends \lib\core\AbstractAdmin {
 	 */
 	public function removePost() {
 		if($this->file->isDirectory()) {
-			if($this->file->getPath === self::FOLDER_DEFAULT || !$this->file->removeDirectory(TRUE)) {
+			if($this->folder === self::ROOT_URL || !$this->file->removeDirectory(TRUE)) {
 				return array(
-					'message' => '<p class="msg-error">Can\'t remove this directory. Please try again.</p>'
+					'error' => '<p class="msg-error">Can\'t remove this directory. Please try again.</p>'
 				);
 			}
 		} else {
 			if(!$this->file->removeFile()) {
 				return array(
-					'message' => '<p class="msg-error">Can\'t remove this file. Please try again.</p>'
+					'error' => '<p class="msg-error">Can\'t remove this file. Please try again.</p>'
 				);
 			}
 		}
@@ -330,19 +362,28 @@ class Admin extends \lib\core\AbstractAdmin {
 	public function removePage($field) {
 		$form = new \lib\html\HTMLFormStacked();
 
+		// Check directory
 		if($this->file->isDirectory()) {
-			$form->addContent('<p>Are you sure you want to remove this directory? This action can\'t be undone!</p>');
-		} else {
-			$form->addContent('<p>Are you sure you want to remove this file? This action can\'t be undone!</p>');
+			$files = $this->file->listAll(TRUE);
+
+			// Check files
+			if($files !== array()) {
+				$list = new \lib\html\HTMLList();
+				$list->addItems($files);
+
+				$form->addContent('<p>This folder contains the following items.</p>' . $list);
+			}
 		}
 
-		$form->addContent('<a href="' . $this->url->getPath() . '?module=file' . '"><button type="button">No</button></a>');
+		$form->addContent('<p>Are you sure you want to permanently remove this ' . ($this->file->isDirectory() ? 'directory' : 'file') . '? This action can\'t be undone!</p>');
+
+		$form->addContent('<a href="' . $this->url->getPath() . '?module=file&amp;folder=' . dirname($this->folder) . '/"><button type="button">Back</button></a>');
 
 		$form->addButton('Yes', array(
 			'type' => 'submit'
 		));
 
-		return '<h2 class="icon icon-module-theme">Remove file</h2>' . $field['message'] . $form->__toString();
+		return '<h2 class="icon icon-module-file">Remove file</h2>' . $field['error'] . $form->__toString();
 	}
 }
 
