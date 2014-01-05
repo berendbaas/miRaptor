@@ -13,7 +13,7 @@ $config['cache'] = FALSE;
 $config['debug'] = TRUE;
 $config['default_host'] = 'www.example.org';
 $config['timezone'] = 'Europe/Amsterdam';
-$config['user_directory'] = 'users';
+$config['user_directory'] =  __DIR__ . DIRECTORY_SEPARATOR . 'users';
 
 // PHP DataBase Connector (PDBC)
 $config['pdbc'] = array();

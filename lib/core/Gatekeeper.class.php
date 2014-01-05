@@ -8,115 +8,99 @@ namespace lib\core;
  * @version 1.0
  */
 class Gatekeeper {
-	private $directory;
-	private $database;
+	const DEFAULT_FILE = 'index.html';
+
+	private $pdbc;
+	private $url;
+	private $userDirectory;
+	private $file;
 
 	/**
-	 * Construct a Gatekeeper object with the given PDBC & URL.
+	 * Construct a Gatekeeper object with the given PDBC, URL & user directory.
 	 *
-	 * @param  \lib\pdbc\PDBC          $pdbc
-	 * @param  URL                     $url
-	 * @throws StatusCodeException     if the file isn't found at the current directory or if the user doesn't exists.
+	 * @param \lib\pdbc\PDBC $pdbc
+	 * @param URL            $url
+	 * @param string         $userDirectory
+	 * @throws StatusCodeException     if the requested website can't be found.
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
-	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url) {
-		// Get website directory & database
-		$website = self::getWebsite($pdbc, $url);
-		$directory = self::getUser($pdbc, $url, $website['uid']);
+	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $userDirectory) {
+		$this->pdbc = $pdbc;
+		$this->url = $url;
+		$this->userDirectory = $userDirectory;
 
-		// Set website directory & database
-		$this->directory = $directory . $website['directory'];
-		$this->database = $website['db'];
+		$this->init();
 	}
 
 	/**
-	 * Returns an array with the user ID, directory & database of the website.
+	 * Init the gatekeeper object.
 	 *
-	 * @param  \lib\pdbc\PDBC          $pdbc
-	 * @param  URL                     $url
-	 * @return array                   an array with the user ID, directory & database of the website.
-	 * @throws StatusCodeException     if the file isn't found at the current directory.
-	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
-	 */
-	private static function getWebsite(\lib\pdbc\PDBC $pdbc, URL $url) {
-		$pdbc->query('SELECT `uid`, `directory`, `db`
-		              FROM `website`
-		              WHERE `active` = 1
-		              AND `domain` = "' . $pdbc->quote($url->getHost()) . '"');
-
-		$website = $pdbc->fetch();
-
-		if(!$website) {
-			self::getWebsiteException($pdbc, $url);
-		}
-
-		return $website;
-	}
-
-	/**
-	 * This function helps self::getWebsite() determine whether he has to throw a 301 or 404 exception.
-	 *
-	 * @param  \lib\pdbc\PDBC          $pdbc
-	 * @param  URL                     $url
 	 * @return void
-	 * @throws StatusCodeException     if the file isn't found at the current directory.
+	 * @throws StatusCodeException     if the requested website can't be found.
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
-	private static function getWebsiteException(\lib\pdbc\PDBC $pdbc, URL $url) {
-		$pdbc->query('SELECT `website`.`domain`, `redirect`.`path`
-		              FROM `website`
-		              RIGHT JOIN (SELECT `wid`,`path`
-		                          FROM `redirect`
-		                          WHERE `domain` = "' . $pdbc->quote($url->getHost()) . '") AS `redirect`
-		              ON `website`.`id` = `redirect`.`wid`');
+	private function init() {
+		$this->pdbc->query('SELECT CONCAT(`user`.`directory`, `website`.`directory`) as `directory`, `db`
+		                    FROM `website`
+		                    LEFT JOIN `user`
+		                    ON `website`.`uid` = `user`.`id`
+		                    WHERE `active` = 1
+		                    AND `host` = "' . $this->pdbc->quote($this->url->getHost()) . '"');
 
-		$redirect = $pdbc->fetch();
+		$website = $this->pdbc->fetch();
 
-		if(!$redirect) {
-			throw new StatusCodeException('Gatekeeper: unknown domain - ' . $url->getHost(), StatusCodeException::ERROR_CLIENT_NOT_FOUND);
+		if($website === NULL) {
+			$this->redirect();
 		}
-			
-		throw new StatusCodeException($url->getScheme() . URL::DELIMITER_SCHEME . $redirect['domain'] . $redirect['path'] . $url->getURI(), StatusCodeException::REDIRECTION_MOVED_PERMANENTLY);
+		
+		$this->file = new File($this->userDirectory . $website['directory'] . $this->url->getDirectory() . ($this->url->getFile() === '' ? self::DEFAULT_FILE : $this->url->getFile()));
+		$this->pdbc = clone $this->pdbc;
+		$this->pdbc->selectDatabase($website['db']);
 	}
 
 	/**
-	 * Returns the user directory.
+	 * Try to redirect to the correct website, if possible.
 	 *
-	 * @param  \lib\pdbc\PDBC          $pdbc
-	 * @param  URL                     $url
-	 * @param  int                     $id
-	 * @return string                  the user directory.
-	 * @throws StatusCodeException     if the user doesn't exists.
+	 * @return void
+	 * @throws StatusCodeException     if the requested website can't be found.
 	 * @throws \lib\pdbc\PDBCException if the given query can't be executed.
 	 */
-	private static function getUser(\lib\pdbc\PDBC $pdbc, URL $url, $id) {
-		$pdbc->query('SELECT `directory` FROM `user` WHERE `id` = ' . $id);
+	private function redirect() {
+		$this->pdbc->query('SELECT `website`.`host`, `redirect`.`path`
+		                    FROM `website`
+		                    RIGHT JOIN (SELECT `wid`,`path`
+		                                FROM `redirect`
+		                                WHERE `host` = "' . $this->pdbc->quote($this->url->getHost()) . '") AS `redirect`
+		                    ON `website`.`id` = `redirect`.`wid`');
 
-		$user = $pdbc->fetch();
+		$redirect = $this->pdbc->fetch();
 
-		if(!$user) {
-			throw new StatusCodeException('Gatekeeper: unknown user - ' . $url->getHost(), StatusCodeException::ERROR_CLIENT_NOT_FOUND);
+		if($redirect === NULL) {
+			throw new StatusCodeException('Gatekeeper: unknown host - ' . $this->url->getHost(), StatusCodeException::ERROR_CLIENT_NOT_FOUND);
 		}
 
-		return end($user);
+		$this->url->setHost($redirect['host']);
+		$this->url->setPath($redirect['path']);
+
+		throw new StatusCodeException($this->url, StatusCodeException::REDIRECTION_MOVED_PERMANENTLY);
 	}
 
 	/**
-	 * Returns the directory of the website.
-	 * 
-	 * @return string the directory of the website.
+	 * Returns the requested File object.
+	 *
+	 * @return File the requested File object.
 	 */
-	public function getDirectory() {
-		return $this->directory;
+	public function getFile() {
+		return $this->file;
 	}
 
 	/**
-	 * Returns the database name of the website.
-	 * 
-	 * @return string the database name of the website.
+	 * Returns the requested PDBC object.
+	 *
+	 * @return \lib\pdbc\PDBC the requested PDBC object.
 	 */
-	public function getDatabase() {
-		return $this->database;
+	public function getPDBC() {
+		return $this->pdbc;
 	}
 }
 

@@ -8,8 +8,6 @@ namespace lib\core;
  * @version 1.0
  */
 class Guide implements Runnable {
-	const DEFAULT_FILE = 'index.html';
-	
 	const METHOD_GET = 'GET';
 	const METHOD_POST = 'POST';
 
@@ -24,16 +22,16 @@ class Guide implements Runnable {
 	 * @param  URL            $url
 	 * @param  string         $folder
 	 */
-	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, $folder) {
+	public function __construct(\lib\pdbc\PDBC $pdbc, URL $url, File $file) {
 		$this->pdbc = $pdbc;
 		$this->url = $url;
-		$this->filename = $folder . $url->getDirectory() . ($url->getFile() === '' ? self::DEFAULT_FILE : $url->getFile());
+		$this->file = $file;
 	}
 
 	public function run() {
 		switch(strtoupper($_SERVER['REQUEST_METHOD'])) {
 			case self::METHOD_GET:
-				if(file_exists($this->filename)) {
+				if($this->file->exists()) {
 					$this->getPage();
 					break;
 				}
@@ -56,18 +54,18 @@ class Guide implements Runnable {
 	 */
 	private function getPage() {
 		// Header parse
-		$lastModified = filemtime($this->filename);
+		$lastModified = $this->file->lastModified();
 
 		if(!$this->isModified($lastModified)) {
 			throw new StatusCodeException('Guide: Page not Modified', StatusCodeException::REDIRECTION_NOT_MODIFIED);
 		}
 
 		// Header echo
-		header('content-type: ' . mime_content_type($this->filename));
+		header('content-type: ' . mime_content_type($this->file->getPath()));
 		header('last-modified: ' . gmdate("D, d M Y H:i:s", $lastModified) . " GMT");
 
 		// Content echo
-		echo file_get_contents($this->filename);
+		echo file_get_contents($this->file->getPath());
 
 	}
 
@@ -113,7 +111,7 @@ class Guide implements Runnable {
 		// Content cache
 		if($parser->isStatic() && MIRAPTOR_CACHE) {
 			// Create folder(s)
-			$folder = dirname($this->filename);
+			$folder = dirname($this->file->getPath());
 
 			if(!file_exists($folder)) {
 				$old = umask(002);
@@ -122,7 +120,7 @@ class Guide implements Runnable {
 			}
 
 			// Create file
-			file_put_contents($this->filename, $parser->__toString());
+			file_put_contents($this->file->getPath(), $parser->__toString());
 		}
 	}
 }

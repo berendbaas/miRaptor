@@ -46,11 +46,11 @@ class Main implements Runnable {
 
 		try {
 			// Gatekeeper
-			$gatekeeper = new Gatekeeper($this->pdbc, $this->url);
-			$this->pdbc->selectDatabase($gatekeeper->getDatabase());
+			$gatekeeper = new Gatekeeper($this->pdbc, $this->url, $this->userDirectory);
+			$this->pdbc = $gatekeeper->getPDBC();
 
 			// Guide
-			$guide = new Guide($this->pdbc, $this->url, $this->userDirectory . $gatekeeper->getDirectory());
+			$guide = new Guide($this->pdbc, $this->url, $gatekeeper->getFile());
 			$guide->run();
 		} catch(StatusCodeException $e) {
 			$this->statusCode = $e->getCode();
