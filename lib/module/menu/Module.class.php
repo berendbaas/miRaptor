@@ -20,9 +20,10 @@ class Module extends \lib\core\AbstractModule {
 
 	public function run() {
 		// Get arguments
+		$uri = $this->parseURI();
+		$depth = $this->parseDepth();
 		$startLevel = $this->parseStartLevel();
 		$endLevel = $this->parseEndLevel();
-		$depth = $this->parseDepth();
 
 		// Depth
 		if($endLevel !== self::DEFAULT_END_LEVEL) {
@@ -38,46 +39,35 @@ class Module extends \lib\core\AbstractModule {
 		}
 
 		// Result
-		$this->result = $this->getMenu($this->parseURI($startLevel), $depth);
+		$this->result = $this->getMenu($this->getID($uri, $startLevel), $depth);
 	}
 
 	/**
-	 * Returns the router ID that belongs to the given start leven & URI argument.
+	 * Returns the depth argument or NULL, if none is given.
 	 *
-	 * @param  int                       $startLevel
-	 * @return int                       the router ID that belongs to the given start leven & URI argument.
-	 * @throws \lib\core\ModuleException if the given URI doesn't exists.
-	 * @throws \lib\pdbc\PDBCException   if the given query can't be executed.
+	 * @return string the depth argument or NULL, if none is given.
 	 */
-	private function parseURI($startLevel) {
-		// Uri isn't given
-		if(!isset($this->arguments['uri'])) {
-			return self::DEFAULT_ID;
+	private function parseURI() {
+		if(isset($this->arguments['uri'])) {
+			return $this->arguments['uri'];
 		}
 
-		// Uri is empty
-		if($this->arguments['uri'] == '') {
-			return $this->routerID;
+		return NULL;
+	}
+
+	/**
+	 * Returns the depth argument or the default argument, if none is given.
+	 *
+	 * @return string the depth argument or the default argument, if none is given.
+	 */
+	private function parseDepth() {
+		if(isset($this->arguments['depth'])) {
+			$depth = intval($this->arguments['depth']);
+
+			return ($depth < 1) ? self::DEFAULT_DEPTH : $depth;
 		}
 
-		// Uri is given & not empty
-		$this->pdbc->query('SELECT `id`, `depth`
-		                    FROM `router`
-		                    WHERE `uri` = "' . $this->pdbc->quote($uri) . '"');
-
-		$start = $this->pdbc->fetch();
-
-		// Check uri
-		if(!$start) {
-			throw new \lib\core\ModuleException('The URI doesn\'t exists.');
-		}
-
-		// Check startLevel
-		if($start['depth'] < $startLevel) {
-			throw new \lib\core\ModuleException('The start level can\'t be smaller then the uri level.');
-		}
-
-		return $start['id'];
+		return self::DEFAULT_DEPTH;
 	}
 
 	/**
@@ -109,20 +99,57 @@ class Module extends \lib\core\AbstractModule {
 
 		return self::DEFAULT_END_LEVEL;
 	}
-
+	
 	/**
-	 * Returns the depth argument or the default argument, if none is given.
+	 * Returns the router ID that belongs to the given start leven & URI argument.
 	 *
-	 * @return string the depth argument or the default argument, if none is given.
+	 * @param  string                    $uri
+	 * @param  int                       $startLevel
+	 * @return int                       the router ID that belongs to the given start leven & URI argument.
+	 * @throws \lib\core\ModuleException if the given URI doesn't exists.
+	 * @throws \lib\pdbc\PDBCException   if the given query can't be executed.
 	 */
-	private function parseDepth() {
-		if(isset($this->arguments['depth'])) {
-			$depth = intval($this->arguments['depth']);
-
-			return ($depth < 1) ? self::DEFAULT_DEPTH : $depth;
+	private function getID($uri, $startLevel) {
+		// Check URI null
+		if($uri === NULL) {
+			return self::DEFAULT_ID;
 		}
 
-		return self::DEFAULT_DEPTH;
+		// Check URI empty
+		if($uri !== '') {
+			$query = 'SELECT `id`, `pid`, `depth`
+			          FROM `router`
+			          WHERE `uri` = "' . $this->pdbc->quote($uri) . '"';
+		} else {
+			$query = 'SELECT `id`, `pid`, `depth`
+			          FROM `router`
+			          WHERE `id` = "' . $this->pdbc->quote($this->routerID) . '"';
+		}
+
+		// Fetch
+		$this->pdbc->query($query);
+		$current = $this->pdbc->fetch();
+
+		// Check uri
+		if(!$current) {
+			throw new \lib\core\ModuleException('The URI doesn\'t exists.');
+		}
+
+		// Check startLevel
+		if($current['depth'] < $startLevel) {
+			throw new \lib\core\ModuleException('The start level can\'t be smaller then the uri level.');
+		}
+
+		// Find startLevel
+		while($current['depth'] > $startLevel) {
+			$this->pdbc->query('SELECT `id`, `pid`, `depth`
+			                    FROM `router`
+			                    WHERE `id` = "' . $this->pdbc->quote($current['pid']) . '"');
+
+			$current = $this->pdbc->fetch();
+		}
+
+		return $current['id'];
 	}
 
 	/**
