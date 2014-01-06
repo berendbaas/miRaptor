@@ -15,10 +15,11 @@ class HTMLList {
 	 * Construct an HTML list with the given items & order.
 	 *
 	 * @param boolean $ordered = FALSE
+	 * @param array   $attributes = array()
 	 */
-	public function __construct($ordered = FALSE) {
+	public function __construct($ordered = FALSE, $attributes = array()) {
 		$this->ordered = $ordered;
-		$this->result = ($this->ordered ? '<ol>' : '<ul>') . PHP_EOL;
+		$this->result = HTML::openTag($this->ordered ? 'ol' : 'ul', $attributes);
 	}
 
 	/**
@@ -33,17 +34,18 @@ class HTMLList {
 	/**
 	 * Add the given item to the HTML list.
 	 *
-	 * @param string $item
+	 * @param  string $item
+	 * @param  array  $attributes = array()
 	 * @return void
 	 */
-	public function addItem($item) {
-		$this->result .= '<li>' . $item . '</li>' . PHP_EOL;
+	public function addItem($item, $attributes = array()) {
+		$this->result .= HTML::element('li', $attributes, $item);
 	}
 
 	/**
 	 * Add the given items to the HTML list.
 	 *
-	 * @param array $items
+	 * @param  array $items
 	 * @return void
 	 */
 	public function addItems(array $items) {
