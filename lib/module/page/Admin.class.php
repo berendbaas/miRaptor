@@ -500,7 +500,7 @@ class Admin extends \lib\core\AbstractAdmin {
 		                                                     THEN "/"
 		                                                     ELSE CASE `parent`.`root`
 		                                                          WHEN 0 THEN `parent`.`uri`
-		                                                          ELSE CONCAT("/", REPLACE(LOWER(`router`.`name`), " ", "-"), "/")
+		                                                          ELSE CONCAT("/", REPLACE(LOWER(`parent`.`name`), " ", "-"), "/")
 		                                                          END
 		                                                     END,
 		                                                     REPLACE(LOWER(`router`.`name`), " ", "-"), "/")
